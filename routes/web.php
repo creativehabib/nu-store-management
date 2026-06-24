@@ -1,0 +1,33 @@
+<?php
+
+use App\Livewire\Admin\UserApprovalManager;
+use App\Livewire\Category\CategoryManager;
+use App\Livewire\Inventory\StockInManager;
+use App\Livewire\Product\ProductManager;
+use App\Livewire\Report\ReportManager;
+use App\Livewire\Requisition\CreateRequisition;
+use App\Livewire\Requisition\MyRequisitions;
+use App\Livewire\Workflow\ApprovalQueue;
+use App\Livewire\Workflow\FinalPrint;
+use App\Livewire\Workflow\InitiatorQueue;
+use Illuminate\Support\Facades\Route;
+
+Route::view('/', 'welcome')->name('home');
+
+
+
+Route::middleware(['auth', 'approved'])->group(function () {
+    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('/admin/categories', CategoryManager::class)->name('admin.categories');
+    Route::get('/admin/products', ProductManager::class)->name('admin.products');
+    Route::get('/admin/user-approvals', UserApprovalManager::class)->name('admin.user_approvals');
+    Route::get('/requisition/create', CreateRequisition::class)->name('requisition.create');
+    Route::get('/requisition/my-history', MyRequisitions::class)->name('requisition.my_history');
+    Route::get('/workflow/initiator-queue', InitiatorQueue::class)->name('workflow.initiator');
+    Route::get('/workflow/approval-queue', ApprovalQueue::class)->name('workflow.approval');
+    Route::get('/workflow/print/{id}', FinalPrint::class)->name('workflow.print');
+    Route::get('/inventory/stock-in', StockInManager::class)->name('inventory.stock_in');
+    Route::get('/report/summary', ReportManager::class)->name('report.summary');
+});
+
+require __DIR__.'/settings.php';
