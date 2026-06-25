@@ -75,9 +75,11 @@
                     <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
                         {{ __('Language Settings') }}
                     </flux:sidebar.item>
+
+                    <livewire:layout.language-switcher />
+                    <livewire:layout.notification-bell />
                 @endif
-                <livewire:layout.language-switcher />
-                <livewire:layout.notification-bell />
+
             </flux:sidebar.nav>
 
             <flux:spacer />
