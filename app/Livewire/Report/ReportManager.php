@@ -84,6 +84,6 @@ class ReportManager extends Component
         return view('livewire.report.report-manager', [
             'departments' => $departments,
             'reportData' => $reportData
-        ]);
+        ])->layout('layouts.app', ['title' => 'Report Manager']);
     }
 }

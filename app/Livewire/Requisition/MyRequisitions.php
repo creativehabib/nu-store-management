@@ -34,6 +34,6 @@ class MyRequisitions extends Component
 
         return view('livewire.requisition.my-requisitions', [
             'requisitions' => $requisitions,
-        ]);
+        ])->layout('layouts.app', ['title' => 'My Requisitions']);
     }
 }

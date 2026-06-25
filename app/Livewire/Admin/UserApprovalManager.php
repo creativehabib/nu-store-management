@@ -92,6 +92,6 @@ class UserApprovalManager extends Component
 
         return view('livewire.admin.user-approval-manager', [
             'users' => $users
-        ]);
+        ])->layout('layouts.app', ['title' => 'User Manager']);
     }
 }

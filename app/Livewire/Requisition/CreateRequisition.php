@@ -69,6 +69,6 @@ class CreateRequisition extends Component
 
     public function render()
     {
-        return view('livewire.requisition.create-requisition');
+        return view('livewire.requisition.create-requisition')->layout('layouts.app', ['title' => 'Create Requisition']);
     }
 }

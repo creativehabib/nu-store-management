@@ -58,6 +58,6 @@ class DashboardStats extends Component
         return view('livewire.dashboard.dashboard-stats', [
             'role' => $role,
             'stats' => $stats
-        ]);
+        ])->layout('layouts.app', ['title' => 'Dashboard']);
     }
 }

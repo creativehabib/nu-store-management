@@ -194,6 +194,6 @@ class LanguageManager extends Component
 
         return view('livewire.admin.language-manager', [
             'filteredTranslations' => $filteredTranslations
-        ]);
+        ])->layout('layouts.app', ['title' => 'Language Manager']);
     }
 }

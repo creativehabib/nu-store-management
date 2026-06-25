@@ -59,6 +59,6 @@ class FinalPrint extends Component
 
     public function render()
     {
-        return view('livewire.workflow.final-print');
+        return view('livewire.workflow.final-print')->layout('layouts.app', ['title' => 'Final Print']);
     }
 }

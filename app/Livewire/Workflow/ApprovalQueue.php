@@ -159,6 +159,6 @@ class ApprovalQueue extends Component
         return view('livewire.workflow.approval-queue', [
             'requisitions' => $query->latest()->paginate(10), // প্রতি পেজে ১০টি করে আসবে
             'departments' => $departments
-        ]);
+        ])->layout('layouts.app', ['title' => 'My Requisitions']);
     }
 }

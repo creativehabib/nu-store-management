@@ -69,6 +69,6 @@ class CategoryManager extends Component
         return view('livewire.category.category-manager', [
             // লেটেস্ট ক্যাটাগরিগুলো পেজিনেশন সহ পাঠানো হচ্ছে
             'categories' => Category::latest()->paginate(10),
-        ]);
+        ])->layout('layouts.app', ['title' => 'Category Manager']);
     }
 }

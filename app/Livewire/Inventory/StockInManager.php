@@ -112,6 +112,6 @@ class StockInManager extends Component
         return view('livewire.inventory.stock-in-manager', [
             'products' => Product::orderBy('name_bn')->get(),
             'stockEntries' => StockEntry::with('product.category')->latest()->paginate(10)
-        ]);
+        ])->layout('layouts.app', ['title' => 'Stock Manager']);
     }
 }

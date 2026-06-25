@@ -81,6 +81,6 @@ class ProductManager extends Component
             // প্রোডাক্টের সাথে ক্যাটাগরির নাম দেখানোর জন্য with('category') ব্যবহার করা হয়েছে
             'products' => Product::with('category')->latest()->paginate(10),
             'categories' => Category::orderBy('name')->get(),
-        ]);
+        ])->layout('layouts.app', ['title' => 'Product Manager']);
     }
 }

@@ -106,6 +106,8 @@ class InitiatorQueue extends Component
 
     public function render()
     {
-        return view('livewire.workflow.initiator-queue');
+        return view('livewire.workflow.initiator-queue')->layout('layouts.app', [
+            'title' => 'Initiator Queue',
+        ]);
     }
 }
