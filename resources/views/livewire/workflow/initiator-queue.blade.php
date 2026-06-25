@@ -59,53 +59,65 @@
     </flux:card>
 
     @if($selectedRequisition)
-        <flux:modal name="approve-modal-{{ $selectedRequisition->id }}" class="md:w-3/4 lg:w-2/3">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">রিকুইজিশন ডিটেইলস: {{ $selectedRequisition->requisition_no }}</flux:heading>
-                    <p class="text-sm text-zinc-500 mt-1">আবেদনকারী: {{ $selectedRequisition->user->name }} ({{ $selectedRequisition->user->department }})</p>
-                </div>
+        <flux:modal name="view-action-modal" class="md:w-3/4 lg:w-2/3">
+            @if($selectedRequisition)
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">রিকুইজিশন ডিটেইলস: {{ $selectedRequisition->requisition_no }}</flux:heading>
+                        <p class="text-sm text-zinc-500 mt-1">আবেদনকারী: {{ $selectedRequisition->user->name }} ({{ $selectedRequisition->user->department }})</p>
+                    </div>
 
-                <flux:separator />
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-zinc-200 dark:border-zinc-700">
-                        <thead>
-                        <tr class="bg-zinc-50 dark:bg-zinc-800 border-b dark:border-zinc-700">
-                            <th class="p-2 text-sm border-r dark:border-zinc-700">দ্রব্যের নাম</th>
-                            <th class="p-2 text-sm border-r dark:border-zinc-700 text-center">বর্তমান স্টক</th>
-                            <th class="p-2 text-sm border-r dark:border-zinc-700 text-center">চাহিদার পরিমাণ</th>
-                            <th class="p-2 text-sm text-center">সরবরাহের পরিমাণ নির্ধারণ</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($selectedRequisition->items as $item)
-                            <tr class="border-b dark:border-zinc-700">
-                                <td class="p-2 border-r dark:border-zinc-700">{{ $item->product->name_bn }} <br><span class="text-xs text-zinc-500">{{ $item->purpose }}</span></td>
-                                <td class="p-2 border-r dark:border-zinc-700 text-center font-bold text-blue-600">{{ $item->product->stock }}</td>
-                                <td class="p-2 border-r dark:border-zinc-700 text-center">{{ $item->demanded_qty }}</td>
-                                <td class="p-2 text-center w-32">
-                                    <flux:input type="number" wire:model="suppliedQuantities.{{ $item->id }}" min="0" max="{{ $item->product->stock }}" />
-                                </td>
+                    <flux:separator />
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse border border-zinc-200 dark:border-zinc-700">
+                            <thead>
+                            <tr class="bg-zinc-50 dark:bg-zinc-800 border-b dark:border-zinc-700">
+                                <th class="p-2 text-sm border-r dark:border-zinc-700">দ্রব্যের নাম</th>
+                                <th class="p-2 text-sm border-r dark:border-zinc-700 text-center">বর্তমান স্টক</th>
+                                <th class="p-2 text-sm border-r dark:border-zinc-700 text-center">চাহিদার পরিমাণ</th>
+                                <th class="p-2 text-sm text-center">সরবরাহের পরিমাণ নির্ধারণ</th>
                             </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                            @foreach($selectedRequisition->items as $item)
+                                <tr class="border-b dark:border-zinc-700">
+                                    <td class="p-2 border-r dark:border-zinc-700">{{ $item->product->name_bn }} <br><span class="text-xs text-zinc-500">{{ $item->purpose }}</span></td>
+                                    <td class="p-2 border-r dark:border-zinc-700 text-center font-bold text-blue-600">{{ $item->product->stock }}</td>
+                                    <td class="p-2 border-r dark:border-zinc-700 text-center">{{ $item->demanded_qty }}</td>
+                                    <td class="p-2 text-center w-32">
+                                        <flux:input type="number" wire:model="suppliedQuantities.{{ $item->id }}" min="0" max="{{ $item->product->stock }}" />
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div>
-                    <flux:textarea wire:model="comment" label="নোট / কমেন্ট (অপশনাল)" placeholder="যেমন: স্টকে পর্যাপ্ত আছে..." rows="2" />
-                </div>
+                    <div>
+                        <flux:textarea wire:model="comment" label="নোট / কমেন্ট (অপশনাল)" placeholder="যেমন: স্টকে পর্যাপ্ত আছে..." rows="2" />
+                    </div>
 
-                <div class="flex justify-end gap-2">
-                    <flux:modal.close>
-                        <flux:button variant="ghost">বাতিল</flux:button>
-                    </flux:modal.close>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <flux:modal.close>
+                            <flux:button variant="ghost">বাতিল</flux:button>
+                        </flux:modal.close>
 
-                    <flux:button variant="primary" icon="check-circle" wire:click="forwardRequisition" wire:confirm="আপনি কি এটি পরবর্তী ধাপে পাঠাতে চান?">
-                        Forward to AD
-                    </flux:button>
+                        <flux:button variant="primary" icon="check-circle" wire:click="forwardRequisition" wire:confirm="আপনি কি এটি পরবর্তী ধাপে পাঠাতে চান?">
+                            Forward to AD
+                        </flux:button>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="py-12 flex flex-col items-center justify-center text-zinc-500">
+                    <svg class="animate-spin h-8 w-8 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="font-medium text-lg">ফাইল লোড হচ্ছে, অপেক্ষা করুন...</p>
+                </div>
+            @endif
+
         </flux:modal>
     @endif
 </div>
