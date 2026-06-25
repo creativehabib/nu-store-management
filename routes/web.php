@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Admin\LanguageManager;
 use App\Livewire\Admin\UserApprovalManager;
 use App\Livewire\Category\CategoryManager;
 use App\Livewire\Inventory\StockInManager;
@@ -14,8 +15,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-
-
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::get('/admin/categories', CategoryManager::class)->name('admin.categories');
@@ -28,6 +27,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/workflow/print/{id}', FinalPrint::class)->name('workflow.print');
     Route::get('/inventory/stock-in', StockInManager::class)->name('inventory.stock_in');
     Route::get('/report/summary', ReportManager::class)->name('report.summary');
+    Route::get('/admin/language-settings', LanguageManager::class)->name('admin.language_settings');
 });
 
 require __DIR__.'/settings.php';

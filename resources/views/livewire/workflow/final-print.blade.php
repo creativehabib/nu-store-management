@@ -3,32 +3,32 @@
     <div id="print-area" class="bg-white text-black p-10 shadow-lg rounded-lg border border-zinc-200 print:shadow-none print:border-none print:p-0">
 
         <div class="text-center border-b-2 border-black pb-4 mb-6">
-            <h1 class="text-2xl font-bold">জাতীয় বিশ্ববিদ্যালয়</h1>
-            <p class="text-lg">গাজীপুর-১৭০৪</p>
-            <p class="text-lg font-semibold">শিক্ষক প্রশিক্ষণ দপ্তর</p>
-            <h2 class="text-xl font-bold mt-4 underline inline-block">স্টোর রিকুইজিশন ফরম</h2>
+            <h1 class="text-3xl font-bold">{{ __('National University') }}</h1>
+            <p class="text-lg">{{ __('Bangladesh') }}</p>
+            <p class="text-lg font-semibold">{{ __('Teacher Training Department') }}</p>
+            <h2 class="text-xl font-bold mt-4 underline inline-block">{{ __('Store Requisition Form') }}</h2>
         </div>
 
         <div class="flex justify-between items-end mb-6 text-sm">
             <div class="space-y-1">
-                <p><strong>নাম:</strong> {{ $requisition->user->name }}</p>
-                <p><strong>পদবি:</strong> {{ $requisition->user->post }}</p>
-                <p><strong>দপ্তর:</strong> {{ $requisition->user->department }}</p>
+                <p><strong>{{ __('Name:') }}</strong> {{ $requisition->user->name }}</p>
+                <p><strong>{{ __('Designation:') }}</strong> {{ $requisition->user->post }}</p>
+                <p><strong>{{ __('Department:') }}</strong> {{ $requisition->user->department }}</p>
             </div>
             <div class="space-y-1 text-right">
-                <p><strong>ক্রমিক নং:</strong> {{ $requisition->requisition_no }}</p>
-                <p><strong>তারিখ:</strong> {{ $requisition->created_at->format('d M, Y') }}</p>
+                <p><strong>{{ __('Serial No:') }}</strong> {{ $requisition->requisition_no }}</p>
+                <p><strong>{{ __('Date:') }}</strong> {{ $requisition->created_at->format('d M, Y') }}</p>
             </div>
         </div>
 
         <table class="w-full border-collapse border border-black mb-16 text-sm">
             <thead>
             <tr>
-                <th class="border border-black p-2 w-16 text-center">ক্রমিক নং</th>
-                <th class="border border-black p-2">দ্রব্যের নাম</th>
-                <th class="border border-black p-2 text-center w-32">চাহিদার পরিমাণ</th>
-                <th class="border border-black p-2 text-center w-32">সরবরাহের পরিমাণ</th>
-                <th class="border border-black p-2 text-center w-32">এন্ট্রির বিবরণ</th>
+                <th class="border border-black p-2 w-16 text-center">{{ __('Sl No.') }}</th>
+                <th class="border border-black p-2">{{ __('Item Name') }}</th>
+                <th class="border border-black p-2 text-center w-32">{{ __('Demanded Quantity') }}</th>
+                <th class="border border-black p-2 text-center w-32">{{ __('Supplied Quantity') }}</th>
+                <th class="border border-black p-2 text-center w-32">{{ __('Purpose/Description') }}</th>
             </tr>
             </thead>
             <tbody>
@@ -46,7 +46,7 @@
 
         <div class="grid grid-cols-5 gap-4 mt-24 text-center text-xs font-semibold">
             <div class="flex flex-col justify-end">
-                <p class="border-t border-black pt-2 mx-2">গ্রহণকারীর স্বাক্ষর ও তারিখ</p>
+                <p class="border-t border-black pt-2 mx-2">{{ __('Receiver\'s Signature & Date') }}</p>
             </div>
 
             <div class="flex flex-col justify-end items-center">
@@ -55,7 +55,7 @@
                 @else
                     <div class="h-10 mb-1"></div>
                 @endif
-                <p class="border-t border-black pt-2 w-full mx-2">প্রস্তুতকারী</p>
+                <p class="border-t border-black pt-2 w-full mx-2">{{ __('Prepared By') }}</p>
             </div>
 
             <div class="flex flex-col justify-end items-center">
@@ -64,7 +64,7 @@
                 @else
                     <div class="h-10 mb-1"></div>
                 @endif
-                <p class="border-t border-black pt-2 w-full mx-2">সহকারী পরিচালক</p>
+                <p class="border-t border-black pt-2 w-full mx-2">{{ __('Assistant Director') }}</p>
             </div>
 
             <div class="flex flex-col justify-end items-center">
@@ -73,7 +73,7 @@
                 @else
                     <div class="h-10 mb-1"></div>
                 @endif
-                <p class="border-t border-black pt-2 w-full mx-2">উপ-পরিচালক</p>
+                <p class="border-t border-black pt-2 w-full mx-2">{{ __('Deputy Director') }}</p>
             </div>
 
             <div class="flex flex-col justify-end items-center">
@@ -82,22 +82,22 @@
                 @else
                     <div class="h-10 mb-1"></div>
                 @endif
-                <p class="border-t border-black pt-2 w-full mx-2">পরিচালক</p>
+                <p class="border-t border-black pt-2 w-full mx-2">{{ __('Director') }}</p>
             </div>
         </div>
     </div>
 
     <div class="flex justify-end gap-4 mt-4 print:hidden">
         <flux:button variant="outline" icon="printer" onclick="window.print()">
-            Print Layout
+            {{ __('Print Layout') }}
         </flux:button>
 
         @if($requisition->status === 'director_approved')
-            <flux:button variant="primary" icon="archive-box-arrow-down" wire:click="distributeStock" wire:confirm="আপনি কি স্টক মাইনাস করতে নিশ্চিত? একবার স্টক মাইনাস করলে এটি আর পরিবর্তন করা যাবে না।">
-                Distribute Product (Stock Minus)
+            <flux:button variant="primary" icon="archive-box-arrow-down" wire:click="distributeStock" wire:confirm="{{ __('Are you sure you want to deduct the stock? Once deducted, this cannot be undone.') }}">
+                {{ __('Distribute Product (Stock Minus)') }}
             </flux:button>
         @elseif($requisition->status === 'distributed')
-            <flux:badge color="green" size="lg" icon="check-badge">পণ্য বিতরণ ও স্টক মাইনাস সম্পন্ন হয়েছে</flux:badge>
+            <flux:badge color="green" size="lg" icon="check-badge">{{ __('Product distribution and stock deduction completed') }}</flux:badge>
         @endif
     </div>
 </div>

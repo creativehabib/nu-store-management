@@ -5,7 +5,7 @@
             @if($notifications->count() > 0)
                 <span class="absolute top-1 right-2 flex h-3 w-3">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 text-[10px] text-white flex items-center justify-center">
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 text-[10px] text-white items-center justify-center">
                         {{ $notifications->count() }}
                     </span>
                 </span>
@@ -14,7 +14,7 @@
 
         <flux:menu class="w-80 max-h-96 overflow-y-auto">
             <div class="px-4 py-2 border-b dark:border-zinc-700 font-bold flex justify-between items-center bg-zinc-50 dark:bg-zinc-800">
-                <span>নোটিফিকেশন</span>
+                <span>{{ __('Notifications') }}</span>
             </div>
 
             @forelse($notifications as $notification)
@@ -27,7 +27,7 @@
                 </flux:menu.item>
             @empty
                 <div class="px-4 py-6 text-center text-zinc-500 text-sm">
-                    কোনো নতুন নোটিফিকেশন নেই
+                    {{ __('There are no new notifications.') }}
                 </div>
             @endforelse
         </flux:menu>

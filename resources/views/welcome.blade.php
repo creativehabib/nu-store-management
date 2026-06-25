@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>স্টোর ম্যানেজমেন্ট সিস্টেম | জাতীয় বিশ্ববিদ্যালয়</title>
+    <title>{{ __('Store Management System | National University') }}</title>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
 
@@ -34,10 +34,10 @@
             </div>
 
             <div>
-                <h1 class="text-2xl font-bold text-zinc-900 dark:text-white mb-2">জাতীয় বিশ্ববিদ্যালয়, বাংলাদেশ</h1>
-                <h2 class="text-lg font-medium text-indigo-600 dark:text-indigo-400">স্টোর ম্যানেজমেন্ট সিস্টেম</h2>
+                <h1 class="text-2xl font-bold text-zinc-900 dark:text-white mb-2">{{ __('National University, Bangladesh') }}</h1>
+                <h2 class="text-lg font-medium text-indigo-600 dark:text-indigo-400">{{ __('Store Management System') }}</h2>
                 <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-                    দাপ্তরিক পণ্য ও স্টেশনারি সামগ্রীর চাহিদা প্রদান এবং মজুত ব্যবস্থাপনার ডিজিটাল পোর্টাল।
+                    {{ __('Digital portal for official goods and stationery requisition and inventory management.') }}
                 </p>
             </div>
 
@@ -45,17 +45,17 @@
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/dashboard') }}" class="flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm">
-                            ড্যাশবোর্ডে প্রবেশ করুন
+                            {{ __('Enter Dashboard') }}
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </a>
                     @else
                         <a href="{{ route('login') }}" class="flex items-center justify-center w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm">
-                            সিস্টেমে লগইন করুন
+                            {{ __('Login to System') }}
                         </a>
 
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="flex items-center justify-center w-full py-2.5 px-4 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm font-semibold rounded-lg transition-colors duration-200 shadow-sm">
-                                নতুন রিকুইজিশনার একাউন্ট
+                                {{ __('New Requisitioner Account') }}
                             </a>
                         @endif
                     @endauth
@@ -65,7 +65,7 @@
 
         <div class="bg-zinc-50 dark:bg-zinc-900/50 p-4 border-t border-zinc-200 dark:border-zinc-700 text-center">
             <p class="text-xs text-zinc-500 dark:text-zinc-500">
-                &copy; {{ date('Y') }} National University. All rights reserved.
+                &copy; {{ date('Y') }} {{ __('National University') }}. All rights reserved.
             </p>
         </div>
     </div>

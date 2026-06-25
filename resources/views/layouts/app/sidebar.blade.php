@@ -18,7 +18,7 @@
 
                     @if(auth()->user()->role === 'admin')
                         <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
-                            {{ __('User Approvals') }}
+                            {{ __('User Manage') }}
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
                             {{ __('Categories') }}
@@ -70,6 +70,14 @@
                         </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
+
+                @if(auth()->user()->role === 'admin')
+                    <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
+                        {{ __('Language Settings') }}
+                    </flux:sidebar.item>
+                @endif
+                <livewire:layout.language-switcher />
+                <livewire:layout.notification-bell />
             </flux:sidebar.nav>
 
             <flux:spacer />

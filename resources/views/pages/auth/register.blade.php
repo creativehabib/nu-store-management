@@ -1,6 +1,6 @@
 <x-layouts::auth :title="__('Register')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('স্টোর রিকুইজিশন সিস্টেমে আপনার অ্যাকাউন্ট তৈরি করুন')" />
+        <x-auth-header :title="__('Create an account')" :description="__('Create your account in the Store Requisition System')" />
 
         <x-auth-session-status class="text-center" :status="session('status')" />
 
@@ -10,27 +10,27 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <flux:input name="name" :label="__('Name')" :value="old('name')" type="text" required autofocus autocomplete="name" :placeholder="__('Full name')" />
 
-                <flux:input name="pf_no" label="PF No (ID)" :value="old('pf_no')" type="text" required placeholder="Ex: 2115" />
+                <flux:input name="pf_no" :label="__('PF No (ID)')" :value="old('pf_no')" type="text" required :placeholder="__('Ex: 2115')" />
 
-                <flux:input name="post" label="Post" :value="old('post')" type="text" required placeholder="Ex: Administrative Officer" />
+                <flux:input name="post" :label="__('Post')" :value="old('post')" type="text" required :placeholder="__('Ex: Administrative Officer')" />
 
-                <flux:input name="department" label="Department" :value="old('department')" type="text" required placeholder="Ex: National University" />
+                <flux:input name="department" :label="__('Department')" :value="old('department')" type="text" required :placeholder="__('Ex: National University')" />
 
-                <flux:input name="mobile_no" label="Mobile No" :value="old('mobile_no')" type="text" required placeholder="017XXXXXXXX" />
+                <flux:input name="mobile_no" :label="__('Mobile No')" :value="old('mobile_no')" type="text" required :placeholder="__('017XXXXXXXX')" />
 
-                <flux:input name="email" :label="__('Email address')" :value="old('email')" type="email" required autocomplete="email" placeholder="email@example.com" />
+                <flux:input name="email" :label="__('Email address')" :value="old('email')" type="email" required autocomplete="email" :placeholder="__('email@example.com')" />
             </div>
 
-            <flux:select name="role" label="User Role" required>
-                <flux:select.option value="requisitioner" selected>Requisitioner</flux:select.option>
-                <flux:select.option value="initiator">Initiator</flux:select.option>
-                <flux:select.option value="assistant_director">Assistant Director</flux:select.option>
-                <flux:select.option value="deputy_director">Deputy Director</flux:select.option>
-                <flux:select.option value="director">Director</flux:select.option>
-                <flux:select.option value="adin">Initiator</flux:select.option>
+            <flux:select name="role" :label="__('User Role')" required>
+                <flux:select.option value="requisitioner" selected>{{ __('Requisitioner') }}</flux:select.option>
+                <flux:select.option value="initiator">{{ __('Initiator') }}</flux:select.option>
+                <flux:select.option value="assistant_director">{{ __('Assistant Director') }}</flux:select.option>
+                <flux:select.option value="deputy_director">{{ __('Deputy Director') }}</flux:select.option>
+                <flux:select.option value="director">{{ __('Director') }}</flux:select.option>
+                <flux:select.option value="admin">{{ __('Admin') }}</flux:select.option>
             </flux:select>
 
-            <flux:input name="digital_signature" label="Digital Signature (Image)" type="file" required accept="image/*" />
+            <flux:input name="digital_signature" :label="__('Digital Signature (Image)')" type="file" required accept="image/*" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <flux:input name="password" :label="__('Password')" type="password" required autocomplete="new-password" :placeholder="__('Password')" passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}" viewable />

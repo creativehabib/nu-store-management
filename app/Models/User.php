@@ -48,7 +48,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
     'role',
     'is_approved',
     'picture',
-    'digital_signature'
+    'digital_signature',
+    'locale',
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser

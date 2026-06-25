@@ -74,9 +74,9 @@ new #[Title('Profile settings')] class extends Component {
 
         $user->save();
 
-        Flux::toast(variant: 'success', text: __('প্রোফাইল এবং সিগনেচার সফলভাবে আপডেট হয়েছে।'));
+        Flux::toast(variant: 'success', text: __('Profile and signature updated successfully.'));
 
-        // ফাইল ইনপুট ক্লিয়ার করা
+        // ফাইল ইনপুট ক্লিয়ার করা
         $this->reset('digital_signature');
     }
 
@@ -119,7 +119,7 @@ new #[Title('Profile settings')] class extends Component {
 
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
-    <x-pages::settings.layout :heading="__('প্রোফাইল ও সিগনেচার')" :subheading="__('আপনার নাম, ইমেইল, মোবাইল নম্বর এবং ডিজিটাল সিগনেচার আপডেট করুন')">
+    <x-pages::settings.layout :heading="__('Profile and Signature')" :subheading="__('Update your name, email, mobile number, and digital signature')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
 
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
@@ -148,30 +148,30 @@ new #[Title('Profile settings')] class extends Component {
                 {{-- @end-chisel-email-verification --}}
             </div>
 
-            <flux:input wire:model="mobile_no" label="মোবাইল নম্বর" type="text" required />
+            <flux:input wire:model="mobile_no" :label="__('Mobile Number')" type="text" required />
 
             <div class="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                <flux:heading size="lg">ডিজিটাল সিগনেচার</flux:heading>
-                <p class="text-sm text-zinc-500">অনুমোদনের ক্ষেত্রে এই সিগনেচারটি প্রিন্ট কপিতে ব্যবহার করা হবে (সাদা ব্যাকগ্রাউন্ডের ছবি ব্যবহার করার চেষ্টা করুন)।</p>
+                <flux:heading size="lg">{{ __('Digital Signature') }}</flux:heading>
+                <p class="text-sm text-zinc-500">{{ __('This signature will be used on printed copies for approval (try using an image with a white background).') }}</p>
 
                 @if($current_signature)
                     <div class="mb-4">
-                        <p class="text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">বর্তমান সিগনেচার:</p>
+                        <p class="text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">{{ __('Current Signature:') }}</p>
                         <div class="p-4 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg inline-block">
                             <img src="{{ asset('storage/' . $current_signature) }}" alt="Signature" class="h-16 object-contain mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:p-1">
                         </div>
                     </div>
                 @endif
 
-                <flux:input type="file" wire:model="digital_signature" label="নতুন সিগনেচার আপলোড করুন (ঐচ্ছিক)" accept="image/*" />
+                <flux:input type="file" wire:model="digital_signature" :label="__('Upload New Signature (Optional)')" accept="image/*" />
 
-                <div wire:loading wire:target="digital_signature" class="text-sm text-indigo-600 mt-1">ছবি আপলোড হচ্ছে, দয়া করে অপেক্ষা করুন...</div>
+                <div wire:loading wire:target="digital_signature" class="text-sm text-indigo-600 mt-1">{{ __('Uploading image, please wait...') }}</div>
             </div>
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
                     <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
-                        {{ __('আপডেট করুন (Save)') }}
+                        {{ __('Update (Save)') }}
                     </flux:button>
                 </div>
             </div>
