@@ -11,12 +11,45 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </flux:sidebar.item>
 
-                    @if(auth()->user()->role === 'admin')
+                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:sidebar.item>
+
+                {{-- রিকুইজিশন ম্যানেজমেন্ট (গ্রুপ করা) --}}
+                <flux:sidebar.group heading="{{ __('Requisition Management') }}" class="grid">
+                    <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
+                        {{ __('Submit Demand') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clock" :href="route('requisition.my_history')" :current="request()->routeIs('requisition.my_history')" wire:navigate>
+                        {{ __('My Requisitions') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                {{-- ওয়ার্কফ্লো / অ্যাপ্রুভাল কিউ --}}
+                @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
+                    <flux:sidebar.group heading="{{ __('Workflow') }}" class="grid">
+                        @if(auth()->user()->role === 'initiator')
+                            <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
+                                {{ __('Initiator Queue') }}
+                            </flux:sidebar.item>
+                        @endif
+                        @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
+                            <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
+                                {{ __('Approval Queue') }}
+                            </flux:sidebar.item>
+                        @endif
+                        @if(auth()->user()->role === 'initiator')
+                            <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
+                                {{ __('Stock In Entry') }}
+                            </flux:sidebar.item>
+                        @endif
+                    </flux:sidebar.group>
+                @endif
+
+                {{-- অ্যাডমিন প্যানেল --}}
+                @if(auth()->user()->role === 'admin')
+                    <flux:sidebar.group heading="{{ __('System Administration') }}" class="grid">
                         <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
                             {{ __('User Manage') }}
                         </flux:sidebar.item>
@@ -26,58 +59,22 @@
                         <flux:sidebar.item icon="cube" :href="route('admin.products')" :current="request()->routeIs('admin.products')" wire:navigate>
                             {{ __('Products') }}
                         </flux:sidebar.item>
-                    @endif
-
-                    <!-- Requisitioner Menu -->
-                    @if(auth()->user()->role === 'requisitioner')
-                        <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
-                            {{ __('Submit Demand') }}
+                        <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
+                            {{ __('Language Settings') }}
                         </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endif
 
-                        <!-- নতুন ট্র্যাকিং মেনু -->
-                        <flux:sidebar.item icon="clock" :href="route('requisition.my_history')" :current="request()->routeIs('requisition.my_history')" wire:navigate>
-                            {{ __('My Requisitions') }}
-                        </flux:sidebar.item>
-                    @endif
-
-                    @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
-
-                        <!-- Initiator এর মেনু -->
-                        @if(auth()->user()->role === 'initiator')
-                            <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
-                                {{ __('Initiator Queue') }}
-                            </flux:sidebar.item>
-                        @endif
-
-                        <!-- AD, DD এবং Director এর মেনু -->
-                        @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
-                            <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
-                                {{ __('Approval Queue') }}
-                                <flux:badge size="sm" color="amber">New</flux:badge>
-                            </flux:sidebar.item>
-                        @endif
-                    @endif
-
-                    @if(auth()->user()->role === 'initiator')
-                        <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
-                            {{ __('Stock In Entry') }}
-                        </flux:sidebar.item>
-                    @endif
-
-                    @if(in_array(auth()->user()->role, ['admin', 'director', 'deputy_director', 'initiator']))
+                {{-- রিপোর্টস --}}
+                @if(in_array(auth()->user()->role, ['admin', 'director', 'deputy_director', 'initiator']))
+                    <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
                         <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
                             {{ __('Reports & Export') }}
                         </flux:sidebar.item>
-                    @endif
-                </flux:sidebar.group>
-
-                @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
-                        {{ __('Language Settings') }}
-                    </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endif
 
                 {{--<livewire:layout.notification-bell />--}}
-                @endif
                 <livewire:layout.language-switcher />
             </flux:sidebar.nav>
 
