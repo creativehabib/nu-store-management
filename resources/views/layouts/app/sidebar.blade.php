@@ -76,10 +76,9 @@
                         {{ __('Language Settings') }}
                     </flux:sidebar.item>
 
-                    <livewire:layout.language-switcher />
                     <livewire:layout.notification-bell />
                 @endif
-
+                <livewire:layout.language-switcher />
             </flux:sidebar.nav>
 
             <flux:spacer />
