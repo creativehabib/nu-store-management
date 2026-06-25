@@ -48,6 +48,7 @@ class ApprovalQueue extends Component
             $this->suppliedQuantities[$item->id] = $item->supplied_qty;
         }
         $this->comment = '';
+        Flux::modal('view-action-modal')->show();
     }
 
     public function processAction($actionType)
@@ -112,6 +113,7 @@ class ApprovalQueue extends Component
         ]);
 
         Flux::toast($msg);
+        Flux::modal('view-action-modal')->close();
         $this->selectedRequisition = null;
     }
 

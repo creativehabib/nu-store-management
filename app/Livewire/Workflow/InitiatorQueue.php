@@ -3,6 +3,7 @@
 namespace App\Livewire\Workflow;
 
 use App\Models\Requisition;
+use App\Models\User;
 use App\Notifications\RequisitionNotification;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +46,7 @@ class InitiatorQueue extends Component
         }
 
         $this->comment = '';
+        Flux::modal('view-action-modal')->show();
     }
 
     // অনুমোদন করে পরবর্তী ধাপে পাঠানো
@@ -77,6 +79,7 @@ class InitiatorQueue extends Component
         ]);
 
         Flux::toast('রিকুইজিশনটি সফলভাবে পরবর্তী ধাপে (Assistant Director) পাঠানো হয়েছে!');
+        Flux::modal('view-action-modal')->close();
 
         // রিসেট করা
         $this->selectedRequisition = null;
