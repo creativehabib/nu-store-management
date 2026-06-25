@@ -36,11 +36,9 @@
 
                         <td class="p-3 text-right">
                             @if($req->status === 'pending' || $req->status === 'returned')
-                                <flux:modal.trigger name="approve-modal-{{ $req->id }}">
-                                    <flux:button size="sm" variant="primary" icon="eye" wire:click="viewRequisition({{ $req->id }})">
-                                        View & Action
-                                    </flux:button>
-                                </flux:modal.trigger>
+                                <flux:button size="sm" variant="primary" icon="eye" wire:click="viewRequisition({{ $req->id }})">
+                                    View & Action
+                                </flux:button>
                             @elseif($req->status === 'director_approved' || $req->status === 'distributed')
                                 <flux:button size="sm" variant="outline" icon="printer" href="{{ route('workflow.print', $req->id) }}" wire:navigate>
                                     Print & Distribute
@@ -61,7 +59,7 @@
     </flux:card>
 
     @if($selectedRequisition)
-        <flux:modal name="approve-modal-{{ $selectedRequisition->id }}" class="md:w-3/4 lg:w-2/3">
+        <flux:modal name="view-action-modal-{{ $selectedRequisition->id }}" class="md:w-3/4 lg:w-2/3">
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg">রিকুইজিশন ডিটেইলস: {{ $selectedRequisition->requisition_no }}</flux:heading>
@@ -69,7 +67,6 @@
                 </div>
 
                 <flux:separator />
-
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse border border-zinc-200 dark:border-zinc-700">
                         <thead>
