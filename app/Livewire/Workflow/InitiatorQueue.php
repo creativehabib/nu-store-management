@@ -13,10 +13,9 @@ use Livewire\Component;
 class InitiatorQueue extends Component
 {
     public $requisitions;
+    public ?Requisition $selectedRequisition = null;
 
-    public $selectedRequisition; // মডালে দেখানোর জন্য
-
-    public $suppliedQuantities = []; // ডাইনামিক সরবরাহের পরিমাণ
+    public $suppliedQuantities = [];
 
     public $comment = '';
 
@@ -25,9 +24,9 @@ class InitiatorQueue extends Component
         $this->loadRequisitions();
     }
 
-    public function loadRequisitions()
+    public function loadRequisitions(): void
     {
-        // আপডেট: এখন Initiator pending, returned, director_approved এবং distributed স্ট্যাটাসগুলোও দেখবে
+        // Initiator pending, returned, director_approved এবং distributed স্ট্যাটাসগুলোও দেখবে
         $this->requisitions = Requisition::with(['user', 'items.product'])
             ->whereIn('status', ['pending', 'returned', 'director_approved', 'distributed'])
             ->latest()
@@ -35,8 +34,9 @@ class InitiatorQueue extends Component
     }
 
     // একটি নির্দিষ্ট রিকুইজিশন ভিউ করা (মডাল ওপেন করার জন্য)
-    public function viewRequisition($id)
+    public function viewRequisition($id): void
     {
+        // findOrFail ব্যবহার করা হলো যাতে ডাটা না থাকলে আগে থেকেই আটকে দেয়
         $this->selectedRequisition = Requisition::with(['user', 'items.product'])->findOrFail($id);
 
         // ডিফল্টভাবে চাহিদার পরিমাণকে সরবরাহের পরিমাণ হিসেবে সেট করা হচ্ছে
@@ -50,8 +50,15 @@ class InitiatorQueue extends Component
     }
 
     // অনুমোদন করে পরবর্তী ধাপে পাঠানো
-    public function forwardRequisition()
+    public function forwardRequisition(): void
     {
+        // সিকিউরিটি চেক
+        if (! $this->selectedRequisition) {
+            Flux::toast(__('Requisition data not found! Please refresh the page.'), variant: 'danger');
+
+            return;
+        }
+
         // ১. প্রতিটি আইটেমের সরবরাহের পরিমাণ আপডেট করা
         foreach ($this->selectedRequisition->items as $item) {
             if (isset($this->suppliedQuantities[$item->id])) {
@@ -78,18 +85,23 @@ class InitiatorQueue extends Component
             'approval_history' => $history,
         ]);
 
-        Flux::toast('রিকুইজিশনটি সফলভাবে পরবর্তী ধাপে (Assistant Director) পাঠানো হয়েছে!');
-        Flux::modal('view-action-modal')->close();
-
-        // রিসেট করা
-        $this->selectedRequisition = null;
-        $this->loadRequisitions();
-
+        // ৪. নোটিফিকেশন পাঠানো (অবজেক্ট null করার আগেই এই কাজ করতে হবে)
         $targetUsers = User::where('role', 'assistant_director')->get();
-        $message = "নতুন রিকুইজিশন ({$this->selectedRequisition->requisition_no}) আপনার অনুমোদনের অপেক্ষায় আছে।";
+
+        // ট্রান্সলেশন স্ট্রিং এর ভেতরে ডাইনামিক ভ্যারিয়েবল পাস করার নিয়ম
+        $message = __('New requisition (:req_no) is waiting for your approval.', ['req_no' => $this->selectedRequisition->requisition_no]);
+
         $url = route('workflow.approval');
 
         Notification::send($targetUsers, new RequisitionNotification($this->selectedRequisition, $message, $url));
+
+        // ৫. সাকসেস মেসেজ এবং মডাল ক্লোজ
+        Flux::toast(__('Requisition successfully forwarded to Assistant Director!'));
+        Flux::modal('view-action-modal')->close();
+
+        // ৬. একদম শেষে রিসেট করা
+        $this->selectedRequisition = null;
+        $this->loadRequisitions();
     }
 
     public function render()
