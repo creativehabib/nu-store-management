@@ -74,6 +74,13 @@
                     </flux:sidebar.group>
                 @endif
 
+                @if(auth()->user()->role === 'admin')
+                    <flux:sidebar.group heading="{{ __('Administration') }}">
+                        <flux:sidebar.item icon="cog" :href="route('admin.mail_settings')" :current="request()->routeIs('admin.mail_settings')">
+                            {{ __('Mail Settings') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endif
                 {{--<livewire:layout.notification-bell />--}}
                 <livewire:layout.language-switcher />
             </flux:sidebar.nav>

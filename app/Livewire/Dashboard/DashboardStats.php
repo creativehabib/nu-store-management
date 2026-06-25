@@ -26,38 +26,49 @@ class DashboardStats extends Component
         $role = $user->role;
         $stats = [];
 
-        // Admin এর জন্য স্ট্যাটিস্টিকস
+        // --- আপনার পূর্বের স্ট্যাটিস্টিকস লজিক ---
         if ($role === 'admin') {
             $stats['total_users'] = User::count();
             $stats['pending_users'] = User::where('is_approved', false)->count();
             $stats['total_products'] = Product::count();
-            $stats['low_stock'] = Product::where('stock', '<=', 10)->count(); // স্টক ১০ বা তার কম হলে
-        }
-        // Requisitioner এর জন্য স্ট্যাটিস্টিকস
-        elseif ($role === 'requisitioner') {
+            $stats['low_stock'] = Product::where('stock', '<=', 10)->count();
+        } elseif ($role === 'requisitioner') {
             $stats['total_submitted'] = Requisition::where('user_id', $user->id)->count();
             $stats['pending'] = Requisition::where('user_id', $user->id)->where('status', '!=', 'distributed')->count();
             $stats['distributed'] = Requisition::where('user_id', $user->id)->where('status', 'distributed')->count();
             $stats['returned'] = Requisition::where('user_id', $user->id)->where('status', 'returned')->count();
-        }
-        // Approvers (Initiator, AD, DD, Director) এর জন্য স্ট্যাটিস্টিকস
-        else {
+        } else {
             $queueStatuses = $this->getQueueStatus($role);
-
             if ($role === 'initiator') {
                 $stats['pending_action'] = Requisition::whereIn('status', ['pending', 'returned'])->count();
                 $stats['ready_to_print'] = Requisition::whereIn('status', ['director_approved', 'distributed'])->count();
             } else {
                 $stats['pending_approval'] = Requisition::whereIn('status', $queueStatuses)->count();
             }
-
-            // সিস্টেমে মোট কতগুলো রিকুইজিশন প্রসেস হচ্ছে
             $stats['total_requisitions'] = Requisition::count();
         }
 
+        // --- নতুন চার্ট ডাটা লজিক ---
+
+        // ১. গত ৬ মাসের মাসিক রিকুইজিশন ট্রেন্ড
+        $monthlyData = Requisition::selectRaw('count(*) as total, DATE_FORMAT(created_at, "%M") as month, MIN(created_at) as min_date')
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('month')
+            ->orderBy('min_date', 'asc') // created_at এর বদলে MIN(created_at) ব্যবহার করুন
+            ->pluck('total', 'month');
+
+        // ২. ক্যাটাগরি ভিত্তিক পণ্য সংখ্যা (ইনভেন্টরি অ্যানালিটিক্স)
+        $categoryData = \App\Models\Category::withCount('products')
+            ->pluck('products_count', 'name');
+
         return view('livewire.dashboard.dashboard-stats', [
             'role' => $role,
-            'stats' => $stats
-        ])->layout('layouts.app', ['title' => 'Dashboard']);
+            'stats' => $stats,
+            // চার্টের জন্য ডাটা পাস করা
+            'monthlyLabels' => $monthlyData->keys(),
+            'monthlyValues' => $monthlyData->values(),
+            'categoryLabels' => $categoryData->keys(),
+            'categoryValues' => $categoryData->values(),
+        ])->layout('layouts.app', ['title' => __('Dashboard')]);
     }
 }

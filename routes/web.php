@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\LanguageManager;
+use App\Livewire\Admin\MailSettings;
 use App\Livewire\Admin\UserApprovalManager;
 use App\Livewire\Category\CategoryManager;
 use App\Livewire\Inventory\StockInManager;
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/inventory/stock-in', StockInManager::class)->name('inventory.stock_in');
     Route::get('/report/summary', ReportManager::class)->name('report.summary');
     Route::get('/admin/language-settings', LanguageManager::class)->name('admin.language_settings');
+    Route::get('/admin/mail-settings', MailSettings::class)->name('admin.mail_settings');
 });
 
 require __DIR__.'/settings.php';

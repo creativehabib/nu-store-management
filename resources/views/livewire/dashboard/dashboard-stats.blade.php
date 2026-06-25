@@ -4,6 +4,7 @@
         <p class="text-zinc-500 text-sm mt-1">{{ __('Below is the summary of your dashboard:') }}</p>
     </div>
 
+    {{-- স্ট্যাটাস কার্ডসমূহ (আপনার আগের কোড) --}}
     @if($role === 'admin')
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <flux:card class="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
@@ -94,7 +95,6 @@
 
     @if(in_array($role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
             @if($role === 'initiator')
                 <flux:card class="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                     <div class="flex items-center justify-between">
@@ -138,4 +138,60 @@
             </flux:card>
         </div>
     @endif
+
+    @if(in_array($role, ['admin', 'director']))
+        {{-- চার্ট সেকশন --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <flux:card>
+                <flux:heading>{{ __('Monthly Requisition Trends') }}</flux:heading>
+                <div class="mt-4 h-64">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </flux:card>
+
+            <flux:card>
+                <flux:heading>{{ __('Category-wise Inventory') }}</flux:heading>
+                <div class="mt-4 h-64 flex justify-center">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </flux:card>
+        </div>
+    @endif
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('livewire:navigated', () => { initCharts(); });
+
+        function initCharts() {
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($monthlyLabels) !!},
+                    datasets: [{
+                        label: '{{ __("Requisitions") }}',
+                        data: {!! json_encode($monthlyValues) !!},
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($categoryLabels) !!},
+                    datasets: [{
+                        data: {!! json_encode($categoryValues) !!},
+                        backgroundColor: ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+        initCharts();
+    </script>
 </div>
