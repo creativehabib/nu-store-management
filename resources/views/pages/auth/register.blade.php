@@ -27,10 +27,9 @@
                 <flux:select.option value="assistant_director">{{ __('Assistant Director') }}</flux:select.option>
                 <flux:select.option value="deputy_director">{{ __('Deputy Director') }}</flux:select.option>
                 <flux:select.option value="director">{{ __('Director') }}</flux:select.option>
-                <flux:select.option value="admin">{{ __('Admin') }}</flux:select.option>
             </flux:select>
 
-            <flux:input name="digital_signature" :label="__('Digital Signature (Image)')" type="file" required accept="image/*" />
+            <flux:input name="digital_signature" :label="__('Digital Signature (Image)')" type="file" accept="image/*" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <flux:input name="password" :label="__('Password')" type="password" required autocomplete="new-password" :placeholder="__('Password')" passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}" viewable />
