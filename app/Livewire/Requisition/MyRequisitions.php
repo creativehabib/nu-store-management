@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Requisition;
 
+use App\Models\Requisition;
+use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Requisition;
-use Illuminate\Support\Facades\Auth;
 
 class MyRequisitions extends Component
 {
@@ -20,6 +21,8 @@ class MyRequisitions extends Component
         $this->selectedRequisition = Requisition::with(['items.product'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
+
+        Flux::modal('history-modal')->show();
     }
 
     public function render()
@@ -30,7 +33,7 @@ class MyRequisitions extends Component
             ->paginate(10);
 
         return view('livewire.requisition.my-requisitions', [
-            'requisitions' => $requisitions
+            'requisitions' => $requisitions,
         ]);
     }
 }
