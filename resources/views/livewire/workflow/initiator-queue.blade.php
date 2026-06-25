@@ -59,7 +59,7 @@
     </flux:card>
 
     @if($selectedRequisition)
-        <flux:modal name="view-action-modal-{{ $selectedRequisition->id }}" class="md:w-3/4 lg:w-2/3">
+        <flux:modal name="approve-modal-{{ $selectedRequisition->id }}" class="md:w-3/4 lg:w-2/3">
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg">রিকুইজিশন ডিটেইলস: {{ $selectedRequisition->requisition_no }}</flux:heading>
