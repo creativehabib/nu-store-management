@@ -28,7 +28,7 @@ class CreateNewUser implements CreatesNewUsers
             'post' => ['required', 'string', 'max:255'],
             'department' => ['required', 'string', 'max:255'],
             'role' => ['required', 'in:director,deputy_director,assistant_director,initiator,requisitioner'],
-            'digital_signature' => ['required', 'image', 'mimes:jpeg,png,jpg,svg', 'max:2048'],
+            'digital_signature' => ['image', 'mimes:jpeg,png,jpg,svg', 'max:2048'],
         ])->validate();
 
         // ২. ডিজিটাল সিগনেচার ফাইল সেভ করার লজিক
