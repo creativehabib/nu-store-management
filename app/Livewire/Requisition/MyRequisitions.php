@@ -15,7 +15,7 @@ class MyRequisitions extends Component
     public $selectedRequisition;
 
     // মডাল ওপেন করে নির্দিষ্ট রিকুইজিশনের ডিটেইলস ও হিস্ট্রি দেখা
-    public function viewHistory($id)
+    public function viewHistory($id): void
     {
         // নিজের রিকুইজিশন ছাড়া অন্য কারোটা যেন দেখতে না পারে, তাই user_id চেক করা হয়েছে
         $this->selectedRequisition = Requisition::with(['items.product'])

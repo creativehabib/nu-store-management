@@ -41,14 +41,14 @@ class CreateNewUser implements CreatesNewUsers
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
-            'password' => $input['password'], // Fortify Model Attribute এর কারণে হ্যাশ হয়ে যাবে
+            'password' => $input['password'],
             'pf_no' => $input['pf_no'],
             'mobile_no' => $input['mobile_no'],
             'post' => $input['post'],
             'department' => $input['department'],
             'role' => $input['role'],
             'digital_signature' => $signaturePath,
-            'is_approved' => false, // ডিফল্টভাবে অ্যাকাউন্ট আন-অ্যাপ্রুভড থাকবে
+            'is_approved' => false,
         ]);
     }
 }
