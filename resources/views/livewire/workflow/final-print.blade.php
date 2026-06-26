@@ -5,7 +5,7 @@
         <div class="text-center border-b-2 border-black pb-4 mb-6">
             <h1 class="text-3xl font-bold">{{ __('National University') }}</h1>
             <p class="text-lg">{{ __('Bangladesh') }}</p>
-            <p class="text-lg font-semibold">{{ __('Teacher Training Department') }}</p>
+            <p class="text-lg font-semibold">{{ __('Office of the Teacher Training') }}</p>
             <h2 class="text-xl font-bold mt-4 underline inline-block">{{ __('Store Requisition Form') }}</h2>
         </div>
 

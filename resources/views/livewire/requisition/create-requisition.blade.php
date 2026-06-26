@@ -11,8 +11,11 @@
                             <flux:select
                                 wire:model.live="selectedCategories.{{ $index }}"
                                 label="{{ __('Category') }}"
-                                placeholder="Select Category"
                             >
+                                <flux:select.option value="">
+                                    Select Category
+                                </flux:select.option>
+
                                 @foreach($categories as $category)
                                     <flux:select.option value="{{ $category->id }}">
                                         {{ $category->name }}
