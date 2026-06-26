@@ -8,6 +8,7 @@ use App\Support\SettingManager;
 // use Database\Seeders\DefaultContentSeeder;
 // use Database\Seeders\MenuSeeder;
 // use Database\Seeders\RolePermissionSeeder;
+use Database\Seeders\ProductSeeder;
 use DateTimeZone;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -162,6 +163,11 @@ class InstallController extends Controller
         //            '--class' => MenuSeeder::class,
         //            '--force' => true,
         //        ]);
+
+        Artisan::call('db:seed', [
+            '--class' => ProductSeeder::class,
+            '--force' => true,
+        ]);
 
         return redirect()->route('install.account');
     }
