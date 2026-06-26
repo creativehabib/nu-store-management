@@ -87,8 +87,14 @@
                             {{ __('Cache Management') }}
                         </flux:sidebar.item>
 
+                        <flux:navlist.item icon="circle-stack" href="{{ route('admin.backup') }}" :current="request()->routeIs('admin.backup')">
+                            {{ __('Database Backup') }}
+                        </flux:navlist.item>
+
                     </flux:sidebar.group>
                 @endif
+
+
                 {{--<livewire:layout.notification-bell />--}}
                 <livewire:layout.language-switcher />
             </flux:sidebar.nav>

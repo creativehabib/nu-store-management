@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Install\InstallController;
+use App\Livewire\Admin\BackupManagement;
 use App\Livewire\Admin\CacheManagement;
 use App\Livewire\Admin\GeneralSettings;
 use App\Livewire\Admin\LanguageManager;
@@ -54,6 +55,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/admin/system-info', SystemInformation::class)->name('admin.system_info');
     Route::get('/admin/cache-management', CacheManagement::class)->name('admin.cache_management');
     Route::get('/admin/general-settings', GeneralSettings::class)->name('admin.general_settings');
+    Route::get('/admin/database-backup', BackupManagement::class)->name('admin.backup');
 });
 
 require __DIR__.'/settings.php';
