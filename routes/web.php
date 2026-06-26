@@ -6,6 +6,7 @@ use App\Livewire\Admin\CacheManagement;
 use App\Livewire\Admin\GeneralSettings;
 use App\Livewire\Admin\LanguageManager;
 use App\Livewire\Admin\MailSettings;
+use App\Livewire\Admin\ProductSummaryReport;
 use App\Livewire\Admin\SystemInformation;
 use App\Livewire\Admin\UserApprovalManager;
 use App\Livewire\Category\CategoryManager;
@@ -56,6 +57,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/admin/cache-management', CacheManagement::class)->name('admin.cache_management');
     Route::get('/admin/general-settings', GeneralSettings::class)->name('admin.general_settings');
     Route::get('/admin/database-backup', BackupManagement::class)->name('admin.backup');
+    Route::get('/admin/product-summary', ProductSummaryReport::class)->name('admin.product_summary');
 });
 
 require __DIR__.'/settings.php';

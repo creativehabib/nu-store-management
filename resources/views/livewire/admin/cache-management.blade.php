@@ -1,7 +1,6 @@
 <div class="grid grid-cols-1">
     <div class="col-span-1">
         <div class="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
-            <!-- Header -->
             <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <h4 class="flex items-center text-lg font-semibold text-slate-800 dark:text-slate-100">
                     <flux:icon.arrow-path class="size-5 mr-2" />
@@ -9,7 +8,6 @@
                 </h4>
             </div>
 
-            <!-- Body -->
             <div class="px-4 py-4">
                 <p class="text-sm mb-3 text-slate-700 dark:text-slate-300">
                     Clear cache to make your site up to date. ডাটাবেস ক্যাশিং, স্ট্যাটিক ব্লকসহ সকল ক্যাশ পরিষ্কার করুন। ডেটা আপডেট করার পরও পরিবর্তন দৃশ্যমান না হলে এই কমান্ডটি চালান।
@@ -26,7 +24,6 @@
                         </thead>
                         <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
 
-                        <!-- Row 1 -->
                         <tr class="bg-white dark:bg-slate-900">
                             <td class="px-3 py-3 align-middle">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-sky-500 text-white">
@@ -49,17 +46,16 @@
                             <td class="px-3 py-3 text-center align-middle">
                                 <button wire:click="clearAllCache" wire:loading.attr="disabled" wire:target="clearAllCache"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="clearAllCache" class="flex items-center">
+                                    <span wire:loading.remove wire:target="clearAllCache" class="inline-flex items-center">
                                         <flux:icon.trash class="size-4 mr-1" /> Clear
                                     </span>
-                                    <span wire:loading wire:target="clearAllCache" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="clearAllCache" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Clearing...
                                     </span>
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Row 2 -->
                         <tr class="align-middle bg-white dark:bg-slate-900">
                             <td class="px-3 py-3">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-amber-400 text-white">
@@ -75,17 +71,16 @@
                             <td class="px-3 py-3 text-center">
                                 <button wire:click="clearCompiledViews" wire:loading.attr="disabled" wire:target="clearCompiledViews"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="clearCompiledViews" class="flex items-center">
+                                    <span wire:loading.remove wire:target="clearCompiledViews" class="inline-flex items-center">
                                         <flux:icon.arrow-path class="size-4 mr-1" /> Refresh
                                     </span>
-                                    <span wire:loading wire:target="clearCompiledViews" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="clearCompiledViews" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Refreshing...
                                     </span>
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Row 3 -->
                         <tr class="align-middle bg-white dark:bg-slate-900">
                             <td class="px-3 py-3">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-emerald-500 text-white">
@@ -101,17 +96,16 @@
                             <td class="px-3 py-3 text-center">
                                 <button wire:click="clearConfigCache" wire:loading.attr="disabled" wire:target="clearConfigCache"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="clearConfigCache" class="flex items-center">
+                                    <span wire:loading.remove wire:target="clearConfigCache" class="inline-flex items-center">
                                         <flux:icon.trash class="size-4 mr-1" /> Clear
                                     </span>
-                                    <span wire:loading wire:target="clearConfigCache" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="clearConfigCache" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Clearing...
                                     </span>
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Row 4 -->
                         <tr class="align-middle bg-white dark:bg-slate-900">
                             <td class="px-3 py-3">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-rose-500 text-white">
@@ -127,17 +121,16 @@
                             <td class="px-3 py-3 text-center">
                                 <button wire:click="clearRouteCache" wire:loading.attr="disabled" wire:target="clearRouteCache"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="clearRouteCache" class="flex items-center">
+                                    <span wire:loading.remove wire:target="clearRouteCache" class="inline-flex items-center">
                                         <flux:icon.trash class="size-4 mr-1" /> Clear
                                     </span>
-                                    <span wire:loading wire:target="clearRouteCache" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="clearRouteCache" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Clearing...
                                     </span>
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Row 5 -->
                         <tr class="align-middle bg-white dark:bg-slate-900">
                             <td class="px-3 py-3">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-sky-600 text-white">
@@ -153,17 +146,16 @@
                             <td class="px-3 py-3 text-center">
                                 <button wire:click="clearLogFiles" wire:loading.attr="disabled" wire:target="clearLogFiles"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="clearLogFiles" class="flex items-center">
+                                    <span wire:loading.remove wire:target="clearLogFiles" class="inline-flex items-center">
                                         <flux:icon.trash class="size-4 mr-1" /> Clear
                                     </span>
-                                    <span wire:loading wire:target="clearLogFiles" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="clearLogFiles" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Clearing...
                                     </span>
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Row 6 -->
                         <tr class="align-middle bg-white dark:bg-slate-900">
                             <td class="px-3 py-3">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-800 text-white">
@@ -179,17 +171,16 @@
                             <td class="px-3 py-3 text-center">
                                 <button wire:click="clearOptimizationCaches" wire:loading.attr="disabled" wire:target="clearOptimizationCaches"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium border border-slate-800 text-slate-800 hover:bg-slate-800 hover:text-white dark:border-slate-600 dark:text-slate-100 dark:hover:bg-slate-200 dark:hover:text-slate-900 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="clearOptimizationCaches" class="flex items-center">
+                                    <span wire:loading.remove wire:target="clearOptimizationCaches" class="inline-flex items-center">
                                         <flux:icon.trash class="size-4 mr-1" /> Clear
                                     </span>
-                                    <span wire:loading wire:target="clearOptimizationCaches" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="clearOptimizationCaches" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Clearing...
                                     </span>
                                 </button>
                             </td>
                         </tr>
 
-                        <!-- Row 7 -->
                         <tr class="bg-white dark:bg-slate-900">
                             <td class="px-3 py-3 align-middle">
                                 <span class="inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-500 text-white">
@@ -205,10 +196,10 @@
                             <td class="px-3 py-3 text-center align-middle">
                                 <button wire:click="cacheViews" wire:loading.attr="disabled" wire:target="cacheViews"
                                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium border border-sky-500 text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/30 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed mt-auto cursor-pointer">
-                                    <span wire:loading.remove wire:target="cacheViews" class="flex items-center">
+                                    <span wire:loading.remove wire:target="cacheViews" class="inline-flex items-center">
                                         <flux:icon.eye class="size-4 mr-1" /> Cache
                                     </span>
-                                    <span wire:loading wire:target="cacheViews" class="flex items-center">
+                                    <span wire:loading.inline-flex wire:target="cacheViews" class="items-center">
                                         <flux:icon.arrow-path class="size-4 mr-2 animate-spin" /> Caching...
                                     </span>
                                 </button>
@@ -219,7 +210,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="px-4 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
                 <div class="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
                     <flux:icon.information-circle class="size-4 mt-0.5 text-slate-400" />
@@ -228,5 +218,4 @@
             </div>
         </div>
     </div>
-
 </div>

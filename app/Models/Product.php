@@ -19,4 +19,9 @@ class Product extends Model
     {
         return $this->hasMany(RequisitionItem::class);
     }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(RequisitionItem::class);
+    }
 }

@@ -58,14 +58,17 @@
 
                 @if(auth()->user()->role === 'admin')
                     <flux:sidebar.group heading="{{ __('System Administration') }}">
-                        <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
-                            {{ __('User Manage') }}
-                        </flux:sidebar.item>
                         <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
                             {{ __('Categories') }}
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="cube" :href="route('admin.products')" :current="request()->routeIs('admin.products')" wire:navigate>
                             {{ __('Products') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="chart-pie" :href="route('admin.product_summary')" :current="request()->routeIs('admin.product_summary')" wire:navigate>
+                            {{ __('Products Summary') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
+                            {{ __('User Manage') }}
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
                             {{ __('Language Settings') }}

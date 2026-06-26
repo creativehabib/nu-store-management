@@ -2,21 +2,31 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
-use App\Models\User;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Requisition;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class DashboardStats extends Component
 {
     // ইউজারের রোল অনুযায়ী কিউ স্ট্যাটাস বের করার মেথড
-    private function getQueueStatus($role)
+    private function getQueueStatus($role): array
     {
-        if ($role === 'initiator') return ['pending', 'returned', 'director_approved', 'distributed'];
-        if ($role === 'assistant_director') return ['initiator_checked'];
-        if ($role === 'deputy_director') return ['ad_approved'];
-        if ($role === 'director') return ['dd_approved'];
+        if ($role === 'initiator') {
+            return ['pending', 'returned', 'director_approved', 'distributed'];
+        }
+        if ($role === 'assistant_director') {
+            return ['initiator_checked'];
+        }
+        if ($role === 'deputy_director') {
+            return ['ad_approved'];
+        }
+        if ($role === 'director') {
+            return ['dd_approved'];
+        }
+
         return [];
     }
 
@@ -58,7 +68,7 @@ class DashboardStats extends Component
             ->pluck('total', 'month');
 
         // ২. ক্যাটাগরি ভিত্তিক পণ্য সংখ্যা (ইনভেন্টরি অ্যানালিটিক্স)
-        $categoryData = \App\Models\Category::withCount('products')
+        $categoryData = Category::withCount('products')
             ->pluck('products_count', 'name');
 
         return view('livewire.dashboard.dashboard-stats', [
