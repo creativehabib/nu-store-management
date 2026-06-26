@@ -2,30 +2,69 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
-use Livewire\WithPagination;
 use App\Models\User;
 use Flux\Flux;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class UserApprovalManager extends Component
 {
     use WithPagination;
 
-    // এডিট করার জন্য প্রোপার্টিসমূহ
-    public $userId, $name, $email, $pf_no, $post, $department, $role, $mobile_no;
+    public $userId;
+
+    public $name;
+
+    public $email;
+
+    public $pf_no;
+
+    public $post;
+
+    public $department;
+
+    public $role;
+
+    public $mobile_no;
+
     public $isEditMode = false;
 
-    // অ্যাপ্রুভ এবং আন-অ্যাপ্রুভ টগল করার মেথড
-    public function toggleApproval($id)
-    {
-        $user = User::findOrFail($id);
-        $user->update(['is_approved' => !$user->is_approved]);
+    // Properties for Modal
+    public $targetUserId = null;
 
-        $msg = $user->is_approved ? 'ইউজার অ্যাকাউন্ট অ্যাপ্রুভ করা হয়েছে!' : 'ইউজার অ্যাকাউন্ট সাসপেন্ড/আন-অ্যাপ্রুভ করা হয়েছে!';
-        Flux::toast($msg);
+    public $actionType = ''; // 'suspend' or 'delete'
+
+    // Open Modal
+    public function confirmAction($id, $type)
+    {
+        $this->targetUserId = $id;
+        $this->actionType = $type;
+        Flux::modal('delete-user-modal')->show();
     }
 
-    // এডিট মোড অন করার মেথড
+    // Execute Action from Modal
+    public function executeAction()
+    {
+        if (! $this->targetUserId || auth()->id() == $this->targetUserId) {
+            Flux::toast('This operation is not allowed!', 'danger');
+
+            return;
+        }
+
+        if ($this->actionType === 'suspend') {
+            $user = User::findOrFail($this->targetUserId);
+            $user->update(['is_approved' => ! $user->is_approved]);
+            Flux::toast($user->is_approved ? 'User account approved!' : 'User account suspended!');
+        } elseif ($this->actionType === 'delete') {
+            User::findOrFail($this->targetUserId)->delete();
+            Flux::toast('User account deleted successfully!');
+        }
+
+        $this->targetUserId = null;
+        $this->actionType = '';
+        Flux::modal('delete-user-modal')->close();
+    }
+
     public function edit($id)
     {
         $user = User::findOrFail($id);
@@ -37,25 +76,22 @@ class UserApprovalManager extends Component
         $this->department = $user->department;
         $this->role = $user->role;
         $this->mobile_no = $user->mobile_no;
-
         $this->isEditMode = true;
     }
 
-    // ইউজারের ইনফরমেশন আপডেট করার মেথড
     public function update()
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $this->userId,
-            'pf_no' => 'required|string|unique:users,pf_no,' . $this->userId,
+            'email' => 'required|email|unique:users,email,'.$this->userId,
+            'pf_no' => 'required|string|unique:users,pf_no,'.$this->userId,
             'post' => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'role' => 'required|in:director,deputy_director,assistant_director,initiator,requisitioner',
             'mobile_no' => 'required|string|max:20',
         ]);
 
-        $user = User::findOrFail($this->userId);
-        $user->update([
+        User::findOrFail($this->userId)->update([
             'name' => $this->name,
             'email' => $this->email,
             'pf_no' => $this->pf_no,
@@ -65,19 +101,11 @@ class UserApprovalManager extends Component
             'mobile_no' => $this->mobile_no,
         ]);
 
-        Flux::toast('ইউজারের তথ্য সফলভাবে আপডেট করা হয়েছে!');
+        Flux::toast('User information updated successfully!');
         $this->resetFields();
     }
 
-    // ইউজার ডিলিট করার মেথড
-    public function deleteUser($id)
-    {
-        User::findOrFail($id)->delete();
-        Flux::toast('ইউজার অ্যাকাউন্ট মুছে ফেলা হয়েছে!');
-    }
-
-    // ফর্ম রিসেট
-    public function resetFields()
+    public function resetFields(): void
     {
         $this->reset(['userId', 'name', 'email', 'pf_no', 'post', 'department', 'role', 'mobile_no', 'isEditMode']);
         $this->resetValidation();
@@ -85,13 +113,12 @@ class UserApprovalManager extends Component
 
     public function render()
     {
-        // এডমিন বাদে সিস্টেমের সকল ইউজারকে আনা হচ্ছে (Approve এবং Unapprove উভয়ই)
-        $users = User::where('role', '!=', 'admin')
+        $users = User::orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
             ->latest()
             ->paginate(10);
 
         return view('livewire.admin.user-approval-manager', [
-            'users' => $users
+            'users' => $users,
         ])->layout('layouts.app', ['title' => 'User Manager']);
     }
 }

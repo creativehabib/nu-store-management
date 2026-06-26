@@ -58,37 +58,37 @@
         </div>
     </flux:card>
 
-    <flux:card class="p-0 overflow-hidden">
+    <flux:card class="p-2 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                 <tr class="bg-zinc-50 dark:bg-zinc-900 border-b dark:border-zinc-700 text-zinc-500 text-xs uppercase tracking-wider">
-                    <th class="p-4 font-semibold w-1/4">{{ __('Key') }}</th>
-                    <th class="p-4 font-semibold w-1/3">{{ __('EN (English)') }}</th>
-                    <th class="p-4 font-semibold w-1/3">{{ strtoupper($locale) }} {{ __('(Translation)') }}</th>
-                    <th class="p-4 font-semibold text-right">{{ __('Action') }}</th>
+                    <th class="p-2 font-semibold w-1/4">{{ __('Key') }}</th>
+                    <th class="p-2 font-semibold w-1/3">{{ __('EN (English)') }}</th>
+                    <th class="p-2 font-semibold w-1/3">{{ strtoupper($locale) }} {{ __('(Translation)') }}</th>
+                    <th class="p-2 font-semibold text-right">{{ __('Action') }}</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
                 @forelse($filteredTranslations as $key => $value)
                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
-                        <td class="p-4 text-sm text-zinc-600 dark:text-zinc-400 font-mono break-all">
+                        <td class="p-2 text-sm text-zinc-600 dark:text-zinc-400 font-mono break-all">
                             {{ $key }}
                         </td>
 
-                        <td class="p-4 text-sm">
+                        <td class="p-2 text-sm">
                             <span class="cursor-pointer text-blue-600 dark:text-blue-400 border-b border-dashed border-blue-400/50 hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" wire:click="editKey('{{ $key }}')">
                                 {{ !empty($baseTranslations[$key]) ? $baseTranslations[$key] : __('Empty') }}
                             </span>
                         </td>
 
-                        <td class="p-4 text-sm">
+                        <td class="p-2 text-sm">
                             <span class="cursor-pointer text-blue-600 dark:text-blue-400 border-b border-dashed border-blue-400/50 hover:border-blue-600 hover:text-blue-800 dark:hover:text-blue-300 transition-colors {{ empty($value) ? 'text-amber-600 dark:text-amber-500 font-medium' : '' }}" wire:click="editKey('{{ $key }}')">
                                 {{ !empty($value) ? $value : __('Missing (Empty)') }}
                             </span>
                         </td>
 
-                        <td class="p-4 text-right">
+                        <td class="p-2 text-right">
                             <flux:button size="sm" variant="subtle" icon="trash" class="text-red-500 hover:text-red-600 hover:bg-red-50" wire:click="deleteTranslation('{{ $key }}')" wire:confirm="{{ __('Are you sure you want to delete this key?') }}"></flux:button>
                         </td>
                     </tr>
