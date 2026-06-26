@@ -1,13 +1,14 @@
-<div class="p-6">
+<div class="p-6 max-w-7xl mx-auto">
     {{-- Breadcrumb --}}
     <div class="mb-6 flex items-center text-sm text-slate-500 uppercase font-semibold tracking-wider">
         <span class="text-blue-600">Dashboard</span>
         <span class="mx-2">/</span>
         <span class="text-slate-500">Settings</span>
         <span class="mx-2">/</span>
-        <span class="text-slate-800">Backups</span>
+        <span class="text-slate-800 dark:text-slate-300">Backups</span>
     </div>
 
+    {{-- Info Alert --}}
     <div class="bg-amber-400 text-white rounded-lg p-4 mb-6 shadow-sm">
         <ul class="space-y-2 text-sm">
             <li class="flex items-start gap-2">
@@ -29,15 +30,19 @@
         </ul>
     </div>
 
+    {{-- Main Card --}}
     <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+
+        {{-- Header & Generate Button --}}
         <div class="p-4 flex items-center justify-end border-b border-slate-200 dark:border-slate-700">
-            <button wire:click="generateBackup" wire:loading.attr="disabled" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-500 flex items-center gap-2">
-                <i class="fas fa-database" wire:loading.remove wire:target="generateBackup"></i>
-                <i class="fas fa-spinner fa-spin" wire:loading wire:target="generateBackup"></i>
+            <button wire:click="generateBackup" wire:loading.attr="disabled" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-500 flex items-center gap-2 transition-colors">
+                <flux:icon.circle-stack class="w-4 h-4" wire:loading.remove wire:target="generateBackup" />
+                <flux:icon.arrow-path class="w-4 h-4 animate-spin" wire:loading wire:target="generateBackup" />
                 <span>Generate backup</span>
             </button>
         </div>
 
+        {{-- Data Table --}}
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -58,18 +63,23 @@
                         <td class="p-4 text-slate-500">{{ $backup['created_at'] }}</td>
                         <td class="p-4 text-right">
                             <div class="flex items-center justify-end gap-2">
+
                                 <button wire:click="restoreBackup('{{ $backup['name'] }}')" wire:confirm="Are you sure you want to restore this backup? Current data will be overwritten." title="Restore" class="w-8 h-8 rounded bg-emerald-500 text-white hover:bg-emerald-600 transition-colors flex items-center justify-center shadow-sm">
-                                    <i class="fas fa-database"></i>
+                                    <flux:icon.arrow-path class="w-4 h-4" />
                                 </button>
+
                                 <button wire:click="downloadBackup('{{ $backup['name'] }}')" title="Download" class="w-8 h-8 rounded bg-blue-600 text-white hover:bg-blue-500 transition-colors flex items-center justify-center shadow-sm">
-                                    <i class="fas fa-download"></i>
+                                    <flux:icon.arrow-down-tray class="w-4 h-4" />
                                 </button>
+
                                 <button wire:click="$refresh" title="Refresh" class="w-8 h-8 rounded bg-slate-500 text-white hover:bg-slate-400 transition-colors flex items-center justify-center shadow-sm">
-                                    <i class="fas fa-sync-alt"></i>
+                                    <flux:icon.arrow-path-rounded-square class="w-4 h-4" />
                                 </button>
-                                <button wire:click="deleteBackup('{{ $backup['name'] }}')" wire:confirm="Delete this backup?" title="Delete" class="w-8 h-8 rounded bg-rose-500 text-white hover:bg-rose-600 transition-colors flex items-center justify-center shadow-sm">
-                                    <i class="fas fa-trash-alt"></i>
+
+                                <button wire:click="confirmDelete('{{ $backup['name'] }}')" title="Delete" class="w-8 h-8 rounded bg-rose-500 text-white hover:bg-rose-600 transition-colors flex items-center justify-center shadow-sm">
+                                    <flux:icon.trash class="w-4 h-4" />
                                 </button>
+
                             </div>
                         </td>
                     </tr>
@@ -84,4 +94,7 @@
             </table>
         </div>
     </div>
+
+    <x-delete-modal name="delete-backup-modal" action="executeDelete" />
+
 </div>

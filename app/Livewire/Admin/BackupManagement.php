@@ -11,6 +11,7 @@ use Symfony\Component\Process\Process;
 
 class BackupManagement extends Component
 {
+    public $backupToDelete = null;
     private string $backupFolder = 'backups/database';
 
     public function generateBackup(): void
@@ -94,9 +95,19 @@ class BackupManagement extends Component
         return response()->download($backupPath);
     }
 
-    public function deleteBackup(string $backup): void
+    public function confirmDelete(string $filename): void
     {
-        $backupPath = $this->backupPath($backup);
+        $this->backupToDelete = $filename;
+        Flux::modal('delete-backup-modal')->show();
+    }
+
+    public function executeDelete(): void
+    {
+        if (!$this->backupToDelete) {
+            return;
+        }
+
+        $backupPath = $this->backupPath($this->backupToDelete);
 
         if (! File::exists($backupPath)) {
             Flux::toast('Backup file not found.', variant: 'danger');
@@ -104,6 +115,10 @@ class BackupManagement extends Component
         }
 
         File::delete($backupPath);
+
+        $this->backupToDelete = null;
+        Flux::modal('delete-backup-modal')->close();
+
         Flux::toast('Backup deleted successfully!');
     }
 
