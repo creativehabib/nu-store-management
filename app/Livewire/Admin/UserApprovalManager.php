@@ -87,7 +87,7 @@ class UserApprovalManager extends Component
             'pf_no' => 'required|string|unique:users,pf_no,'.$this->userId,
             'post' => 'required|string|max:255',
             'department' => 'required|string|max:255',
-            'role' => 'required|in:director,deputy_director,assistant_director,initiator,requisitioner',
+            'role' => 'required|in:director,deputy_director,assistant_director,initiator,requisitioner,admin',
             'mobile_no' => 'required|string|max:20',
         ]);
 
