@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('pf_no')->unique(); // ID হিসেবে ব্যবহার হবে
+            $table->string('pf_no')->unique();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('mobile_no');
-            $table->string('post');
-            $table->string('department');
+            $table->string('mobile_no')->unique();
+            $table->string('post')->nullable();
+            $table->string('department')->nullable();
             $table->string('password');
             $table->string('picture')->nullable();
             $table->string('digital_signature')->nullable();

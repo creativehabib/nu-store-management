@@ -47,9 +47,17 @@
                     </flux:sidebar.group>
                 @endif
 
-                {{-- অ্যাডমিন প্যানেল --}}
+                {{-- রিপোর্টস --}}
+                @if(in_array(auth()->user()->role, ['admin', 'director', 'deputy_director', 'initiator']))
+                    <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
+                        <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
+                            {{ __('Reports & Export') }}
+                        </flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endif
+
                 @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.group heading="{{ __('System Administration') }}" class="grid">
+                    <flux:sidebar.group heading="{{ __('System Administration') }}">
                         <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
                             {{ __('User Manage') }}
                         </flux:sidebar.item>
@@ -62,23 +70,23 @@
                         <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
                             {{ __('Language Settings') }}
                         </flux:sidebar.item>
-                    </flux:sidebar.group>
-                @endif
 
-                {{-- রিপোর্টস --}}
-                @if(in_array(auth()->user()->role, ['admin', 'director', 'deputy_director', 'initiator']))
-                    <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
-                        <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
-                            {{ __('Reports & Export') }}
-                        </flux:sidebar.item>
-                    </flux:sidebar.group>
-                @endif
-
-                @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.group heading="{{ __('Administration') }}">
-                        <flux:sidebar.item icon="cog" :href="route('admin.mail_settings')" :current="request()->routeIs('admin.mail_settings')">
+                        <flux:sidebar.item icon="cog-8-tooth" :href="route('admin.mail_settings')" :current="request()->routeIs('admin.mail_settings')" wire:navigate>
                             {{ __('Mail Settings') }}
                         </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="cog-6-tooth" :href="route('admin.general_settings')" :current="request()->routeIs('admin.general_settings')" wire:navigate>
+                            {{ __('General Settings') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="server-stack" :href="route('admin.system_info')" :current="request()->routeIs('admin.system_info')" wire:navigate>
+                            {{ __('System Info') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="archive-box" :href="route('admin.cache_management')" :current="request()->routeIs('admin.cache_management')" wire:navigate>
+                            {{ __('Cache Management') }}
+                        </flux:sidebar.item>
+
                     </flux:sidebar.group>
                 @endif
                 {{--<livewire:layout.notification-bell />--}}
