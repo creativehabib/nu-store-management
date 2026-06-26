@@ -12,6 +12,7 @@ use Symfony\Component\Process\Process;
 class BackupManagement extends Component
 {
     public $backupToDelete = null;
+
     private string $backupFolder = 'backups/database';
 
     public function generateBackup(): void
@@ -20,6 +21,7 @@ class BackupManagement extends Component
 
         if (! $config) {
             Flux::toast('Database connection is not configured.', variant: 'danger');
+
             return;
         }
 
@@ -31,7 +33,7 @@ class BackupManagement extends Component
             now()->format('Ymd_His')
         );
 
-        $fullPath = $this->backupDirectory() . DIRECTORY_SEPARATOR . $filename;
+        $fullPath = $this->backupDirectory().DIRECTORY_SEPARATOR.$filename;
 
         $process = $this->buildBackupProcess($config, $fullPath);
 
@@ -43,7 +45,8 @@ class BackupManagement extends Component
         $process->run();
 
         if (! $process->isSuccessful()) {
-            Flux::toast('Backup failed: ' . trim($process->getErrorOutput()), variant: 'danger');
+            Flux::toast('Backup failed: '.trim($process->getErrorOutput()), variant: 'danger');
+
             return;
         }
 
@@ -56,6 +59,7 @@ class BackupManagement extends Component
 
         if (! File::exists($backupPath)) {
             Flux::toast('Backup file not found.', variant: 'danger');
+
             return;
         }
 
@@ -63,6 +67,7 @@ class BackupManagement extends Component
 
         if (! $config) {
             Flux::toast('Database connection is not configured.', variant: 'danger');
+
             return;
         }
 
@@ -76,7 +81,8 @@ class BackupManagement extends Component
         $process->run();
 
         if (! $process->isSuccessful()) {
-            Flux::toast('Restore failed: ' . trim($process->getErrorOutput()), variant: 'danger');
+            Flux::toast('Restore failed: '.trim($process->getErrorOutput()), variant: 'danger');
+
             return;
         }
 
@@ -89,6 +95,7 @@ class BackupManagement extends Component
 
         if (! File::exists($backupPath)) {
             Flux::toast('Backup file not found.', variant: 'danger');
+
             return null;
         }
 
@@ -103,7 +110,7 @@ class BackupManagement extends Component
 
     public function executeDelete(): void
     {
-        if (!$this->backupToDelete) {
+        if (! $this->backupToDelete) {
             return;
         }
 
@@ -131,12 +138,12 @@ class BackupManagement extends Component
 
     private function backupDirectory(): string
     {
-        return storage_path('app' . DIRECTORY_SEPARATOR . $this->backupFolder);
+        return storage_path('app'.DIRECTORY_SEPARATOR.$this->backupFolder);
     }
 
     private function backupPath(string $backup): string
     {
-        return $this->backupDirectory() . DIRECTORY_SEPARATOR . basename($backup);
+        return $this->backupDirectory().DIRECTORY_SEPARATOR.basename($backup);
     }
 
     private function listBackups(): array
@@ -190,12 +197,12 @@ class BackupManagement extends Component
         if ($driver === 'mysql') {
             $process = new Process([
                 'mysqldump',
-                '--user=' . ($config['username'] ?? 'root'),
-                '--host=' . ($config['host'] ?? '127.0.0.1'),
-                '--port=' . ($config['port'] ?? 3306),
+                '--user='.($config['username'] ?? 'root'),
+                '--host='.($config['host'] ?? '127.0.0.1'),
+                '--port='.($config['port'] ?? 3306),
                 '--databases',
                 $config['database'] ?? '',
-                '--result-file=' . $fullPath,
+                '--result-file='.$fullPath,
             ]);
 
             if (! empty($config['password'])) {
@@ -206,6 +213,7 @@ class BackupManagement extends Component
         }
 
         Flux::toast('Unsupported database driver for backup.', variant: 'danger');
+
         return null;
     }
 
@@ -216,9 +224,9 @@ class BackupManagement extends Component
         if ($driver === 'mysql') {
             $process = new Process([
                 'mysql',
-                '--user=' . ($config['username'] ?? 'root'),
-                '--host=' . ($config['host'] ?? '127.0.0.1'),
-                '--port=' . ($config['port'] ?? 3306),
+                '--user='.($config['username'] ?? 'root'),
+                '--host='.($config['host'] ?? '127.0.0.1'),
+                '--port='.($config['port'] ?? 3306),
                 $config['database'] ?? '',
             ]);
 
@@ -227,10 +235,12 @@ class BackupManagement extends Component
             }
 
             $process->setInput(File::get($backupPath));
+
             return $process;
         }
 
         Flux::toast('Unsupported database driver for restore.', variant: 'danger');
+
         return null;
     }
 }

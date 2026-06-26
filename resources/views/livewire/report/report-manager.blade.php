@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <flux:heading size="xl" class="border-b pb-2 print:hidden">{{ __('Reports and Export') }}</flux:heading>
 
     <flux:card class="print:hidden mb-6">
@@ -51,7 +51,7 @@
 
         <flux:card class="print:border-none print:shadow-none print:p-0 print:bg-transparent">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse print:border-black print:border">
+                <table class="w-full text-left border-collapse print:border-black print:border text-sm">
                     <thead>
                     <tr class="bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-700 print:bg-white print:border-black">
                         <th class="p-3 print:p-2 print:border-black print:border text-sm font-semibold">{{ __('Date') }}</th>

@@ -1,9 +1,9 @@
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <flux:heading size="xl" class="border-b pb-2">{{ __('My Requisitions (Tracking & History)') }}</flux:heading>
 
     <flux:card>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse text-sm">
                 <thead>
                 <tr class="bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-700">
                     <th class="p-3 text-sm font-semibold">{{ __('Requisition No') }}</th>
@@ -70,7 +70,7 @@
                 <div>
                     <h3 class="font-semibold mb-2">{{ __('Item Details & Approval:') }}</h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse border border-zinc-200 dark:border-zinc-700 text-sm">
+                        <table class="w-full text-left border-collapse border border-zinc-200 dark:border-zinc-700 text-xs">
                             <thead>
                             <tr class="bg-zinc-50 dark:bg-zinc-800 border-b dark:border-zinc-700">
                                 <th class="p-2 border-r dark:border-zinc-700">{{ __('Item Name') }}</th>

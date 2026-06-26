@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <flux:card class="flex items-center gap-4 py-4 bg-white dark:bg-zinc-800">

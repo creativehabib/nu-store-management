@@ -12,12 +12,12 @@ class CategoryManager extends Component
     use WithPagination;
 
     public $categoryId;
-
     public $name;
-
     public $isEditMode = false;
 
-    // ভ্যালিডেশন রুলস
+    // নতুন প্রপার্টি
+    public $categoryToDelete = null;
+
     public function rules()
     {
         return [
@@ -25,7 +25,6 @@ class CategoryManager extends Component
         ];
     }
 
-    // সেভ বা আপডেট করার মেথড
     public function save()
     {
         $this->validate();
@@ -35,13 +34,10 @@ class CategoryManager extends Component
             ['name' => $this->name]
         );
 
-        // Flux টোস্ট মেসেজ
-        Flux::toast($this->isEditMode ? 'ক্যাটাগরি সফলভাবে আপডেট হয়েছে!' : 'নতুন ক্যাটাগরি যুক্ত হয়েছে!');
-
+        Flux::toast($this->isEditMode ? 'ক্যাটাগরি সফলভাবে আপডেট হয়েছে!' : 'নতুন ক্যাটাগরি যুক্ত হয়েছে!');
         $this->resetFields();
     }
 
-    // এডিট মোড অন করার মেথড
     public function edit($id)
     {
         $category = Category::findOrFail($id);
@@ -49,15 +45,22 @@ class CategoryManager extends Component
         $this->name = $category->name;
         $this->isEditMode = true;
     }
-
-    // ডিলিট করার মেথড
-    public function delete($id)
+    public function confirmDelete($id): void
     {
-        Category::findOrFail($id)->delete();
-        Flux::toast('ক্যাটাগরি মুছে ফেলা হয়েছে!');
+        $this->categoryToDelete = $id;
+        Flux::modal('delete-category-modal')->show();
+    }
+    public function executeDelete(): void
+    {
+        if ($this->categoryToDelete) {
+            Category::findOrFail($this->categoryToDelete)->delete();
+            Flux::toast('ক্যাটাগরি মুছে ফেলা হয়েছে!');
+
+            $this->categoryToDelete = null;
+            Flux::modal('delete-category-modal')->close();
+        }
     }
 
-    // ফর্ম রিসেট করার মেথড
     public function resetFields()
     {
         $this->reset(['categoryId', 'name', 'isEditMode']);
@@ -67,7 +70,6 @@ class CategoryManager extends Component
     public function render()
     {
         return view('livewire.category.category-manager', [
-            // লেটেস্ট ক্যাটাগরিগুলো পেজিনেশন সহ পাঠানো হচ্ছে
             'categories' => Category::latest()->paginate(10),
         ])->layout('layouts.app', ['title' => 'Category Manager']);
     }

@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
     {{-- print:flex print:flex-col print:min-h-screen যুক্ত করা হয়েছে --}}
     <div id="print-area" class="bg-white text-black p-10 shadow-lg rounded-lg border border-zinc-200 print:shadow-none print:border-none print:p-0 print:flex print:flex-col print:min-h-screen">

@@ -1,9 +1,9 @@
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <flux:heading size="xl" class="border-b pb-2">{{ __('Initiator Queue') }}</flux:heading>
 
     <flux:card>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse text-sm">
                 <thead>
                 <tr class="bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-700">
                     <th class="p-3 text-sm font-semibold">{{ __('Requisition No') }}</th>

@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <div class="border-b pb-4 mb-4">
         <flux:heading size="xl">{{ __('System Information') }}</flux:heading>
         <p class="text-zinc-500 text-sm mt-1">{{ __('Current server and application environment details.') }}</p>

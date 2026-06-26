@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto py-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
     <flux:card>
         <flux:heading size="lg">{{ __('General Settings') }}</flux:heading>
         <flux:subheading>{{ __('Manage your website identity and contact information.') }}</flux:subheading>

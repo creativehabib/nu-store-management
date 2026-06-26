@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <flux:heading size="xl" class="border-b pb-2">{{ __('Product / Inventory Management') }}</flux:heading>
 
     <flux:card>
@@ -35,7 +35,7 @@
 
     <flux:card>
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse text-sm">
                 <thead>
                 <tr class="bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-700">
                     <th class="p-3 text-sm font-semibold">#</th>
@@ -58,7 +58,7 @@
                         </td>
                         <td class="p-3 text-right flex justify-end gap-2">
                             <flux:button size="sm" variant="outline" icon="pencil" wire:click="edit({{ $product->id }})" />
-                            <flux:button size="sm" variant="danger" icon="trash" wire:click="delete({{ $product->id }})" wire:confirm="{{ __('Are you sure you want to delete this?') }}" />
+                            <flux:button size="sm" variant="danger" icon="trash" wire:click="confirmDelete({{ $product->id }})" />
                         </td>
                     </tr>
                 @empty
@@ -76,4 +76,6 @@
             {{ $products->links() }}
         </div>
     </flux:card>
+
+    <x-delete-modal name="delete-produt-modal" action="executeDelete"/>
 </div>

@@ -1,4 +1,4 @@
-<div class="p-6 max-w-7xl mx-auto space-y-6 print-container">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6 print-container">
     {{-- Header & Action Buttons --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-700 pb-4 print:hidden">
         <div>

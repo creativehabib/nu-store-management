@@ -23,7 +23,7 @@ class ProductManager extends Component
     public $stock = 0;
 
     public $isEditMode = false;
-
+    public $productToDelete = null;
     public function rules()
     {
         return [
@@ -63,10 +63,21 @@ class ProductManager extends Component
         $this->isEditMode = true;
     }
 
-    public function delete($id)
+    // ডিলিট বাটনের পরিবর্তে এটি ব্যবহার করুন
+    public function confirmDelete($id): void
     {
-        Product::findOrFail($id)->delete();
-        Flux::toast('প্রোডাক্ট মুছে ফেলা হয়েছে!');
+        $this->productToDelete = $id;
+        Flux::modal('delete-produt-modal')->show();
+    }
+
+    public function executeDelete(): void
+    {
+        if ($this->productToDelete) {
+            Product::findOrFail($this->productToDelete)->delete();
+            Flux::toast('প্রোডাক্ট মুছে ফেলা হয়েছে!');
+            $this->productToDelete = null;
+            Flux::modal('delete-produt-modal')->close();
+        }
     }
 
     public function resetFields()

@@ -39,7 +39,7 @@ class CreateRequisition extends Component
         $this->selectedCategories[] = '';
     }
 
-    public function removeRow($index)
+    public function removeRow($index): void
     {
         unset($this->requisitionItems[$index]);
         unset($this->selectedCategories[$index]);
@@ -47,7 +47,7 @@ class CreateRequisition extends Component
         $this->selectedCategories = array_values($this->selectedCategories);
     }
 
-    public function submitDemand()
+    public function submitDemand(): void
     {
         $this->validate([
             'selectedCategories.*' => 'required|exists:categories,id',

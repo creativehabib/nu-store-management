@@ -1,4 +1,4 @@
-<div class="p-6 max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
     {{-- Breadcrumb --}}
     <div class="mb-6 flex items-center text-sm text-slate-500 uppercase font-semibold tracking-wider">
         <span class="text-blue-600">Dashboard</span>
