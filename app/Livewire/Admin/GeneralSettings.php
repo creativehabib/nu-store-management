@@ -20,7 +20,6 @@ class GeneralSettings extends Component
         $this->site_email = setting('site_email');
         $this->site_phone = setting('site_phone');
         $this->site_address = setting('site_address');
-        $this->favicon = setting('site_favicon');
         $this->facebook_url = setting('facebook_url');
         $this->twitter_url = setting('twitter_url');
         $this->instagram_url = setting('instagram_url');
