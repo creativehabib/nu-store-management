@@ -32,7 +32,7 @@
     <div class=" border-b border-zinc-200 dark:border-zinc-800">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <a href="/"><img src="{{ setting('site_logo') ?? asset('logo.png') }}" class="w-8 h-10" alt="Logo"></a>
+                <a href="/"><img src="/{{ setting('site_logo') ?? asset('logo.png') }}" class="w-8 h-10" alt="Logo"></a>
                 <div>
                     <h2 class="font-bold text-lg leading-tight">National University</h2>
                     <span class="text-xs text-zinc-500 uppercase tracking-widest">Bangladesh</span>
