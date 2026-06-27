@@ -24,7 +24,7 @@
                 <flux:heading size="md" class="mb-4">{{ __('Branding') }}</flux:heading>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <flux:input wire:model="logo" type="file" label="{{ __('Site Logo') }}" accept="image/*" />
-                    <flux:input wire:model="site_favicon" type="file" label="{{ __('Favicon') }}" accept="image/*" />
+                    <flux:input wire:model="favicon" type="file" label="{{ __('Favicon') }}" accept="image/*" />
                 </div>
             </div>
 

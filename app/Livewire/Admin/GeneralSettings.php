@@ -31,7 +31,7 @@ class GeneralSettings extends Component
             'site_name' => 'required|string|max:255',
             'site_email' => 'nullable|email',
             'logo' => 'nullable|image|max:1024',
-            'site_favicon' => 'nullable|image|max:512',
+            'favicon' => 'nullable|image|max:512',
         ]);
 
         // ফাইল আপলোড লজিক
