@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,12 +19,52 @@
         body { font-family: 'Instrument Sans', sans-serif; }
     </style>
     <script>
-        tailwind.config={darkMode:'class'};
-        if(localStorage.theme==='dark'){document.documentElement.classList.add('dark')}
-        function toggleTheme(){
-            document.documentElement.classList.toggle('dark');
-            localStorage.theme=document.documentElement.classList.contains('dark')?'dark':'light';
+        // এই ফাংশনটি ব্রাউজারের সিস্টেম সেটিংস এবং ইউজার সেভ করা মোড চেক করবে
+        function checkTheme() {
+            const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const storedTheme = localStorage.theme;
+
+            // যদি ইউজার আগে থেকে কিছু সিলেক্ট না করে থাকে (অথবা স্টোরেজ খালি থাকে)
+            if (!storedTheme) {
+                if (isSystemDark) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } else {
+                // যদি ইউজার ম্যানুয়ালি সিলেক্ট করে থাকে
+                if (storedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
         }
+
+        // পেজ লোড হওয়ার ঠিক আগেই থিম সেট করুন
+        checkTheme();
+
+        // টগল করার ফাংশন
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        // ব্রাউজারের সিস্টেম সেটিংস রিয়েল-টাইমে পরিবর্তন হলে আপডেট করবে
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!('theme' in localStorage)) {
+                if (e.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        });
     </script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
