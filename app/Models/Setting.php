@@ -8,6 +8,12 @@ class Setting extends Model
 {
     protected $fillable = [
         'key',
-        'value'
+        'value',
+        'group',
+        'autoload',
+    ];
+
+    protected $casts = [
+        'autoload' => 'boolean',
     ];
 }

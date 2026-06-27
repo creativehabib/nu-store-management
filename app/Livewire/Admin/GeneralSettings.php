@@ -16,7 +16,7 @@ class GeneralSettings extends Component
 
     public function mount()
     {
-        $this->site_name = setting('site_name', 'My Laravel App');
+        $this->site_name = setting('site_name', 'Inventory Management System');
         $this->site_email = setting('site_email');
         $this->site_phone = setting('site_phone');
         $this->site_address = setting('site_address');
