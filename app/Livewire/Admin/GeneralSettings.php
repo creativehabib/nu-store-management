@@ -20,6 +20,7 @@ class GeneralSettings extends Component
         $this->site_email = setting('site_email');
         $this->site_phone = setting('site_phone');
         $this->site_address = setting('site_address');
+        $this->favicon = setting('site_favicon');
         $this->facebook_url = setting('facebook_url');
         $this->twitter_url = setting('twitter_url');
         $this->instagram_url = setting('instagram_url');
@@ -31,7 +32,7 @@ class GeneralSettings extends Component
             'site_name' => 'required|string|max:255',
             'site_email' => 'nullable|email',
             'logo' => 'nullable|image|max:1024',
-            'favicon' => 'nullable|image|max:512',
+            'site_favicon' => 'nullable|image|max:512',
         ]);
 
         // ফাইল আপলোড লজিক
