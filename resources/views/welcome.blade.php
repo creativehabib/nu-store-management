@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ setting('site_name', 'Store Management System') }} | {{ __('National University') }}</title>
-    <link rel="icon" href="/logo.png" sizes="any">
+    <link rel="icon" href="{{ asset( setting('site_favicon') ?? 'logo.png') }}" sizes="any">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
@@ -18,6 +18,7 @@
     <style>
         body { font-family: 'Instrument Sans', sans-serif; }
     </style>
+    @fluxAppearance
     <script>
         // এই ফাংশনটি ব্রাউজারের সিস্টেম সেটিংস এবং ইউজার সেভ করা মোড চেক করবে
         function checkTheme() {
@@ -54,25 +55,14 @@
                 localStorage.theme = 'dark';
             }
         }
-
-        // ব্রাউজারের সিস্টেম সেটিংস রিয়েল-টাইমে পরিবর্তন হলে আপডেট করবে
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            if (!('theme' in localStorage)) {
-                if (e.matches) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            }
-        });
     </script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+<body class="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
     <div class=" border-b border-zinc-200 dark:border-zinc-800">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <a href="/"><img src="{{  asset('logo.png') }}" class="w-8 h-10" alt="Logo"></a>
+                <a href="/"><img src="{{  asset( setting('site_logo') ?? 'logo.png') }}" class="w-10 h-10" alt="Logo"></a>
                 <div>
                     <h2 class="font-bold text-lg leading-tight">National University</h2>
                     <span class="text-xs text-zinc-500 uppercase tracking-widest">Bangladesh</span>
