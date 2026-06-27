@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class GeneralSettings extends Component
@@ -14,7 +15,7 @@ class GeneralSettings extends Component
     public $facebook_url, $twitter_url, $instagram_url;
     public $logo, $favicon;
 
-    public function mount()
+    public function mount(): void
     {
         $this->site_name = setting('site_name', 'Inventory Management System');
         $this->site_email = setting('site_email');
@@ -25,16 +26,21 @@ class GeneralSettings extends Component
         $this->instagram_url = setting('instagram_url');
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validate([
             'site_name' => 'required|string|max:255',
             'site_email' => 'nullable|email',
             'logo' => 'nullable|image|max:1024',
-            'favicon' => 'nullable|image|max:512',
+            'favicon' => [
+                'nullable',
+                'file',
+                'max:512',
+                'mimes:ico,png,jpg,jpeg,webp,gif,svg',
+                'mimetypes:image/x-icon,image/vnd.microsoft.icon,image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
+            ],
         ]);
 
-        // ফাইল আপলোড লজিক
         if ($this->logo) {
             $path = $this->logo->store('settings', 'public');
             set_setting('site_logo', $path);
@@ -45,7 +51,6 @@ class GeneralSettings extends Component
             set_setting('site_favicon', $path);
         }
 
-        // টেক্সট সেটিংস সেভ করা
         set_setting('site_name', $this->site_name);
         set_setting('site_email', $this->site_email);
         set_setting('site_phone', $this->site_phone);
@@ -57,7 +62,7 @@ class GeneralSettings extends Component
         Flux::toast(__('General settings updated successfully!'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.general-settings');
     }
