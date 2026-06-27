@@ -3,13 +3,19 @@
     {{-- print:flex print:flex-col print:min-h-screen যুক্ত করা হয়েছে --}}
     <div id="print-area" class="bg-white text-black p-10 shadow-lg rounded-lg border border-zinc-200 print:shadow-none print:border-none print:p-0 print:flex print:flex-col print:min-h-screen">
 
-        {{-- উপরের সমস্ত কন্টেন্টকে flex-1 এর ভেতরে রাখা হলো যাতে এটি ফাঁকা জায়গা দখল করে ফুটারকে নিচে ঠেলে দেয় --}}
         <div class="flex-1">
-            <div class="text-center border-b-2 border-black pb-4 mb-6">
-                <h1 class="text-3xl font-bold">{{ __('National University') }}</h1>
-                <p class="text-lg">{{ __('Bangladesh') }}</p>
-                <p class="text-lg font-semibold">{{ __('Office of the Teacher Training') }}</p>
-                <h2 class="text-xl font-bold mt-4 underline inline-block">{{ __('Store Requisition Form') }}</h2>
+            <div class="flex items-center justify-between border-b-2 border-black pb-4 mb-6 print:flex">
+                <div class="flex-shrink-0 pl-32 self-start mt-1">
+                    <img src="{{ asset('logo.png') }}" alt="National University Logo" class="w-20 h-20 object-contain">
+                </div>
+
+                <div class="text-center flex-grow px-4">
+                    <h1 class="text-2xl font-bold uppercase">{{ __('National University') }}</h1>
+                    <p class="text-lg">{{ __('Bangladesh') }}</p>
+                    <p class="text-md font-semibold">{{ __('Office of the Teacher Training') }}</p>
+                    <h2 class="text-lg font-bold mt-2 underline inline-block">{{ __('Store Requisition Form') }}</h2>
+                </div>
+                <div class="w-20 pr-44"></div>
             </div>
 
             <div class="flex justify-between items-end mb-6 text-sm">
