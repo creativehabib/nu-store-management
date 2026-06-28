@@ -57,22 +57,64 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load mail settings from database.
+     * Load SMTP mail settings from the database when the application is installed.
      */
     protected function loadMailSettings(): void
     {
-        // নিশ্চিত করুন যে টেবিলটি বিদ্যমান
-        if (Schema::hasTable('settings')) {
-            $settings = Setting::pluck('value', 'key');
-
-            if ($settings->isNotEmpty()) {
-                config(['mail.mailers.smtp.host' => $settings['mail_host'] ?? env('MAIL_HOST')]);
-                config(['mail.mailers.smtp.port' => $settings['mail_port'] ?? env('MAIL_PORT')]);
-                config(['mail.mailers.smtp.username' => $settings['mail_username'] ?? env('MAIL_USERNAME')]);
-                config(['mail.mailers.smtp.password' => $settings['mail_password'] ?? env('MAIL_PASSWORD')]);
-                config(['mail.mailers.smtp.encryption' => $settings['mail_encryption'] ?? env('MAIL_ENCRYPTION')]);
-                config(['mail.from.address' => $settings['mail_from_address'] ?? env('MAIL_FROM_ADDRESS')]);
-            }
+        if (! Schema::hasTable('settings')) {
+            return;
         }
+
+        $settings = Setting::query()
+            ->whereIn('key', [
+                'mail_host',
+                'mail_port',
+                'mail_username',
+                'mail_password',
+                'mail_encryption',
+                'mail_from_address',
+                'mail_enabled',
+            ])
+            ->pluck('value', 'key');
+
+        if (! $this->mailEnabled($settings->get('mail_enabled', '1'))) {
+            config(['mail.default' => 'log']);
+
+            return;
+        }
+
+        if (! $settings->has('mail_host') || ! $settings->has('mail_from_address')) {
+            return;
+        }
+
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.scheme' => $this->mailScheme($settings->get('mail_encryption')),
+            'mail.mailers.smtp.host' => $settings->get('mail_host', config('mail.mailers.smtp.host')),
+            'mail.mailers.smtp.port' => (int) $settings->get('mail_port', config('mail.mailers.smtp.port')),
+            'mail.mailers.smtp.username' => $settings->get('mail_username', config('mail.mailers.smtp.username')),
+            'mail.mailers.smtp.password' => $settings->get('mail_password', config('mail.mailers.smtp.password')),
+            'mail.from.address' => $settings->get('mail_from_address', config('mail.from.address')),
+        ]);
+    }
+
+    /**
+     * Determine whether real email delivery is enabled.
+     */
+    protected function mailEnabled(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Convert legacy encryption values to Laravel's SMTP scheme option.
+     */
+    protected function mailScheme(?string $encryption): ?string
+    {
+        return match (strtolower((string) $encryption)) {
+            'ssl', 'smtps' => 'smtps',
+            'tls', 'starttls', 'smtp' => 'smtp',
+            default => null,
+        };
     }
 }

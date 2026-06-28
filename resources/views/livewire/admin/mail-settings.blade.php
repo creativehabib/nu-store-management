@@ -4,6 +4,12 @@
         <flux:subheading>{{ __('Configure your email server settings here.') }}</flux:subheading>
 
         <form wire:submit="save" class="space-y-4 mt-6">
+            <flux:checkbox
+                wire:model="mail_enabled"
+                label="{{ __('Enable email sending') }}"
+                description="{{ __('Turn this off to stop real SMTP delivery and write emails to the log instead.') }}"
+            />
+
             <flux:input wire:model="mail_host" label="{{ __('Mail Host') }}" placeholder="smtp.example.com" />
             <div class="grid grid-cols-2 gap-4">
                 <flux:input wire:model="mail_port" label="{{ __('Port') }}" placeholder="587" />
