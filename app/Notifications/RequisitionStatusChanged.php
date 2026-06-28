@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Requisition;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -10,12 +11,7 @@ class RequisitionStatusChanged extends Notification
 {
     use Queueable;
 
-    private $requisition;
-
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
+    public function __construct(private Requisition $requisition)
     {
         //
     }

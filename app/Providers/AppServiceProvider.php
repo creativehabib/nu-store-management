@@ -73,8 +73,15 @@ class AppServiceProvider extends ServiceProvider
                 'mail_password',
                 'mail_encryption',
                 'mail_from_address',
+                'mail_enabled',
             ])
             ->pluck('value', 'key');
+
+        if (! $this->mailEnabled($settings->get('mail_enabled', '1'))) {
+            config(['mail.default' => 'log']);
+
+            return;
+        }
 
         if (! $settings->has('mail_host') || ! $settings->has('mail_from_address')) {
             return;
@@ -89,6 +96,14 @@ class AppServiceProvider extends ServiceProvider
             'mail.mailers.smtp.password' => $settings->get('mail_password', config('mail.mailers.smtp.password')),
             'mail.from.address' => $settings->get('mail_from_address', config('mail.from.address')),
         ]);
+    }
+
+    /**
+     * Determine whether real email delivery is enabled.
+     */
+    protected function mailEnabled(mixed $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

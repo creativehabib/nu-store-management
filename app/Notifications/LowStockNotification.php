@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Product;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -10,12 +11,7 @@ class LowStockNotification extends Notification
 {
     use Queueable;
 
-    private $product;
-
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
+    public function __construct(private Product $product)
     {
         //
     }
@@ -39,7 +35,7 @@ class LowStockNotification extends Notification
             ->error()
             ->subject(__('Low Stock Alert!'))
             ->line(__('Product :name is running low on stock. Current stock: :qty', [
-                'name' => $this->product->name,
+                'name' => $this->product->name_bn ?: $this->product->name_en,
                 'qty' => $this->product->stock,
             ]))
             ->action(__('Manage Inventory'), route('admin.products'));

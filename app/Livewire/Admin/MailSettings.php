@@ -11,6 +11,8 @@ use Livewire\Component;
 
 class MailSettings extends Component
 {
+    public bool $mail_enabled = true;
+
     public string $mail_host = '';
 
     public string|int $mail_port = '';
@@ -26,6 +28,7 @@ class MailSettings extends Component
     public function mount(): void
     {
         $settings = Setting::pluck('value', 'key');
+        $this->mail_enabled = filter_var($settings['mail_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
         $this->mail_host = $settings['mail_host'] ?? '';
         $this->mail_port = $settings['mail_port'] ?? '';
         $this->mail_username = $settings['mail_username'] ?? '';
@@ -37,15 +40,17 @@ class MailSettings extends Component
     public function save(): void
     {
         $this->validate([
-            'mail_host' => ['required', 'string', 'max:255'],
-            'mail_port' => ['required', 'integer', 'between:1,65535'],
+            'mail_enabled' => ['boolean'],
+            'mail_host' => [Rule::requiredIf($this->mail_enabled), 'nullable', 'string', 'max:255'],
+            'mail_port' => [Rule::requiredIf($this->mail_enabled), 'nullable', 'integer', 'between:1,65535'],
             'mail_username' => ['nullable', 'string', 'max:255'],
             'mail_password' => ['nullable', 'string', 'max:255'],
             'mail_encryption' => ['nullable', Rule::in(['tls', 'ssl', 'starttls', 'smtp', 'smtps'])],
-            'mail_from_address' => ['required', 'email:rfc'],
+            'mail_from_address' => [Rule::requiredIf($this->mail_enabled), 'nullable', 'email:rfc'],
         ]);
 
         $data = [
+            'mail_enabled' => $this->mail_enabled ? '1' : '0',
             'mail_host' => $this->mail_host,
             'mail_port' => (string) $this->mail_port,
             'mail_username' => $this->mail_username,
@@ -63,6 +68,14 @@ class MailSettings extends Component
                     ['value' => $value, 'group' => 'mail', 'autoload' => true],
                 );
             }
+        }
+
+        if (! $this->mail_enabled) {
+            config(['mail.default' => 'log']);
+
+            Flux::toast(__('Mail settings updated successfully!'));
+
+            return;
         }
 
         config([
