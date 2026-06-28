@@ -6,16 +6,22 @@ use App\Models\Setting;
 use Flux\Flux;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class MailSettings extends Component
 {
-    public $mail_host;
-    public $mail_port;
-    public $mail_username;
-    public $mail_password;
-    public $mail_encryption;
-    public $mail_from_address;
+    public string $mail_host = '';
+
+    public string|int $mail_port = '';
+
+    public ?string $mail_username = '';
+
+    public ?string $mail_password = '';
+
+    public ?string $mail_encryption = 'tls';
+
+    public string $mail_from_address = '';
 
     public function mount(): void
     {
@@ -30,35 +36,48 @@ class MailSettings extends Component
 
     public function save(): void
     {
-        // ১. ভ্যালিডেশন যুক্ত করা হলো
         $this->validate([
-            'mail_host' => 'required|string',
-            'mail_port' => 'required|numeric',
-            'mail_username' => 'nullable|string',
-            'mail_password' => 'nullable|string',
-            'mail_encryption' => 'nullable|string',
-            'mail_from_address' => 'required|email',
+            'mail_host' => ['required', 'string', 'max:255'],
+            'mail_port' => ['required', 'integer', 'between:1,65535'],
+            'mail_username' => ['nullable', 'string', 'max:255'],
+            'mail_password' => ['nullable', 'string', 'max:255'],
+            'mail_encryption' => ['nullable', Rule::in(['tls', 'ssl', 'starttls', 'smtp', 'smtps'])],
+            'mail_from_address' => ['required', 'email:rfc'],
         ]);
 
         $data = [
             'mail_host' => $this->mail_host,
-            'mail_port' => $this->mail_port,
+            'mail_port' => (string) $this->mail_port,
             'mail_username' => $this->mail_username,
             'mail_password' => $this->mail_password,
             'mail_encryption' => $this->mail_encryption,
             'mail_from_address' => $this->mail_from_address,
         ];
 
-        // ২. ডাটা সেভ এবং ক্যাশ ক্লিয়ার করা
         foreach ($data as $key => $value) {
-            // যদি আপনি set_setting() হেল্পার ফাংশনটি ব্যবহার করে থাকেন:
             if (function_exists('set_setting')) {
-                set_setting($key, $value);
+                set_setting($key, $value, 'mail');
             } else {
-                // হেল্পার না থাকলে ডিফল্ট নিয়ম
-                Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+                Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $value, 'group' => 'mail', 'autoload' => true],
+                );
             }
         }
+
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.scheme' => match ($this->mail_encryption) {
+                'ssl', 'smtps' => 'smtps',
+                'tls', 'starttls', 'smtp' => 'smtp',
+                default => null,
+            },
+            'mail.mailers.smtp.host' => $this->mail_host,
+            'mail.mailers.smtp.port' => (int) $this->mail_port,
+            'mail.mailers.smtp.username' => $this->mail_username,
+            'mail.mailers.smtp.password' => $this->mail_password,
+            'mail.from.address' => $this->mail_from_address,
+        ]);
 
         Flux::toast(__('Mail settings updated successfully!'));
     }
