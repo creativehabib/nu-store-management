@@ -4,6 +4,8 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -22,7 +24,10 @@ class CreateNewUser implements CreatesNewUsers
         // ১. ভ্যালিডেশন রুলস আপডেট করা হলো
         Validator::make($input, [
             ...$this->profileRules(),
-            'password' => $this->passwordRules(),
+            'password' => [
+                'required',
+                Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised(),
+            ],
             'pf_no' => ['required', 'string', 'max:255', 'unique:users,pf_no'],
             'mobile_no' => ['required', 'string', 'max:20'],
             'post' => ['required', 'string', 'max:255'],
@@ -41,7 +46,7 @@ class CreateNewUser implements CreatesNewUsers
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
-            'password' => $input['password'],
+            'password' => Hash::make($input['password']),
             'pf_no' => $input['pf_no'],
             'mobile_no' => $input['mobile_no'],
             'post' => $input['post'],
