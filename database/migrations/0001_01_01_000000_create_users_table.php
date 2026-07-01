@@ -19,13 +19,15 @@ return new class extends Migration
             $table->string('locale', 10)->default('en');
             $table->string('mobile_no')->unique();
 
-            // কলামগুলো একবারই ডিফাইন করুন
+            // ফরেন কি কলামগুলো একবারই লিখবেন
+            // constrained() মেথডটি স্বয়ংক্রিয়ভাবে 'departments' টেবিলের 'id' কলামকে রেফার করবে
             $table->foreignId('department_id')->nullable()->constrained('departments')->restrictOnDelete();
             $table->foreignId('designation_id')->nullable()->constrained('designations')->restrictOnDelete();
 
             $table->string('password');
             $table->string('picture')->nullable();
             $table->string('digital_signature')->nullable();
+
             $table->enum('role', [
                 'super_admin', 'admin', 'director', 'deputy_director',
                 'assistant_director', 'initiator', 'requisitioner',
