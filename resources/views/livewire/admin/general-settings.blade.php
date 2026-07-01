@@ -21,6 +21,25 @@
             </div>
 
             <div class="border-t pt-6">
+                <flux:heading size="md" class="mb-4">{{ __('Inventory Store System Mode') }}</flux:heading>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <flux:select wire:model.live="store_mode" label="{{ __('System Mode') }}">
+                        <flux:select.option value="departmental">{{ __('Departmental Mode (Separate for each dept)') }}</flux:select.option>
+                        <flux:select.option value="centralized">{{ __('Centralized Mode (One Central Store)') }}</flux:select.option>
+                    </flux:select>
+
+                    @if($store_mode === 'centralized')
+                        <flux:select wire:model="central_store_dept_id" label="{{ __('Select Central Store Department') }}">
+                            <flux:select.option value="">{{ __('Select Department') }}</flux:select.option>
+                            @foreach($departments as $dept)
+                                <flux:select.option value="{{ $dept->id }}">{{ $dept->name }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                    @endif
+                </div>
+            </div>
+
+            <div class="border-t pt-6">
                 <flux:heading size="md" class="mb-4">{{ __('Branding') }}</flux:heading>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <flux:input wire:model="logo" type="file" label="{{ __('Site Logo') }}" accept="image/*" />

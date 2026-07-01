@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Department;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -15,6 +16,10 @@ class GeneralSettings extends Component
     public $facebook_url, $twitter_url, $instagram_url;
     public $logo, $favicon;
 
+    // নতুন প্রপার্টি
+    public $store_mode;
+    public $central_store_dept_id;
+
     public function mount(): void
     {
         $this->site_name = setting('site_name', 'Inventory Management System');
@@ -24,6 +29,10 @@ class GeneralSettings extends Component
         $this->facebook_url = setting('facebook_url');
         $this->twitter_url = setting('twitter_url');
         $this->instagram_url = setting('instagram_url');
+
+        // স্টোর মোড লোড করা
+        $this->store_mode = setting('store_mode', 'departmental');
+        $this->central_store_dept_id = setting('central_store_dept_id', 1);
     }
 
     public function save(): void
@@ -33,12 +42,12 @@ class GeneralSettings extends Component
             'site_email' => 'nullable|email',
             'logo' => 'nullable|image|max:1024',
             'favicon' => [
-                'nullable',
-                'file',
-                'max:512',
+                'nullable', 'file', 'max:512',
                 'mimes:ico,png,jpg,jpeg,webp,gif,svg',
-                'mimetypes:image/x-icon,image/vnd.microsoft.icon,image/png,image/jpeg,image/webp,image/gif,image/svg+xml',
             ],
+            // নতুন ভ্যালিডেশন
+            'store_mode' => 'required|in:departmental,centralized',
+            'central_store_dept_id' => 'required_if:store_mode,centralized|nullable|integer',
         ]);
 
         if ($this->logo) {
@@ -59,11 +68,17 @@ class GeneralSettings extends Component
         set_setting('twitter_url', $this->twitter_url);
         set_setting('instagram_url', $this->instagram_url);
 
+        // নতুন সেটিংস সেভ করা
+        set_setting('store_mode', $this->store_mode);
+        set_setting('central_store_dept_id', $this->central_store_dept_id);
+
         Flux::toast(__('General settings updated successfully!'));
     }
 
     public function render(): View
     {
-        return view('livewire.admin.general-settings');
+        return view('livewire.admin.general-settings', [
+            'departments' => Department::orderBy('name')->get()
+        ]);
     }
 }

@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-    {{-- print:flex print:flex-col print:min-h-screen যুক্ত করা হয়েছে --}}
+    {{-- print:flex print:flex-col print:min-h-screen যুক্ত করা হয়েছে --}}
     <div id="print-area" class="bg-white text-black p-10 shadow-lg rounded-lg border border-zinc-200 print:shadow-none print:border-none print:p-0 print:flex print:flex-col print:min-h-screen">
 
         <div class="flex-1">
@@ -12,7 +12,16 @@
                 <div class="text-center flex-grow px-4">
                     <h1 class="text-2xl font-bold uppercase">{{ __('National University') }}</h1>
                     <p class="text-lg">{{ __('Bangladesh') }}</p>
-                    <p class="text-md font-semibold">{{ __('Office of the Teacher Training') }}</p>
+
+                    @php
+                        $approvingDeptId = \App\Models\Department::getApprovingDepartmentId($requisition->user->department_id);
+                        $headerDeptName = \App\Models\Department::find($approvingDeptId)->name ?? __('National University');
+                    @endphp
+
+                    <p class="text-md font-semibold">
+                        {{ $headerDeptName }}
+                    </p>
+
                     <h2 class="text-lg font-bold mt-2 underline inline-block">{{ __('Store Requisition Form') }}</h2>
                 </div>
                 <div class="w-20 pr-44"></div>
@@ -21,8 +30,8 @@
             <div class="flex justify-between items-end mb-6 text-sm">
                 <div class="space-y-1">
                     <p><strong>{{ __('Name:') }}</strong> {{ $requisition->user->name }}</p>
-                    <p><strong>{{ __('Designation:') }}</strong> {{ $requisition->user->post }}</p>
-                    <p><strong>{{ __('Department:') }}</strong> {{ $requisition->user->department }}</p>
+                    <p><strong>{{ __('Designation:') }}</strong> {{ $requisition->user->designation->title ?? 'N/A' }}</p>
+                    <p><strong>{{ __('Department:') }}</strong> {{ $requisition->user->department->name ?? 'N/A' }}</p>
                 </div>
                 <div class="space-y-1 text-right">
                     <p><strong>{{ __('Serial No:') }}</strong> {{ $requisition->requisition_no }}</p>
@@ -73,7 +82,10 @@
                     @else
                         <div class="h-10 mb-1"></div>
                     @endif
-                    <p class="border-t border-black pt-2 w-full mx-2">{{ __('Assistant Director') }}</p>
+{{--                        <p class="font-bold text-xs">{{ $officerDetails['assistant_director']['name'] }}</p>--}}
+                        <p class="border-t border-black pt-1 w-full mx-2 text-xs">
+                            {{ $officerDetails['assistant_director']['designation'] }}
+                        </p>
                 </div>
 
                 <div class="flex flex-col justify-end items-center">
@@ -82,7 +94,10 @@
                     @else
                         <div class="h-10 mb-1"></div>
                     @endif
-                    <p class="border-t border-black pt-2 w-full mx-2">{{ __('Deputy Director') }}</p>
+{{--                        <p class="font-bold text-xs">{{ $officerDetails['deputy_director']['name'] }}</p>--}}
+                        <p class="border-t border-black pt-1 w-full mx-2 text-xs">
+                            {{ $officerDetails['deputy_director']['designation'] }}
+                        </p>
                 </div>
 
                 <div class="flex flex-col justify-end items-center">
@@ -91,12 +106,14 @@
                     @else
                         <div class="h-10 mb-1"></div>
                     @endif
-                    <p class="border-t border-black pt-2 w-full mx-2">{{ __('Director') }}</p>
+{{--                        <p class="font-bold text-xs">{{ $officerDetails['director']['name'] }}</p>--}}
+                        <p class="border-t border-black pt-1 w-full mx-2 text-xs">
+                            {{ $officerDetails['director']['designation'] }}
+                        </p>
                 </div>
             </div>
         </div> {{-- flex-1 div এর শেষ --}}
 
-        <!-- Print Footer (শুধুমাত্র প্রিন্টে দেখাবে) -->
         <div class="hidden print:flex justify-between items-end mt-auto pt-2  text-xs text-black border-t border-black">
             <div class="w-1/3">
                 <p><strong>{{ __('Printed By:') }}</strong> {{ auth()->user()->name ?? 'System Admin' }}</p>
@@ -133,7 +150,6 @@
         body { visibility: hidden; background: white; }
         #print-area, #print-area * { visibility: visible; }
 
-        /* Flexbox সাপোর্টের জন্য min-height: 100vh যোগ করা হয়েছে */
         #print-area {
             position: absolute;
             left: 0;

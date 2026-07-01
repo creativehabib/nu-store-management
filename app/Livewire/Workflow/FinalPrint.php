@@ -2,58 +2,77 @@
 
 namespace App\Livewire\Workflow;
 
-use Livewire\Component;
-use App\Models\Requisition;
 use App\Models\Product;
-use Illuminate\Support\Facades\DB;
+use App\Models\Requisition;
+use App\Models\User;
+use App\Models\Department; // <-- এটি যুক্ত করতে হবে
 use Flux\Flux;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class FinalPrint extends Component
 {
     public $requisition;
 
+    public $officerDetails = [];
+
     public function mount($id)
     {
-        // রিকুইজিশনের যাবতীয় ডাটা রিলেশনশিপসহ লোড করা হচ্ছে
-        $this->requisition = Requisition::with(['user', 'items.product'])->findOrFail($id);
+        $this->requisition = Requisition::with(['user.department', 'user.designation', 'items.product'])
+            ->forUserDepartment()
+            ->findOrFail($id);
+
+        // আবেদনকারীর ডিপার্টমেন্ট আইডি
+        $applicantDeptId = $this->requisition->user->department_id;
+
+        // সেন্ট্রাল স্টোর বা নিজ দপ্তরের আইডি ডাইনামিকভাবে বের করা
+        $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
+
+        // initiator রোলটি যুক্ত করা হলো
+        $roles = ['initiator', 'assistant_director', 'deputy_director', 'director'];
+
+        foreach ($roles as $role) {
+            $user = User::with('designation')
+                ->where('role', $role)
+                ->where('department_id', $approvingDeptId) // <-- এখানে approvingDeptId হবে
+                ->first();
+
+            $this->officerDetails[$role] = [
+                'name' => $user->name ?? 'N/A',
+                'designation' => $user->designation->title ?? ucfirst(str_replace('_', ' ', $role)),
+            ];
+        }
     }
 
-    // Approval History থেকে ইউজারের ডিজিটাল সিগনেচার বের করার মেথড
     public function getSignature($role)
     {
         $history = $this->requisition->approval_history ?? [];
         foreach ($history as $h) {
             if ($h['role'] === $role && isset($h['signature'])) {
-                return asset('storage/' . $h['signature']); // সিগনেচারের পাবলিক URL
+                return asset('storage/'.$h['signature']);
             }
         }
         return null;
     }
 
-    // প্রোডাক্ট ডিস্ট্রিবিউশন এবং স্টক মাইনাস লজিক
     public function distributeStock()
     {
         if ($this->requisition->status !== 'director_approved') {
-            Flux::toast('রিকুইজিশনটি এখনো চূড়ান্ত অনুমোদন পায়নি বা ইতিমধ্যে বিতরণ হয়েছে!', 'error');
+            Flux::toast('রিকুইজিশনটি এখনো চূড়ান্ত অনুমোদন পায়নি বা ইতিমধ্যে বিতরণ হয়েছে!', 'error');
             return;
         }
 
-        // DB Transaction ব্যবহার করা হচ্ছে যেন কোনো এরর হলে অর্ধেক ডাটা সেভ না হয়
         DB::transaction(function () {
             foreach ($this->requisition->items as $item) {
                 $product = Product::find($item->product_id);
                 if ($product && $product->stock >= $item->supplied_qty) {
-                    $product->decrement('stock', $item->supplied_qty); // স্টক মাইনাস
+                    $product->decrement('stock', $item->supplied_qty);
                 }
             }
-
-            // স্ট্যাটাস আপডেট করে Distributed করে দেওয়া হলো
             $this->requisition->update(['status' => 'distributed']);
         });
 
-        Flux::toast('সফলভাবে স্টক মাইনাস করা হয়েছে এবং পণ্য বিতরণ সম্পন্ন হয়েছে!');
-
-        // কম্পোনেন্ট রিলোড করার জন্য
+        Flux::toast('সফলভাবে স্টক মাইনাস করা হয়েছে এবং পণ্য বিতরণ সম্পন্ন হয়েছে!');
         $this->requisition->refresh();
     }
 

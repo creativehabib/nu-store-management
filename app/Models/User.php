@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -43,13 +44,13 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
     'password',
     'pf_no',
     'mobile_no',
-    'post',
-    'department',
-    'role',
+    'role',           // post এবং department বাদ দিন
     'is_approved',
     'picture',
     'digital_signature',
     'locale',
+    'department_id',   // নতুন ফরেন কি যোগ করুন
+    'designation_id',  // নতুন ফরেন কি যোগ করুন
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
@@ -81,5 +82,16 @@ class User extends Authenticatable implements PasskeyUser
         return Str::length($initials) > 1
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    // ইউজারের পদবী কী তা বের করার জন্য
+    public function designation(): BelongsTo
+    {
+        return $this->belongsTo(Designation::class);
     }
 }

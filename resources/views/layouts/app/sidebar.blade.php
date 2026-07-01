@@ -48,7 +48,7 @@
                 @endif
 
                 {{-- রিপোর্টস --}}
-                @if(in_array(auth()->user()->role, ['admin', 'director', 'deputy_director', 'initiator']))
+                @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
                     <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
                         <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
                             {{ __('Reports & Export') }}
@@ -63,6 +63,13 @@
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="cube" :href="route('admin.products')" :current="request()->routeIs('admin.products')" wire:navigate>
                             {{ __('Products') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="building-office" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>
+                            {{ __('Departments') }}
+                        </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="briefcase" :href="route('designations.index')" :current="request()->routeIs('designations.*')" wire:navigate>
+                            {{ __('Designations') }}
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="chart-pie" :href="route('admin.product_summary')" :current="request()->routeIs('admin.product_summary')" wire:navigate>
                             {{ __('Products Summary') }}

@@ -48,7 +48,6 @@
             </flux:card>
         </div>
     @endif
-
     @if($role === 'requisitioner')
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <flux:card class="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800">
@@ -143,15 +142,29 @@
         {{-- চার্ট সেকশন --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <flux:card>
-                <flux:heading>{{ __('Monthly Requisition Trends') }}</flux:heading>
-                <div class="mt-4 h-64">
+                <div class="flex items-center justify-between mb-4">
+                    <flux:heading>{{ __('Requisition Trends') }}</flux:heading>
+
+                    <div class="w-36">
+                        <flux:select wire:model.live="trendFilter" size="sm">
+                            <!-- 🟢 All Time অপশনটি একদম উপরে যোগ করা হলো -->
+                            <flux:select.option value="all">{{ __('All Time') }}</flux:select.option>
+                            <flux:select.option value="7">{{ __('7 Days') }}</flux:select.option>
+                            <flux:select.option value="15">{{ __('15 Days') }}</flux:select.option>
+                            <flux:select.option value="30">{{ __('30 Days') }}</flux:select.option>
+                        </flux:select>
+                    </div>
+                </div>
+
+                {{-- wire:ignore যুক্ত করা হয়েছে যাতে লাইভওয়্যার চার্টের ক্যানভাস মুছে না ফেলে --}}
+                <div class="h-64" wire:ignore>
                     <canvas id="monthlyChart"></canvas>
                 </div>
             </flux:card>
 
             <flux:card>
                 <flux:heading>{{ __('Category-wise Inventory') }}</flux:heading>
-                <div class="mt-4 h-64 flex justify-center">
+                <div class="mt-4 h-64 flex justify-center" wire:ignore>
                     <canvas id="categoryChart"></canvas>
                 </div>
             </flux:card>
@@ -161,37 +174,60 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let monthlyChart;
+        let categoryChart;
+
         document.addEventListener('livewire:navigated', () => { initCharts(); });
 
         function initCharts() {
-            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode($monthlyLabels) !!},
-                    datasets: [{
-                        label: '{{ __("Requisitions") }}',
-                        data: {!! json_encode($monthlyValues) !!},
-                        backgroundColor: '#6366f1',
-                        borderRadius: 6
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            const monthlyCtx = document.getElementById('monthlyChart');
+            if(monthlyCtx) {
+                if(monthlyChart) { monthlyChart.destroy(); }
+                monthlyChart = new Chart(monthlyCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: {!! json_encode($trendLabels ?? []) !!},
+                        datasets: [{
+                            label: '{{ __("Requisitions") }}',
+                            data: {!! json_encode($trendValues ?? []) !!},
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
 
-            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-            new Chart(categoryCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: {!! json_encode($categoryLabels) !!},
-                    datasets: [{
-                        data: {!! json_encode($categoryValues) !!},
-                        backgroundColor: ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            const categoryCtx = document.getElementById('categoryChart');
+            if(categoryCtx) {
+                if(categoryChart) { categoryChart.destroy(); }
+                categoryChart = new Chart(categoryCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: {!! json_encode($categoryLabels ?? []) !!},
+                        datasets: [{
+                            data: {!! json_encode($categoryValues ?? []) !!},
+                            backgroundColor: ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
         }
+
+        // প্রথমবার পেজ লোড হলে চার্ট ইনিশিয়ালাইজ করার জন্য
         initCharts();
+
+        // লাইভওয়্যার থেকে ফিল্টার চেঞ্জ হওয়ার ইভেন্ট শুনবে
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('update-trend-chart', (event) => {
+                let data = event[0] || event;
+                if(monthlyChart) {
+                    monthlyChart.data.labels = data.labels;
+                    monthlyChart.data.datasets[0].data = data.values;
+                    monthlyChart.update();
+                }
+            });
+        });
     </script>
 </div>

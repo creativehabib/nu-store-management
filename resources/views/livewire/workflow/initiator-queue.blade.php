@@ -2,6 +2,14 @@
     <flux:heading size="xl" class="border-b pb-2">{{ __('Initiator Queue') }}</flux:heading>
 
     <flux:card>
+        <div class="mb-6">
+            <flux:input
+                wire:model.live.debounce.300ms="search"
+                icon="magnifying-glass"
+                placeholder="{{ __('Search by Requisition No or Applicant Name...') }}"
+            />
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm">
                 <thead>
@@ -19,7 +27,9 @@
                     <tr class="border-b dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
                         <td class="p-3 font-medium">{{ $req->requisition_no }}</td>
                         <td class="p-3">{{ $req->user->name }} <br><span class="text-xs text-zinc-500">{{ $req->user->pf_no }}</span></td>
-                        <td class="p-3">{{ $req->user->department }}</td>
+
+                        <td class="p-3">{{ $req->user->department->name ?? 'N/A' }}</td>
+
                         <td class="p-3">{{ $req->created_at->format('d M, Y') }}</td>
 
                         <td class="p-3">
@@ -63,7 +73,7 @@
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg">{{ __('Requisition Details:') }} {{ $selectedRequisition->requisition_no }}</flux:heading>
-                    <p class="text-sm text-zinc-500 mt-1">{{ __('Applicant:') }} {{ $selectedRequisition->user->name }} ({{ $selectedRequisition->user->department }})</p>
+                    <p class="text-sm text-zinc-500 mt-1">{{ __('Applicant:') }} {{ $selectedRequisition->user->name }} ({{ $selectedRequisition->user->department->name ?? 'N/A' }})</p>
                 </div>
 
                 <flux:separator />
@@ -106,14 +116,6 @@
                         {{ __('Forward to AD') }}
                     </flux:button>
                 </div>
-            </div>
-        @else
-            <div class="py-12 flex flex-col items-center justify-center text-zinc-500">
-                <svg class="animate-spin h-8 w-8 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p class="font-medium text-lg">{{ __('Loading file, please wait...') }}</p>
             </div>
         @endif
     </flux:modal>

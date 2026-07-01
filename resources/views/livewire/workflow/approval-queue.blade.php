@@ -1,6 +1,18 @@
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
     <flux:heading size="xl" class="border-b pb-2">{{ __('Approval Queue') }}</flux:heading>
 
+    @php
+        $user = auth()->user();
+        $isGlobalAdmin = in_array($user->role, ['admin', 'super_admin']);
+
+        $storeRoles = ['initiator', 'assistant_director', 'deputy_director', 'director'];
+        $isCentralStoreOfficer = setting('store_mode', 'departmental') === 'centralized'
+                              && $user->department_id == setting('central_store_dept_id', 1)
+                              && in_array($user->role, $storeRoles);
+
+        $canFilterAllDepartments = $isGlobalAdmin || $isCentralStoreOfficer;
+    @endphp
+
     <flux:card class="bg-zinc-50 dark:bg-zinc-800/50">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
@@ -16,12 +28,16 @@
             </div>
 
             <div>
-                <flux:select wire:model.live="department" :placeholder="__('Select Department')" :label="__('Department')">
-                    <flux:select.option value="">{{ __('All Departments') }}</flux:select.option>
-                    @foreach($departments as $dept)
-                        <flux:select.option value="{{ $dept }}">{{ $dept }}</flux:select.option>
-                    @endforeach
-                </flux:select>
+                @if($canFilterAllDepartments)
+                    <flux:select wire:model.live="department_id" :placeholder="__('Select Department')" :label="__('Department')">
+                        <flux:select.option value="">{{ __('All Departments') }}</flux:select.option>
+                        @foreach($departments as $dept)
+                            <flux:select.option value="{{ $dept->id }}">{{ $dept->name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                @else
+                    <flux:input disabled :label="__('Department')" :value="$user->department->name ?? 'N/A'" />
+                @endif
             </div>
         </div>
     </flux:card>
@@ -43,7 +59,7 @@
                     <tr class="border-b dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
                         <td class="p-3 font-medium">{{ $req->requisition_no }}</td>
                         <td class="p-3">{{ $req->user->name }} <br><span class="text-xs text-zinc-500">{{ $req->user->pf_no }}</span></td>
-                        <td class="p-3">{{ $req->user->department }}</td>
+                        <td class="p-3">{{ $req->user->department->name ?? 'N/A' }}</td>
                         <td class="p-3">{{ $req->created_at->format('d M, Y') }}</td>
                         <td class="p-3 text-right">
                             <flux:button size="sm" variant="primary" icon="document-magnifying-glass" wire:click="viewRequisition({{ $req->id }})">
@@ -73,7 +89,7 @@
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg">{{ __('Requisition No:') }} {{ $selectedRequisition->requisition_no }}</flux:heading>
-                    <p class="text-sm text-zinc-500 mt-1">{{ __('Applicant:') }} {{ $selectedRequisition->user->name }} ({{ $selectedRequisition->user->department }})</p>
+                    <p class="text-sm text-zinc-500 mt-1">{{ __('Applicant:') }} {{ $selectedRequisition->user->name }} ({{ $selectedRequisition->user->department->name ?? 'N/A' }})</p>
                 </div>
 
                 <flux:separator />
@@ -127,7 +143,7 @@
             <div class="py-12 flex flex-col items-center justify-center text-zinc-500">
                 <svg class="animate-spin h-8 w-8 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <p class="font-medium text-lg">{{ __('Loading file, please wait...') }}</p>
             </div>

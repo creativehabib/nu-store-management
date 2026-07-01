@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
+use App\Models\Department; // নতুন যুক্ত করা হলো
+use App\Models\Designation; // নতুন যুক্ত করা হলো
 use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,9 +21,9 @@ class UserApprovalManager extends Component
 
     public $pf_no;
 
-    public $post;
+    public $designation_id; // post এর পরিবর্তে
 
-    public $department;
+    public $department_id; // department এর পরিবর্তে
 
     public $role;
 
@@ -72,8 +74,8 @@ class UserApprovalManager extends Component
         $this->name = $user->name;
         $this->email = $user->email;
         $this->pf_no = $user->pf_no;
-        $this->post = $user->post;
-        $this->department = $user->department;
+        $this->designation_id = $user->designation_id; // আপডেট করা হলো
+        $this->department_id = $user->department_id;   // আপডেট করা হলো
         $this->role = $user->role;
         $this->mobile_no = $user->mobile_no;
         $this->isEditMode = true;
@@ -85,8 +87,8 @@ class UserApprovalManager extends Component
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$this->userId,
             'pf_no' => 'required|string|unique:users,pf_no,'.$this->userId,
-            'post' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
+            'designation_id' => 'required|exists:designations,id', // ভ্যালিডেশন রুল আপডেট
+            'department_id' => 'required|exists:departments,id',   // ভ্যালিডেশন রুল আপডেট
             'role' => 'required|in:director,deputy_director,assistant_director,initiator,requisitioner,admin',
             'mobile_no' => 'required|string|max:20',
         ]);
@@ -95,8 +97,8 @@ class UserApprovalManager extends Component
             'name' => $this->name,
             'email' => $this->email,
             'pf_no' => $this->pf_no,
-            'post' => $this->post,
-            'department' => $this->department,
+            'designation_id' => $this->designation_id, // আপডেট করা হলো
+            'department_id' => $this->department_id,   // আপডেট করা হলো
             'role' => $this->role,
             'mobile_no' => $this->mobile_no,
         ]);
@@ -107,18 +109,23 @@ class UserApprovalManager extends Component
 
     public function resetFields(): void
     {
-        $this->reset(['userId', 'name', 'email', 'pf_no', 'post', 'department', 'role', 'mobile_no', 'isEditMode']);
+        // রিসেট ফিল্ড আপডেট করা হলো
+        $this->reset(['userId', 'name', 'email', 'pf_no', 'designation_id', 'department_id', 'role', 'mobile_no', 'isEditMode']);
         $this->resetValidation();
     }
 
     public function render()
     {
-        $users = User::orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
+        // N+1 কুয়েরি সমস্যা সমাধানের জন্য eager loading (with) যুক্ত করা হলো
+        $users = User::with(['department', 'designation'])
+            ->orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
             ->latest()
             ->paginate(10);
 
         return view('livewire.admin.user-approval-manager', [
             'users' => $users,
+            'departments' => Department::orderBy('name')->get(),     // ড্রপডাউনের জন্য
+            'designations' => Designation::orderBy('rank')->get(),   // ড্রপডাউনের জন্য
         ])->layout('layouts.app', ['title' => 'User Manager']);
     }
 }

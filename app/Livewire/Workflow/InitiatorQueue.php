@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Workflow;
 
+use App\Models\Department; // Department মডেলটি যুক্ত করা হলো
 use App\Models\Requisition;
 use App\Models\User;
 use App\Notifications\RequisitionNotification;
@@ -14,23 +15,49 @@ use Livewire\Component;
 class InitiatorQueue extends Component
 {
     public $requisitions;
+
     public ?Requisition $selectedRequisition = null;
+
     public $suppliedQuantities = [];
+
     public $comment = '';
 
-    public function mount() { $this->loadRequisitions(); }
+    public string $search = '';
+
+    public function mount()
+    {
+        $this->loadRequisitions();
+    }
+
+    public function updatedSearch()
+    {
+        $this->loadRequisitions();
+    }
 
     public function loadRequisitions(): void
     {
-        $this->requisitions = Requisition::with(['user', 'items.product'])
+        $query = Requisition::with(['user.department', 'items.product'])
             ->whereIn('status', ['pending', 'returned', 'director_approved', 'distributed'])
-            ->latest()
-            ->get();
+            ->forUserDepartment();
+
+        if (! empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('requisition_no', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('user', function ($userQuery) {
+                        $userQuery->where('name', 'like', '%'.$this->search.'%');
+                    });
+            });
+        }
+
+        $this->requisitions = $query->latest()->get();
     }
 
     public function viewRequisition($id): void
     {
-        $this->selectedRequisition = Requisition::with(['user', 'items.product'])->findOrFail($id);
+        $this->selectedRequisition = Requisition::with(['user.department', 'items.product'])
+            ->forUserDepartment()
+            ->findOrFail($id);
+
         $this->suppliedQuantities = [];
         foreach ($this->selectedRequisition->items as $item) {
             $this->suppliedQuantities[$item->id] = $item->demanded_qty;
@@ -41,7 +68,7 @@ class InitiatorQueue extends Component
 
     public function forwardRequisition(): void
     {
-        if (!$this->selectedRequisition) {
+        if (! $this->selectedRequisition) {
             Flux::toast(__('Requisition data not found!'), variant: 'danger');
             return;
         }
@@ -73,10 +100,16 @@ class InitiatorQueue extends Component
         $message = __('New requisition (:req_no) is waiting for your approval.', ['req_no' => $this->selectedRequisition->requisition_no]);
         $url = route('workflow.approval');
 
-        // ফিল্টার করে ভ্যালিড ইউজারদের নোটিফিকেশন পাঠান
+        // আবেদনকারীর ডিপার্টমেন্ট আইডি বের করা
+        $applicantDeptId = $this->selectedRequisition->user->department_id;
+
+        // আমাদের গ্লোবাল হেল্পার মেথড দিয়ে সঠিক (অ্যাপ্রুভিং) ডিপার্টমেন্ট বের করা
+        $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
+
+        // সঠিক দপ্তরের Assistant Director (AD) কে নোটিফিকেশন পাঠানো
         $targetUsers = User::where('role', 'assistant_director')
+            ->where('department_id', $approvingDeptId)
             ->whereNotNull('email')
-            ->where('email', '!=', '')
             ->get();
 
         if ($targetUsers->isNotEmpty()) {

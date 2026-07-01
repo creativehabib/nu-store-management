@@ -3,33 +3,31 @@
 namespace App\Livewire\Workflow;
 
 use Livewire\Component;
-use Livewire\WithPagination; // পেজিনেশনের জন্য যুক্ত করা হলো
+use Livewire\WithPagination;
 use App\Models\Requisition;
 use App\Models\User;
+use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 use Flux\Flux;
 
 class ApprovalQueue extends Component
 {
-    use WithPagination; // ট্রেইট ব্যবহার করা হলো
+    use WithPagination;
 
-    // সার্চ এবং ফিল্টারের প্রোপার্টিসমূহ
     public $search = '';
     public $start_date = '';
     public $end_date = '';
-    public $department = '';
+    public $department_id = '';
 
     public $selectedRequisition;
     public $suppliedQuantities = [];
     public $comment = '';
 
-    // ফিল্টার চেঞ্জ হলে পেজিনেশন পেজ রিসেট করার জন্য লজিক
     public function updatingSearch() { $this->resetPage(); }
     public function updatingStartDate() { $this->resetPage(); }
     public function updatingEndDate() { $this->resetPage(); }
-    public function updatingDepartment() { $this->resetPage(); }
+    public function updatingDepartmentId() { $this->resetPage(); }
 
-    // ইউজারের রোল অনুযায়ী কোন স্ট্যাটাসের ডাটা আসবে তা নির্ধারণ
     public function getRoleStatus()
     {
         $role = Auth::user()->role;
@@ -41,7 +39,9 @@ class ApprovalQueue extends Component
 
     public function viewRequisition($id)
     {
-        $this->selectedRequisition = Requisition::with(['user', 'items.product'])->findOrFail($id);
+        $this->selectedRequisition = Requisition::with(['user.department', 'items.product'])
+            ->forUserDepartment()
+            ->findOrFail($id);
 
         $this->suppliedQuantities = [];
         foreach ($this->selectedRequisition->items as $item) {
@@ -58,12 +58,12 @@ class ApprovalQueue extends Component
 
         if ($actionType === 'return') {
             $nextStatus = 'returned';
-            $msg = 'রিকুইজিশনটি Initiator-এর কাছে ফেরত পাঠানো হয়েছে!';
+            $msg = 'রিকুইজিশনটি Initiator-এর কাছে ফেরত পাঠানো হয়েছে!';
         } else {
             if ($role === 'assistant_director') $nextStatus = 'ad_approved';
             if ($role === 'deputy_director') $nextStatus = 'dd_approved';
             if ($role === 'director') $nextStatus = 'director_approved';
-            $msg = 'রিকুইজিশনটি সফলভাবে অনুমোদিত হয়েছে!';
+            $msg = 'রিকুইজিশনটি সফলভাবে অনুমোদিত হয়েছে!';
 
             foreach ($this->selectedRequisition->items as $item) {
                 if (isset($this->suppliedQuantities[$item->id])) {
@@ -71,10 +71,9 @@ class ApprovalQueue extends Component
                 }
             }
 
-            // ১. নোটিফিকেশন টার্গেট সেট করা
             $targetRole = '';
-            $message = "নতুন রিকুইজিশন ({$this->selectedRequisition->requisition_no}) আপনার অনুমোদনের অপেক্ষায় আছে।";
-            $url = route('workflow.approval'); // ডিফল্ট ইউআরএল
+            $message = "নতুন রিকুইজিশন ({$this->selectedRequisition->requisition_no}) আপনার অনুমোদনের অপেক্ষায় আছে।";
+            $url = route('workflow.approval');
 
             if ($nextStatus === 'ad_approved') {
                 $targetRole = 'deputy_director';
@@ -83,17 +82,25 @@ class ApprovalQueue extends Component
             } elseif ($nextStatus === 'director_approved') {
                 $targetRole = 'initiator';
                 $message = "রিকুইজিশন ({$this->selectedRequisition->requisition_no}) প্রিন্ট ও বিতরণের জন্য প্রস্তুত।";
-                $url = route('workflow.initiator'); // ইনিশিয়েটরের কিউতে পাঠাবে
+                $url = route('workflow.initiator');
             } elseif ($nextStatus === 'returned') {
                 $targetRole = 'initiator';
                 $message = "রিকুইজিশন ({$this->selectedRequisition->requisition_no}) আপনার কাছে ফেরত এসেছে।";
                 $url = route('workflow.initiator');
             }
 
-            // ২. টার্গেট ইউজারের কাছে নোটিফিকেশন পাঠানো
             if ($targetRole) {
-                $targetUsers = User::where('role', $targetRole)->get();
-                \Illuminate\Support\Facades\Notification::send($targetUsers, new \App\Notifications\RequisitionNotification($this->selectedRequisition, $message, $url));
+                // নোটিফিকেশনের জন্য সঠিক দপ্তরের কর্মকর্তাদের খুঁজে বের করা
+                $applicantDeptId = $this->selectedRequisition->user->department_id;
+                $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
+
+                $targetUsers = User::where('role', $targetRole)
+                    ->where('department_id', $approvingDeptId) // নির্দিষ্ট ডিপার্টমেন্ট ফিল্টার
+                    ->get();
+
+                if($targetUsers->isNotEmpty()){
+                    \Illuminate\Support\Facades\Notification::send($targetUsers, new \App\Notifications\RequisitionNotification($this->selectedRequisition, $message, $url));
+                }
             }
         }
 
@@ -121,16 +128,15 @@ class ApprovalQueue extends Component
     {
         $status = $this->getRoleStatus();
 
-        // রিলেশনসহ বেস কোয়েরি বিল্ড করা
-        $query = Requisition::with(['user', 'items.product']);
+        $query = Requisition::with(['user.department', 'items.product'])
+            ->forUserDepartment();
 
         if ($status) {
             $query->where('status', $status);
         } else {
-            $query->whereRaw('1 = 0'); // রোল না মিললে খালি দেখাবে
+            $query->whereRaw('1 = 0');
         }
 
-        // ১. সার্চ ফিল্টার লজিক (রিকুইজিশন নম্বর, নাম অথবা PF No দিয়ে সার্চ)
         if (!empty($this->search)) {
             $query->where(function($q) {
                 $q->where('requisition_no', 'like', '%' . $this->search . '%')
@@ -141,23 +147,22 @@ class ApprovalQueue extends Component
             });
         }
 
-        // ২. ডেট রেঞ্জ ফিল্টার লজিক
+        // whereBetween এর পরিবর্তে whereDate ব্যবহার করা হলো তারিখজনিত এরর এড়াতে
         if (!empty($this->start_date) && !empty($this->end_date)) {
-            $query->whereBetween('created_at', [$this->start_date . ' 00:00:00', $this->end_date . ' 23:59:59']);
+            $query->whereDate('created_at', '>=', $this->start_date)
+                ->whereDate('created_at', '<=', $this->end_date);
         }
 
-        // ৩. ডিপার্টমেন্ট ফিল্টার লজিক
-        if (!empty($this->department)) {
+        if (!empty($this->department_id)) {
             $query->whereHas('user', function($q) {
-                $q->where('department', $this->department);
+                $q->where('department_id', $this->department_id);
             });
         }
 
-        // ড্রপডাউনে দেখানোর জন্য ইউনিক ডিপার্টমেন্টের লিস্ট তৈরি
-        $departments = User::whereNotNull('department')->distinct()->pluck('department');
+        $departments = Department::orderBy('name')->get();
 
         return view('livewire.workflow.approval-queue', [
-            'requisitions' => $query->latest()->paginate(10), // প্রতি পেজে ১০টি করে আসবে
+            'requisitions' => $query->latest()->paginate(10),
             'departments' => $departments
         ])->layout('layouts.app', ['title' => 'My Requisitions']);
     }

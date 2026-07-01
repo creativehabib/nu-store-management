@@ -13,8 +13,21 @@
                     <flux:input wire:model="pf_no" label="PF No" required />
                     <flux:input wire:model="mobile_no" label="Mobile No" required />
                     <flux:input wire:model="email" label="Email" type="email" required />
-                    <flux:input wire:model="post" label="Designation" required />
-                    <flux:input wire:model="department" label="Department" required />
+
+                    <flux:select wire:model="designation_id" label="Designation" required>
+                        <flux:select.option value="">{{ __('Select Designation') }}</flux:select.option>
+                        @foreach($designations as $desig)
+                            <flux:select.option value="{{ $desig->id }}">{{ $desig->title }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+
+                    <flux:select wire:model="department_id" label="Department" required>
+                        <flux:select.option value="">{{ __('Select Department') }}</flux:select.option>
+                        @foreach($departments as $dept)
+                            <flux:select.option value="{{ $dept->id }}">{{ $dept->name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+
                     <flux:select wire:model="role" label="System Role" required>
                         <flux:select.option value="requisitioner">Requisitioner</flux:select.option>
                         <flux:select.option value="initiator">Initiator</flux:select.option>
@@ -22,6 +35,7 @@
                         <flux:select.option value="deputy_director">Deputy Director</flux:select.option>
                         <flux:select.option value="director">Director</flux:select.option>
                         <flux:select.option value="admin">Admin</flux:select.option>
+                        <flux:select.option value="super_admin">Super Admin</flux:select.option>
                     </flux:select>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
@@ -53,7 +67,10 @@
                             <div class="font-medium">{{ $user->name }}</div>
                             <div class="text-xs text-zinc-500">{{ $user->email }} / {{ $user->mobile_no }}</div>
                         </td>
-                        <td class="p-3 text-sm">{{ $user->post }}<br><span class="text-xs text-zinc-500">{{ $user->department }}</span></td>
+                        <td class="p-3 text-sm">
+                            {{ $user->designation->title ?? 'N/A' }}<br>
+                            <span class="text-xs text-zinc-500">{{ $user->department->name ?? 'N/A' }}</span>
+                        </td>
                         <td class="p-3"><flux:badge color="zinc">{{ ucwords(str_replace('_', ' ', $user->role)) }}</flux:badge></td>
                         <td class="p-3"><flux:badge color="{{ $user->is_approved ? 'green' : 'amber' }}">{{ $user->is_approved ? 'Approved' : 'Pending' }}</flux:badge></td>
                         <td class="p-3 text-right">

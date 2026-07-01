@@ -10,6 +10,8 @@ use App\Livewire\Admin\ProductSummaryReport;
 use App\Livewire\Admin\SystemInformation;
 use App\Livewire\Admin\UserApprovalManager;
 use App\Livewire\Category\CategoryManager;
+use App\Livewire\Department\DepartmentManager;
+use App\Livewire\Designation\DesignationManager;
 use App\Livewire\Inventory\StockInManager;
 use App\Livewire\Product\ProductManager;
 use App\Livewire\Report\ReportManager;
@@ -41,6 +43,9 @@ Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('/departments', DepartmentManager::class)->name('departments.index');
+    Route::get('/designations', DesignationManager::class)->name('designations.index');
+
     Route::get('/admin/categories', CategoryManager::class)->name('admin.categories');
     Route::get('/admin/products', ProductManager::class)->name('admin.products');
     Route::get('/admin/user-approvals', UserApprovalManager::class)->name('admin.user_approvals');

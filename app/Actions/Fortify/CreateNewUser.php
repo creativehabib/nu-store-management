@@ -21,7 +21,7 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        // ১. ভ্যালিডেশন রুলস আপডেট করা হলো
+        // ১. ভ্যালিডেশন রুলস আপডেট (আইডি ভিত্তিক)
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => [
@@ -30,10 +30,13 @@ class CreateNewUser implements CreatesNewUsers
             ],
             'pf_no' => ['required', 'string', 'max:255', 'unique:users,pf_no'],
             'mobile_no' => ['required', 'string', 'max:20'],
-            'post' => ['required', 'string', 'max:255'],
-            'department' => ['required', 'string', 'max:255'],
+
+            // আইডি ভ্যালিডেশন
+            'designation_id' => ['required', 'exists:designations,id'],
+            'department_id' => ['required', 'exists:departments,id'],
+
             'role' => ['required', 'in:director,deputy_director,assistant_director,initiator,requisitioner'],
-            'digital_signature' => ['image', 'mimes:jpeg,png,jpg,svg', 'max:2048'],
+            'digital_signature' => ['nullable', 'image', 'mimes:jpeg,png,jpg,svg', 'max:2048'],
         ])->validate();
 
         // ২. ডিজিটাল সিগনেচার ফাইল সেভ করার লজিক
@@ -49,8 +52,11 @@ class CreateNewUser implements CreatesNewUsers
             'password' => Hash::make($input['password']),
             'pf_no' => $input['pf_no'],
             'mobile_no' => $input['mobile_no'],
-            'post' => $input['post'],
-            'department' => $input['department'],
+
+            // নতুন ফরেন আইডি ব্যবহার
+            'designation_id' => $input['designation_id'],
+            'department_id' => $input['department_id'],
+
             'role' => $input['role'],
             'digital_signature' => $signaturePath,
             'is_approved' => false,
