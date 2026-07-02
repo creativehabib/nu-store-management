@@ -76,32 +76,46 @@
                         <flux:sidebar.item icon="chart-pie" :href="route('admin.product_summary')" :current="request()->routeIs('admin.product_summary')" wire:navigate>
                             {{ __('Products Summary') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
-                            {{ __('User Manage') }}
-                        </flux:sidebar.item>
-                        <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
-                            {{ __('Language Settings') }}
-                        </flux:sidebar.item>
 
-                        <flux:sidebar.item icon="cog-8-tooth" :href="route('admin.mail_settings')" :current="request()->routeIs('admin.mail_settings')" wire:navigate>
-                            {{ __('Mail Settings') }}
-                        </flux:sidebar.item>
+                        {{-- Settings & Manage সাব-মেনু --}}
+                        <flux:sidebar.group
+                            expandable
+                            icon="cog-8-tooth"
+                            :heading="__('Settings & Manage')"
+                            class="grid"
+                            :expanded="request()->routeIs('admin.user_approvals', 'admin.language_settings', 'admin.mail_settings', 'admin.general_settings', 'admin.system_info', 'admin.cache_management', 'admin.backup')"
+                        >
 
-                        <flux:sidebar.item icon="cog-6-tooth" :href="route('admin.general_settings')" :current="request()->routeIs('admin.general_settings')" wire:navigate>
-                            {{ __('General Settings') }}
-                        </flux:sidebar.item>
+                            <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
+                                {{ __('User Manage') }}
+                            </flux:sidebar.item>
 
-                        <flux:sidebar.item icon="server-stack" :href="route('admin.system_info')" :current="request()->routeIs('admin.system_info')" wire:navigate>
-                            {{ __('System Info') }}
-                        </flux:sidebar.item>
+                            <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
+                                {{ __('Language Settings') }}
+                            </flux:sidebar.item>
 
-                        <flux:sidebar.item icon="archive-box" :href="route('admin.cache_management')" :current="request()->routeIs('admin.cache_management')" wire:navigate>
-                            {{ __('Cache Management') }}
-                        </flux:sidebar.item>
+                            <flux:sidebar.item icon="envelope" :href="route('admin.mail_settings')" :current="request()->routeIs('admin.mail_settings')" wire:navigate>
+                                {{ __('Mail Settings') }}
+                            </flux:sidebar.item>
 
-                        <flux:navlist.item icon="circle-stack" href="{{ route('admin.backup') }}" :current="request()->routeIs('admin.backup')">
-                            {{ __('Database Backup') }}
-                        </flux:navlist.item>
+                            <flux:sidebar.item icon="cog-6-tooth" :href="route('admin.general_settings')" :current="request()->routeIs('admin.general_settings')" wire:navigate>
+                                {{ __('General Settings') }}
+                            </flux:sidebar.item>
+
+                            <flux:sidebar.item icon="server-stack" :href="route('admin.system_info')" :current="request()->routeIs('admin.system_info')" wire:navigate>
+                                {{ __('System Info') }}
+                            </flux:sidebar.item>
+
+                            <flux:sidebar.item icon="archive-box" :href="route('admin.cache_management')" :current="request()->routeIs('admin.cache_management')" wire:navigate>
+                                {{ __('Cache Management') }}
+                            </flux:sidebar.item>
+
+                            <flux:sidebar.item icon="circle-stack" :href="route('admin.backup')" :current="request()->routeIs('admin.backup')" wire:navigate>
+                                {{ __('Database Backup') }}
+                            </flux:sidebar.item>
+
+                        </flux:sidebar.group>
+                        {{-- সাব-মেনু শেষ --}}
 
                     </flux:sidebar.group>
                 @endif
