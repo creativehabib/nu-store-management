@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockEntry extends Model
 {
-    protected $fillable = ['product_id', 'quantity', 'voucher_no', 'supplier'];
+    protected $fillable = ['product_id', 'quantity', 'voucher_no', 'supplier', 'expire_date'];
 
     public function product(): BelongsTo
     {

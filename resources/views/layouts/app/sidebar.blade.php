@@ -67,9 +67,11 @@
                         <flux:sidebar.item icon="building-office" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>
                             {{ __('Departments') }}
                         </flux:sidebar.item>
-
                         <flux:sidebar.item icon="briefcase" :href="route('designations.index')" :current="request()->routeIs('designations.*')" wire:navigate>
                             {{ __('Designations') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
+                            {{ __('Stock In Entry') }}
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="chart-pie" :href="route('admin.product_summary')" :current="request()->routeIs('admin.product_summary')" wire:navigate>
                             {{ __('Products Summary') }}

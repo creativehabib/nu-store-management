@@ -16,7 +16,7 @@ class GeneralSettings extends Component
     public $facebook_url, $twitter_url, $instagram_url;
     public $logo, $favicon;
 
-    // নতুন প্রপার্টি
+    public $show_print_footer;
     public $store_mode;
     public $central_store_dept_id;
 
@@ -30,6 +30,7 @@ class GeneralSettings extends Component
         $this->twitter_url = setting('twitter_url');
         $this->instagram_url = setting('instagram_url');
 
+        $this->show_print_footer = (bool) setting('show_print_footer', true);
         // স্টোর মোড লোড করা
         $this->store_mode = setting('store_mode', 'departmental');
         $this->central_store_dept_id = setting('central_store_dept_id', 1);
@@ -45,6 +46,7 @@ class GeneralSettings extends Component
                 'nullable', 'file', 'max:512',
                 'mimes:ico,png,jpg,jpeg,webp,gif,svg',
             ],
+            'show_print_footer' => 'boolean',
             // নতুন ভ্যালিডেশন
             'store_mode' => 'required|in:departmental,centralized',
             'central_store_dept_id' => 'required_if:store_mode,centralized|nullable|integer',
@@ -68,6 +70,7 @@ class GeneralSettings extends Component
         set_setting('twitter_url', $this->twitter_url);
         set_setting('instagram_url', $this->instagram_url);
 
+        set_setting('show_print_footer', $this->show_print_footer);
         // নতুন সেটিংস সেভ করা
         set_setting('store_mode', $this->store_mode);
         set_setting('central_store_dept_id', $this->central_store_dept_id);

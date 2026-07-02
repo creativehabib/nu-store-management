@@ -28,6 +28,9 @@
                 <div>
                     <flux:input wire:model="supplier" :label="__('Supplier / Source (Optional)')" :placeholder="__('e.g. Government Store')" />
                 </div>
+                <div>
+                    <flux:input type="date" wire:model="expire_date" label="{{ __('Expire Date (Optional)') }}" :placeholder="__('e.g. Expire Date (Optional)')"/>
+                </div>
             </div>
 
             <div class="flex justify-end gap-2 mt-4">
@@ -52,9 +55,12 @@
                     <th class="p-3 text-sm font-semibold">{{ __('Date & Time') }}</th>
                     <th class="p-3 text-sm font-semibold">{{ __('Product Name') }}</th>
                     <th class="p-3 text-sm font-semibold text-center">{{ __('Quantity') }}</th>
-                    <th class="p-3 text-sm font-semibold">I{{ __('Voucher No.') }}</th>
+                    <th class="p-3 text-sm font-semibold">{{ __('Voucher No.') }}</th>
                     <th class="p-3 text-sm font-semibold">{{ __('Supplier') }}</th>
-                    <th class="p-3 text-sm font-semibold text-right">{{ __('Action') }}</th>
+                    <th class="p-3 text-sm font-semibold">{{ __('Exapire Date') }}</th>
+                    @if(auth()->user()->role === 'admin')
+                        <th class="p-3 text-sm font-semibold text-right">{{ __('Action') }}</th>
+                    @endif
                 </tr>
                 </thead>
                 <tbody>
@@ -70,12 +76,15 @@
                         <td class="p-3 text-center text-green-600 font-bold">+ {{ $entry->quantity }}</td>
                         <td class="p-3 text-zinc-500">{{ $entry->voucher_no ?? '-' }}</td>
                         <td class="p-3 text-zinc-500">{{ $entry->supplier ?? '-' }}</td>
-                        <td class="p-3 text-right">
-                            <div class="flex justify-end gap-2">
-                                <flux:button size="sm" variant="outline" icon="pencil" wire:click="edit({{ $entry->id }})" :title="__('Edit')" />
-                                <flux:button size="sm" variant="outline" icon="trash" class="text-red-500 hover:text-red-700 hover:bg-red-50" wire:click="deleteEntry({{ $entry->id }})" wire:confirm="{{ __('Are you sure you want to delete this entry? This will subtract the quantity from the main stock!') }}" :title="__('Delete')" />
-                            </div>
-                        </td>
+                        <td class="p-c text-zinc-500">{{ $entry->expire_date ?? '_' }}</td>
+                        @if(auth()->user()->role === 'admin')
+                            <td class="p-3 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <flux:button size="sm" variant="outline" icon="pencil" wire:click="edit({{ $entry->id }})" :title="__('Edit')" />
+                                    <flux:button size="sm" variant="outline" icon="trash" class="text-red-500 hover:text-red-700 hover:bg-red-50" wire:click="deleteEntry({{ $entry->id }})" wire:confirm="{{ __('Are you sure you want to delete this entry? This will subtract the quantity from the main stock!') }}" :title="__('Delete')" />
+                                </div>
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>

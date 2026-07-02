@@ -19,7 +19,14 @@
                     <flux:input wire:model="instagram_url" label="Instagram" />
                 </div>
             </div>
+            <div class="flex items-center justify-between mt-6">
+                <div>
+                    <h4 class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ __('Show Print Footer') }}</h4>
+                    <p class="text-sm text-zinc-500">{{ __('Enable or disable the footer section (Printed By, Date & Time) in the final print layout.') }}</p>
+                </div>
 
+                <flux:switch wire:model="show_print_footer" />
+            </div>
             <div class="border-t pt-6">
                 <flux:heading size="md" class="mb-4">{{ __('Inventory Store System Mode') }}</flux:heading>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

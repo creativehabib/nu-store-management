@@ -13,7 +13,7 @@ class StockInManager extends Component
 {
     use WithPagination;
 
-    public $entryId, $product_id, $quantity, $voucher_no, $supplier;
+    public $entryId, $product_id, $quantity, $voucher_no, $supplier, $expire_date;
     public $isEditMode = false;
 
     protected $rules = [
@@ -21,6 +21,7 @@ class StockInManager extends Component
         'quantity' => 'required|integer|min:1',
         'voucher_no' => 'nullable|string|max:100',
         'supplier' => 'nullable|string|max:255',
+        'expire_date' => 'nullable|date',
     ];
 
     public function saveStock()
@@ -44,6 +45,7 @@ class StockInManager extends Component
                     'quantity' => $this->quantity,
                     'voucher_no' => $this->voucher_no,
                     'supplier' => $this->supplier,
+                    'expire_date' => $this->expire_date,
                 ]);
 
                 // ৩. নতুন (বা একই) প্রোডাক্টের স্টকে নতুন পরিমাণ যোগ করা
@@ -60,6 +62,7 @@ class StockInManager extends Component
                     'quantity' => $this->quantity,
                     'voucher_no' => $this->voucher_no,
                     'supplier' => $this->supplier,
+                    'expire_date' => $this->expire_date,
                 ]);
 
                 $product = Product::find($this->product_id);
@@ -81,6 +84,7 @@ class StockInManager extends Component
         $this->quantity = $entry->quantity;
         $this->voucher_no = $entry->voucher_no;
         $this->supplier = $entry->supplier;
+        $this->expire_date = $entry->expire_date;
 
         $this->isEditMode = true;
     }
@@ -103,7 +107,7 @@ class StockInManager extends Component
 
     public function resetFields()
     {
-        $this->reset(['entryId', 'product_id', 'quantity', 'voucher_no', 'supplier', 'isEditMode']);
+        $this->reset(['entryId', 'product_id', 'quantity', 'voucher_no', 'supplier', 'expire_date', 'isEditMode']);
         $this->resetValidation();
     }
 

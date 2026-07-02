@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->integer('quantity');
             $table->string('voucher_no')->nullable();
             $table->string('supplier')->nullable();
+            $table->date('expire_date')->nullable();
             $table->timestamps();
         });
     }

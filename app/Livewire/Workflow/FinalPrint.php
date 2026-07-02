@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Workflow;
 
+use App\Models\Department;
 use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\User;
-use App\Models\Department;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -22,6 +22,11 @@ class FinalPrint extends Component
             ->forUserDepartment()
             ->findOrFail($id);
 
+        $user = auth()->user();
+        $isGlobalAdmin = in_array($user->role, ['admin', 'super_admin','initiator']);
+        if (! $isGlobalAdmin) {
+            abort(403, 'Unauthorized access.');
+        }
         // আবেদনকারীর ডিপার্টমেন্ট আইডি
         $applicantDeptId = $this->requisition->user->department_id;
 
@@ -52,6 +57,7 @@ class FinalPrint extends Component
                 return asset('storage/'.$h['signature']);
             }
         }
+
         return null;
     }
 
@@ -59,6 +65,7 @@ class FinalPrint extends Component
     {
         if ($this->requisition->status !== 'director_approved') {
             Flux::toast('রিকুইজিশনটি এখনো চূড়ান্ত অনুমোদন পায়নি বা ইতিমধ্যে বিতরণ হয়েছে!', 'error');
+
             return;
         }
 

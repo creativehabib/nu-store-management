@@ -81,7 +81,7 @@
             <flux:card class="text-center bg-amber-50 dark:bg-amber-900/20 print:border-black print:border print:shadow-none print:bg-transparent">
                 <flux:heading size="lg" class="print:text-black">{{ __('Total Demanded Quantity') }}</flux:heading>
                 <p class="text-3xl font-bold text-amber-600 print:text-black mt-2">
-                    {{ $reportData->sum(fn($req) => $req->items->sum('demanded_qty')) }} {{ __('pcs') }}
+                    {{ $reportData->sum(fn($req) => $req->items->sum('demanded_qty')) }}
                 </p>
             </flux:card>
 
@@ -89,7 +89,7 @@
                 <flux:heading size="lg" class="print:text-black">{{ __('Total Supplied (Stock Out)') }}</flux:heading>
                 <p class="text-3xl font-bold text-green-600 print:text-black mt-2">
                     {{-- শুধুমাত্র distributed হওয়া আইটেমগুলোকেই আমরা প্রকৃত Stock Out হিসেবে ধরব --}}
-                    {{ $reportData->where('status', 'distributed')->sum(fn($req) => $req->items->sum('supplied_qty')) }} {{ __('pcs') }}
+                    {{ $reportData->where('status', 'distributed')->sum(fn($req) => $req->items->sum('supplied_qty')) }}
                 </p>
             </flux:card>
         </div>
