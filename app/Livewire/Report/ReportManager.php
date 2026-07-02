@@ -4,7 +4,6 @@ namespace App\Livewire\Report;
 
 use App\Models\Department;
 use App\Models\Requisition;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class ReportManager extends Component

@@ -10,9 +10,9 @@ return new class extends Migration {
         Schema::create('stock_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->integer('quantity'); // কতটুকু স্টক ইন হলো
-            $table->string('voucher_no')->nullable(); // মেমো বা ভাউচার নম্বর
-            $table->string('supplier')->nullable(); // সরবরাহকারী প্রতিষ্ঠান/ব্যক্তি
+            $table->integer('quantity');
+            $table->string('voucher_no')->nullable();
+            $table->string('supplier')->nullable();
             $table->timestamps();
         });
     }

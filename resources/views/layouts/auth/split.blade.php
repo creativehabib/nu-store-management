@@ -9,7 +9,11 @@
                 <div class="absolute inset-0 bg-neutral-900"></div>
                 <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-medium" wire:navigate>
                     <span class="flex h-10 w-10 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
+                         @if(setting('site_logo'))
+                            <img src="{{ asset('storage/' . setting('site_logo')) }}" alt="{{ setting('site_name') ?? config('app.name') }}" class="size-full object-cover">
+                        @else
+                            <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
+                        @endif
                     </span>
                     {{ config('app.name', 'Laravel') }}
                 </a>

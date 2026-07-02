@@ -5,7 +5,7 @@ namespace App\Livewire\Workflow;
 use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\User;
-use App\Models\Department; // <-- এটি যুক্ত করতে হবে
+use App\Models\Department;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -34,7 +34,7 @@ class FinalPrint extends Component
         foreach ($roles as $role) {
             $user = User::with('designation')
                 ->where('role', $role)
-                ->where('department_id', $approvingDeptId) // <-- এখানে approvingDeptId হবে
+                ->where('department_id', $approvingDeptId)
                 ->first();
 
             $this->officerDetails[$role] = [
