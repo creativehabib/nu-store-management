@@ -1,3 +1,4 @@
+@php($workflowQueueCounts ??= ['initiator' => 0, 'approval' => 0])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
@@ -31,12 +32,26 @@
                     <flux:sidebar.group heading="{{ __('Workflow') }}" class="grid">
                         @if(auth()->user()->role === 'initiator')
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
-                                {{ __('Initiator Queue') }}
+                                <span class="flex w-full items-center justify-between gap-2">
+                                    <span>{{ __('Initiator Queue') }}</span>
+                                    @if(($workflowQueueCounts['initiator'] ?? 0) > 0)
+                                        <span class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold leading-none text-white">
+                                            {{ $workflowQueueCounts['initiator'] }}
+                                        </span>
+                                    @endif
+                                </span>
                             </flux:sidebar.item>
                         @endif
                         @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
                             <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
-                                {{ __('Approval Queue') }}
+                                <span class="flex w-full items-center justify-between gap-2">
+                                    <span>{{ __('Approval Queue') }}</span>
+                                    @if(($workflowQueueCounts['approval'] ?? 0) > 0)
+                                        <span class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold leading-none text-white">
+                                            {{ $workflowQueueCounts['approval'] }}
+                                        </span>
+                                    @endif
+                                </span>
                             </flux:sidebar.item>
                         @endif
                         @if(auth()->user()->role === 'initiator')
