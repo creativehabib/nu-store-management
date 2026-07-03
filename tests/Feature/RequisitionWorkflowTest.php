@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\Requisition;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\WorkflowQueueCounter;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -92,4 +93,53 @@ it('keeps departmental requisitions on the department initiator first', function
     $this->actingAs($initiator);
     Livewire::test(InitiatorQueue::class)
         ->assertSet('requisitions', fn ($requisitions) => $requisitions->pluck('id')->contains($requisition->id));
+});
+
+it('counts sidebar workflow queue notifications for the current user', function () {
+    touch(storage_path('installed'));
+
+    $applicantDepartment = Department::create(['name' => 'Sidebar Applicant Department', 'code' => 'SAD']);
+    $centralStoreDepartment = Department::create(['name' => 'Sidebar Central Store', 'code' => 'SCS']);
+
+    workflowSetting('store_mode', 'centralized');
+    workflowSetting('central_store_dept_id', $centralStoreDepartment->id);
+
+    $requisitioner = workflowUser('requisitioner', $applicantDepartment);
+    $departmentDirector = workflowUser('director', $applicantDepartment);
+    $departmentInitiator = workflowUser('initiator', $applicantDepartment);
+    $centralInitiator = workflowUser('initiator', $centralStoreDepartment);
+
+    Requisition::create([
+        'requisition_no' => 'REQ-SIDEBAR-001',
+        'user_id' => $requisitioner->id,
+        'status' => 'department_director_review',
+        'approval_history' => [],
+    ]);
+
+    Requisition::create([
+        'requisition_no' => 'REQ-SIDEBAR-002',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    $counter = app(WorkflowQueueCounter::class);
+
+    $this->actingAs($departmentDirector);
+    expect($counter->countsFor($departmentDirector))->toBe([
+        'initiator' => 0,
+        'approval' => 1,
+    ]);
+
+    $this->actingAs($departmentInitiator);
+    expect($counter->countsFor($departmentInitiator))->toBe([
+        'initiator' => 0,
+        'approval' => 0,
+    ]);
+
+    $this->actingAs($centralInitiator);
+    expect($counter->countsFor($centralInitiator))->toBe([
+        'initiator' => 1,
+        'approval' => 0,
+    ]);
 });
