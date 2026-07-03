@@ -1,3 +1,4 @@
+@php($workflowQueueCounts ??= ['initiator' => 0, 'approval' => 0])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
