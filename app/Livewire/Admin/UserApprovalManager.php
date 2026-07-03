@@ -2,16 +2,19 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Department;
+use App\Models\Designation;
 use App\Models\User;
-use App\Models\Department; // নতুন যুক্ত করা হলো
-use App\Models\Designation; // নতুন যুক্ত করা হলো
 use Flux\Flux;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class UserApprovalManager extends Component
 {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     public $userId;
 
@@ -28,6 +31,18 @@ class UserApprovalManager extends Component
     public $role;
 
     public $mobile_no;
+
+    public string $password = '';
+
+    public string $password_confirmation = '';
+
+    public $picture;
+
+    public $digital_signature;
+
+    public ?string $current_picture = null;
+
+    public ?string $current_signature = null;
 
     public $isEditMode = false;
 
@@ -78,6 +93,9 @@ class UserApprovalManager extends Component
         $this->department_id = $user->department_id;   // আপডেট করা হলো
         $this->role = $user->role;
         $this->mobile_no = $user->mobile_no;
+        $this->current_picture = $user->picture;
+        $this->current_signature = $user->digital_signature;
+        $this->reset('password', 'password_confirmation', 'picture', 'digital_signature');
         $this->isEditMode = true;
     }
 
@@ -89,11 +107,14 @@ class UserApprovalManager extends Component
             'pf_no' => 'required|string|unique:users,pf_no,'.$this->userId,
             'designation_id' => 'required|exists:designations,id', // ভ্যালিডেশন রুল আপডেট
             'department_id' => 'required|exists:departments,id',   // ভ্যালিডেশন রুল আপডেট
-            'role' => 'required|in:director,deputy_director,assistant_director,initiator,requisitioner,admin',
+            'role' => 'required|in:director,deputy_director,assistant_director,initiator,requisitioner,admin,super_admin',
             'mobile_no' => 'required|string|max:20',
+            'password' => ['nullable', 'confirmed', Password::defaults()],
+            'picture' => ['nullable', 'image', 'max:2048'],
+            'digital_signature' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        User::findOrFail($this->userId)->update([
+        $userData = [
             'name' => $this->name,
             'email' => $this->email,
             'pf_no' => $this->pf_no,
@@ -101,7 +122,25 @@ class UserApprovalManager extends Component
             'department_id' => $this->department_id,   // আপডেট করা হলো
             'role' => $this->role,
             'mobile_no' => $this->mobile_no,
-        ]);
+        ];
+
+        if (filled($this->password)) {
+            $userData['password'] = $this->password;
+        }
+
+        $user = User::findOrFail($this->userId);
+
+        if ($this->picture) {
+            $this->deletePublicFile($user->picture);
+            $userData['picture'] = $this->picture->store('profile-images', 'public');
+        }
+
+        if ($this->digital_signature) {
+            $this->deletePublicFile($user->digital_signature);
+            $userData['digital_signature'] = $this->digital_signature->store('signatures', 'public');
+        }
+
+        $user->update($userData);
 
         Flux::toast('User information updated successfully!');
         $this->resetFields();
@@ -110,8 +149,31 @@ class UserApprovalManager extends Component
     public function resetFields(): void
     {
         // রিসেট ফিল্ড আপডেট করা হলো
-        $this->reset(['userId', 'name', 'email', 'pf_no', 'designation_id', 'department_id', 'role', 'mobile_no', 'isEditMode']);
+        $this->reset([
+            'userId',
+            'name',
+            'email',
+            'pf_no',
+            'designation_id',
+            'department_id',
+            'role',
+            'mobile_no',
+            'password',
+            'password_confirmation',
+            'picture',
+            'digital_signature',
+            'current_picture',
+            'current_signature',
+            'isEditMode',
+        ]);
         $this->resetValidation();
+    }
+
+    private function deletePublicFile(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     public function render()
