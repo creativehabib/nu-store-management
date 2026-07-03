@@ -25,11 +25,13 @@
             <flux:navbar class="me-4">
                 <flux:navbar.item icon="magnifying-glass" href="#" label="Search" />
                 <flux:navbar.item class="max-lg:hidden" icon="cog-6-tooth" href="#" label="Settings" />
-                <flux:navbar.item class="max-lg:hidden" icon="information-circle" href="#" label="Help" />
             </flux:navbar>
 
             <flux:dropdown align="end">
-                <flux:profile :initials="auth()->user()->initials()" avatar="{{ asset('storage/' . auth()->user()->picture) }}"/>
+                <flux:profile
+                    :initials="auth()->user()->initials()"
+                    :avatar="filled(auth()->user()->picture) ? asset('storage/' . auth()->user()->picture) : null"
+                />
                 <flux:navmenu class="max-w-[12rem]">
                     <div class="px-2 py-1.5">
                         <flux:text size="sm">Signed in as</flux:text>
@@ -61,29 +63,7 @@
                     </flux:navmenu.item>
                 </flux:navmenu>
             </flux:dropdown>
-            <flux:dropdown position="top" align="start">
-                <flux:profile :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <flux:menu.radio> {{ auth()->user()->name }}</flux:menu.radio>
-                        <flux:menu.radio>PF No. {{ auth()->user()->pf_no }}</flux:menu.radio>
-                    </flux:menu.radio.group>
-                    <flux:menu.separator />
-                        <form method="POST" action="{{ route('logout') }}" class="w-full">
-                            @csrf
-                            <flux:menu.item
-                                as="button"
-                                type="submit"
-                                icon="arrow-right-start-on-rectangle"
-                                class="w-full cursor-pointer"
-                                data-test="logout-button"
-                            >
-                                {{ __('Log out') }}
-                            </flux:menu.item>
-                        </form>
-                    </flux:menu.item>
-                </flux:menu>
-            </flux:dropdown>
+
         </flux:header>
 
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
