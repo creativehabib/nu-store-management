@@ -4,7 +4,88 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
+    <body class="min-h-screen bg-white dark:bg-zinc-800 flex">
+
+        <flux:header sticky collapsible="mobile" class="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700">
+            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+
+            <flux:navbar class="-mb-px max-lg:hidden">
+                <flux:navbar.item icon="inbox" badge="12" href="#">Inbox</flux:navbar.item>
+                <flux:separator vertical variant="subtle" class="my-2"/>
+                <flux:dropdown class="max-lg:hidden">
+                    <flux:navbar.item icon:trailing="chevron-down">Favorites</flux:navbar.item>
+                    <flux:navmenu>
+                        <flux:navmenu.item href="#">Marketing site</flux:navmenu.item>
+                        <flux:navmenu.item href="#">Android app</flux:navmenu.item>
+                        <flux:navmenu.item href="#">Brand guidelines</flux:navmenu.item>
+                    </flux:navmenu>
+                </flux:dropdown>
+            </flux:navbar>
+            <flux:spacer />
+            <flux:navbar class="me-4">
+                <flux:navbar.item icon="magnifying-glass" href="#" label="Search" />
+                <flux:navbar.item class="max-lg:hidden" icon="cog-6-tooth" href="#" label="Settings" />
+                <flux:navbar.item class="max-lg:hidden" icon="information-circle" href="#" label="Help" />
+            </flux:navbar>
+
+            <flux:dropdown align="end">
+                <flux:profile :initials="auth()->user()->initials()" avatar="{{ asset('storage/' . auth()->user()->picture) }}"/>
+                <flux:navmenu class="max-w-[12rem]">
+                    <div class="px-2 py-1.5">
+                        <flux:text size="sm">Signed in as</flux:text>
+                        <flux:heading class="mt-1! truncate">{{ auth()->user()->email }}</flux:heading>
+                    </div>
+                    <flux:navmenu.separator />
+                    <div class="px-2 py-1.5">
+                        <flux:text size="sm" class="pl-7">Teams</flux:text>
+                    </div>
+                    <flux:navmenu.item href="#" icon="check" class="text-zinc-800 dark:text-white truncate">Personal</flux:navmenu.item>
+                    <flux:navmenu.item href="#" indent class="text-zinc-800 dark:text-white truncate">{{ auth()->user()->name }}</flux:navmenu.item>
+                    <flux:navmenu.separator />
+                    <flux:navmenu.item href="/dashboard" icon="key" class="text-zinc-800 dark:text-white">Licenses</flux:navmenu.item>
+                    <flux:navmenu.item href="/account" icon="user" class="text-zinc-800 dark:text-white">Account</flux:navmenu.item>
+                    <flux:navmenu.separator />
+                    <flux:navmenu.item class="text-zinc-800 dark:text-white">
+                        <form method="POST" action="{{ route('logout') }}" class="w-full">
+                            @csrf
+                            <flux:menu.item
+                                as="button"
+                                type="submit"
+                                icon="arrow-right-start-on-rectangle"
+                                class="w-full cursor-pointer"
+                                data-test="logout-button"
+                            >
+                                {{ __('Log out') }}
+                            </flux:menu.item>
+                        </form>
+                    </flux:navmenu.item>
+                </flux:navmenu>
+            </flux:dropdown>
+            <flux:dropdown position="top" align="start">
+                <flux:profile :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
+                <flux:menu>
+                    <flux:menu.radio.group>
+                        <flux:menu.radio> {{ auth()->user()->name }}</flux:menu.radio>
+                        <flux:menu.radio>PF No. {{ auth()->user()->pf_no }}</flux:menu.radio>
+                    </flux:menu.radio.group>
+                    <flux:menu.separator />
+                        <form method="POST" action="{{ route('logout') }}" class="w-full">
+                            @csrf
+                            <flux:menu.item
+                                as="button"
+                                type="submit"
+                                icon="arrow-right-start-on-rectangle"
+                                class="w-full cursor-pointer"
+                                data-test="logout-button"
+                            >
+                                {{ __('Log out') }}
+                            </flux:menu.item>
+                        </form>
+                    </flux:menu.item>
+                </flux:menu>
+            </flux:dropdown>
+        </flux:header>
+
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
@@ -255,8 +336,8 @@
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+        <flux:header class="hidden">
+            <flux:sidebar.toggle class="hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
 
