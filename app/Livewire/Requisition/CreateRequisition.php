@@ -61,7 +61,7 @@ class CreateRequisition extends Component
             $requisition = Requisition::create([
                 'requisition_no' => 'REQ-'.date('Ymd').'-'.strtoupper(Str::random(4)),
                 'user_id' => Auth::id(),
-                'status' => 'pending',
+                'status' => Requisition::initialStatus(),
                 'approval_history' => [],
             ]);
 
