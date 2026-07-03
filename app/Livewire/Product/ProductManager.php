@@ -24,6 +24,14 @@ class ProductManager extends Component
 
     public $isEditMode = false;
     public $productToDelete = null;
+
+    public bool $lowStockOnly = false;
+
+    public function mount(): void
+    {
+        $this->lowStockOnly = request()->boolean('low_stock');
+    }
+
     public function rules()
     {
         return [
@@ -86,11 +94,23 @@ class ProductManager extends Component
         $this->resetValidation();
     }
 
+    public function clearLowStockFilter(): void
+    {
+        $this->lowStockOnly = false;
+        $this->resetPage();
+    }
+
     public function render()
     {
+        $products = Product::with('category')
+            ->when($this->lowStockOnly, function ($query) {
+                $query->where('stock', '<=', 10);
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('livewire.product.product-manager', [
-            // প্রোডাক্টের সাথে ক্যাটাগরির নাম দেখানোর জন্য with('category') ব্যবহার করা হয়েছে
-            'products' => Product::with('category')->latest()->paginate(10),
+            'products' => $products,
             'categories' => Category::orderBy('name')->get(),
         ])->layout('layouts.app', ['title' => 'Product Manager']);
     }

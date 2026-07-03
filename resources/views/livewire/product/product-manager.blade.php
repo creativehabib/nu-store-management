@@ -1,5 +1,16 @@
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-    <flux:heading size="xl" class="border-b pb-2">{{ __('Product / Inventory Management') }}</flux:heading>
+    <div class="flex flex-col gap-3 border-b pb-2 md:flex-row md:items-center md:justify-between">
+        <flux:heading size="xl">{{ __('Product / Inventory Management') }}</flux:heading>
+
+        @if($lowStockOnly)
+            <div class="flex items-center gap-2">
+                <flux:badge color="red">{{ __('Showing Low Stock Products') }}</flux:badge>
+                <flux:button size="sm" variant="outline" wire:click="clearLowStockFilter">
+                    {{ __('Show All Products') }}
+                </flux:button>
+            </div>
+        @endif
+    </div>
 
     <flux:card>
         <form wire:submit="save" class="space-y-4">
