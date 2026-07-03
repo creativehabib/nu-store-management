@@ -11,7 +11,7 @@ class Requisition extends Model
         'requisition_no',
         'user_id',
         'status',
-        'approval_history'
+        'approval_history',
     ];
 
     // JSON ডাটাকে Array হিসেবে ব্যবহারের জন্য কাস্টিং
@@ -32,6 +32,19 @@ class Requisition extends Model
     public function items(): HasMany
     {
         return $this->hasMany(RequisitionItem::class);
+    }
+
+    public static function initialStatus(?int $requestingDepartmentId = null): string
+    {
+        if (setting('store_mode', 'departmental') === 'centralized') {
+            if ((int) $requestingDepartmentId === (int) setting('central_store_dept_id', 1)) {
+                return 'pending';
+            }
+
+            return 'department_director_review';
+        }
+
+        return 'pending';
     }
 
     public function scopeForUserDepartment($query)
