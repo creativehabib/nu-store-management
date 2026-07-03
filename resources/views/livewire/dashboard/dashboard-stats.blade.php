@@ -1,9 +1,4 @@
 <div class="space-y-6">
-    <div class="border-b pb-4 mb-4">
-        <flux:heading size="xl">{{ __('Welcome') }}, {{ auth()->user()->name }}!</flux:heading>
-        <p class="text-zinc-500 text-sm mt-1">{{ __('Below is the summary of your dashboard:') }}</p>
-    </div>
-
     {{-- স্ট্যাটাস কার্ডসমূহ (আপনার আগের কোড) --}}
     @if($role === 'admin')
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
