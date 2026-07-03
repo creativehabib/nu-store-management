@@ -48,7 +48,7 @@ it('routes centralized requisitions to the applicant department director before 
     $requisition = Requisition::create([
         'requisition_no' => 'REQ-CENTRAL-001',
         'user_id' => $requisitioner->id,
-        'status' => Requisition::initialStatus(),
+        'status' => Requisition::initialStatus($requisitioner->department_id),
         'approval_history' => [],
     ]);
 
@@ -84,13 +84,38 @@ it('keeps departmental requisitions on the department initiator first', function
     $requisition = Requisition::create([
         'requisition_no' => 'REQ-DEPT-001',
         'user_id' => $requisitioner->id,
-        'status' => Requisition::initialStatus(),
+        'status' => Requisition::initialStatus($requisitioner->department_id),
         'approval_history' => [],
     ]);
 
     expect($requisition->status)->toBe('pending');
 
     $this->actingAs($initiator);
+    Livewire::test(InitiatorQueue::class)
+        ->assertSet('requisitions', fn ($requisitions) => $requisitions->pluck('id')->contains($requisition->id));
+});
+
+it('sends centralized requisitions from central store requisitioners directly to the store initiator', function () {
+    touch(storage_path('installed'));
+
+    $centralStoreDepartment = Department::create(['name' => 'Requester Central Store', 'code' => 'RCS']);
+
+    workflowSetting('store_mode', 'centralized');
+    workflowSetting('central_store_dept_id', $centralStoreDepartment->id);
+
+    $requisitioner = workflowUser('requisitioner', $centralStoreDepartment);
+    $centralInitiator = workflowUser('initiator', $centralStoreDepartment);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-CENTRAL-STORE-001',
+        'user_id' => $requisitioner->id,
+        'status' => Requisition::initialStatus($requisitioner->department_id),
+        'approval_history' => [],
+    ]);
+
+    expect($requisition->status)->toBe('pending');
+
+    $this->actingAs($centralInitiator);
     Livewire::test(InitiatorQueue::class)
         ->assertSet('requisitions', fn ($requisitions) => $requisitions->pluck('id')->contains($requisition->id));
 });

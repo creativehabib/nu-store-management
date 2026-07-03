@@ -34,9 +34,13 @@ class Requisition extends Model
         return $this->hasMany(RequisitionItem::class);
     }
 
-    public static function initialStatus(): string
+    public static function initialStatus(?int $requestingDepartmentId = null): string
     {
         if (setting('store_mode', 'departmental') === 'centralized') {
+            if ((int) $requestingDepartmentId === (int) setting('central_store_dept_id', 1)) {
+                return 'pending';
+            }
+
             return 'department_director_review';
         }
 
