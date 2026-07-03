@@ -2,13 +2,15 @@
 
 namespace App\Livewire\Workflow;
 
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\Department;
 use App\Models\Requisition;
 use App\Models\User;
-use App\Models\Department;
-use Illuminate\Support\Facades\Auth;
+use App\Notifications\RequisitionNotification;
 use Flux\Flux;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class ApprovalQueue extends Component
 {
@@ -23,17 +25,47 @@ class ApprovalQueue extends Component
     public $suppliedQuantities = [];
     public $comment = '';
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingStartDate() { $this->resetPage(); }
-    public function updatingEndDate() { $this->resetPage(); }
-    public function updatingDepartmentId() { $this->resetPage(); }
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
 
-    public function getRoleStatus()
+    public function updatingStartDate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingEndDate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingDepartmentId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function getRoleStatus(): ?string
     {
         $role = Auth::user()->role;
-        if ($role === 'assistant_director') return 'initiator_checked';
-        if ($role === 'deputy_director') return 'ad_approved';
-        if ($role === 'director') return 'dd_approved';
+
+        if ($role === 'assistant_director') {
+            return 'initiator_checked';
+        }
+
+        if ($role === 'deputy_director') {
+            return 'ad_approved';
+        }
+
+        if ($role === 'director') {
+            if (setting('store_mode', 'departmental') === 'centralized'
+                && (int) Auth::user()->department_id !== (int) setting('central_store_dept_id', 1)) {
+                return 'department_director_review';
+            }
+
+            return 'dd_approved';
+        }
+
         return null;
     }
 
@@ -51,7 +83,7 @@ class ApprovalQueue extends Component
         Flux::modal('view-action-modal')->show();
     }
 
-    public function processAction($actionType)
+    public function processAction($actionType): void
     {
         $role = Auth::user()->role;
         $nextStatus = '';
@@ -60,9 +92,20 @@ class ApprovalQueue extends Component
             $nextStatus = 'returned';
             $msg = 'রিকুইজিশনটি Initiator-এর কাছে ফেরত পাঠানো হয়েছে!';
         } else {
-            if ($role === 'assistant_director') $nextStatus = 'ad_approved';
-            if ($role === 'deputy_director') $nextStatus = 'dd_approved';
-            if ($role === 'director') $nextStatus = 'director_approved';
+            if ($role === 'assistant_director') {
+                $nextStatus = 'ad_approved';
+            }
+
+            if ($role === 'deputy_director') {
+                $nextStatus = 'dd_approved';
+            }
+
+            if ($role === 'director') {
+                $nextStatus = $this->selectedRequisition->status === 'department_director_review'
+                    ? 'pending'
+                    : 'director_approved';
+            }
+
             $msg = 'রিকুইজিশনটি সফলভাবে অনুমোদিত হয়েছে!';
 
             foreach ($this->selectedRequisition->items as $item) {
@@ -79,6 +122,10 @@ class ApprovalQueue extends Component
                 $targetRole = 'deputy_director';
             } elseif ($nextStatus === 'dd_approved') {
                 $targetRole = 'director';
+            } elseif ($nextStatus === 'pending') {
+                $targetRole = 'initiator';
+                $message = "রিকুইজিশন ({$this->selectedRequisition->requisition_no}) সেন্ট্রাল স্টোরে যাচাইয়ের অপেক্ষায় আছে।";
+                $url = route('workflow.initiator');
             } elseif ($nextStatus === 'director_approved') {
                 $targetRole = 'initiator';
                 $message = "রিকুইজিশন ({$this->selectedRequisition->requisition_no}) প্রিন্ট ও বিতরণের জন্য প্রস্তুত।";
@@ -90,16 +137,16 @@ class ApprovalQueue extends Component
             }
 
             if ($targetRole) {
-                // নোটিফিকেশনের জন্য সঠিক দপ্তরের কর্মকর্তাদের খুঁজে বের করা
-                $applicantDeptId = $this->selectedRequisition->user->department_id;
-                $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
+                $approvingDeptId = $nextStatus === 'pending'
+                    ? (int) setting('central_store_dept_id', 1)
+                    : Department::getApprovingDepartmentId($this->selectedRequisition->user->department_id);
 
                 $targetUsers = User::where('role', $targetRole)
-                    ->where('department_id', $approvingDeptId) // নির্দিষ্ট ডিপার্টমেন্ট ফিল্টার
+                    ->where('department_id', $approvingDeptId)
                     ->get();
 
-                if($targetUsers->isNotEmpty()){
-                    \Illuminate\Support\Facades\Notification::send($targetUsers, new \App\Notifications\RequisitionNotification($this->selectedRequisition, $message, $url));
+                if ($targetUsers->isNotEmpty()) {
+                    Notification::send($targetUsers, new RequisitionNotification($this->selectedRequisition, $message, $url));
                 }
             }
         }
@@ -111,15 +158,16 @@ class ApprovalQueue extends Component
             'action' => $actionType,
             'comment' => $this->comment,
             'date' => now()->toDateTimeString(),
-            'signature' => Auth::user()->digital_signature
+            'signature' => Auth::user()->digital_signature,
         ];
 
         $this->selectedRequisition->update([
             'status' => $nextStatus,
-            'approval_history' => $history
+            'approval_history' => $history,
         ]);
 
         Flux::toast($msg);
+        $this->dispatch('workflow-queue-updated');
         Flux::modal('view-action-modal')->close();
         $this->selectedRequisition = null;
     }
@@ -137,24 +185,24 @@ class ApprovalQueue extends Component
             $query->whereRaw('1 = 0');
         }
 
-        if (!empty($this->search)) {
-            $query->where(function($q) {
-                $q->where('requisition_no', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('user', function($userQuery) {
-                        $userQuery->where('name', 'like', '%' . $this->search . '%')
-                            ->orWhere('pf_no', 'like', '%' . $this->search . '%');
+        if (! empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('requisition_no', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('user', function ($userQuery) {
+                        $userQuery->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('pf_no', 'like', '%'.$this->search.'%');
                     });
             });
         }
 
         // whereBetween এর পরিবর্তে whereDate ব্যবহার করা হলো তারিখজনিত এরর এড়াতে
-        if (!empty($this->start_date) && !empty($this->end_date)) {
+        if (! empty($this->start_date) && ! empty($this->end_date)) {
             $query->whereDate('created_at', '>=', $this->start_date)
                 ->whereDate('created_at', '<=', $this->end_date);
         }
 
-        if (!empty($this->department_id)) {
-            $query->whereHas('user', function($q) {
+        if (! empty($this->department_id)) {
+            $query->whereHas('user', function ($q) {
                 $q->where('department_id', $this->department_id);
             });
         }
@@ -163,7 +211,7 @@ class ApprovalQueue extends Component
 
         return view('livewire.workflow.approval-queue', [
             'requisitions' => $query->latest()->paginate(10),
-            'departments' => $departments
+            'departments' => $departments,
         ])->layout('layouts.app', ['title' => 'My Requisitions']);
     }
 }

@@ -80,6 +80,7 @@ class FinalPrint extends Component
         });
 
         Flux::toast('সফলভাবে স্টক মাইনাস করা হয়েছে এবং পণ্য বিতরণ সম্পন্ন হয়েছে!');
+        $this->dispatch('workflow-queue-updated');
         $this->requisition->refresh();
     }
 

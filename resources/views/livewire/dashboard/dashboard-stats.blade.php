@@ -37,15 +37,30 @@
                 </div>
             </flux:card>
 
-            <flux:card class="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ __('Low Stock (Products)') }}</p>
-                        <p class="text-3xl font-bold mt-2">{{ $stats['low_stock'] }}</p>
+            @if($stats['low_stock'] > 0)
+                <a href="{{ route('admin.products', ['low_stock' => 1]) }}" wire:navigate class="block">
+                    <flux:card class="h-full cursor-pointer bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 transition hover:border-red-400 hover:bg-red-100 dark:hover:bg-red-900/30">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ __('Low Stock (Products)') }}</p>
+                                <p class="text-3xl font-bold mt-2">{{ $stats['low_stock'] }}</p>
+                                <p class="mt-2 text-xs font-medium text-red-500">{{ __('Click to view all low stock products') }}</p>
+                            </div>
+                            <flux:icon.exclamation-triangle class="w-10 h-10 text-red-500 opacity-50" />
+                        </div>
+                    </flux:card>
+                </a>
+            @else
+                <flux:card class="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ __('Low Stock (Products)') }}</p>
+                            <p class="text-3xl font-bold mt-2">{{ $stats['low_stock'] }}</p>
+                        </div>
+                        <flux:icon.exclamation-triangle class="w-10 h-10 text-red-500 opacity-50" />
                     </div>
-                    <flux:icon.exclamation-triangle class="w-10 h-10 text-red-500 opacity-50" />
-                </div>
-            </flux:card>
+                </flux:card>
+            @endif
         </div>
     @endif
     @if($role === 'requisitioner')
