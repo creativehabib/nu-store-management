@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('requisitions')) {
+            return;
+        }
+
         Schema::create('requisitions', function (Blueprint $table) {
             $table->id();
             $table->string('requisition_no')->unique(); // System Auto Fill
