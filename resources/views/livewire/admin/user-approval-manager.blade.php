@@ -13,6 +13,10 @@
                     <flux:input wire:model="pf_no" label="PF No" required />
                     <flux:input wire:model="mobile_no" label="Mobile No" required />
                     <flux:input wire:model="email" label="Email" type="email" required />
+                    <flux:input wire:model="password" label="New Password" type="password" autocomplete="new-password" viewable />
+                    <flux:input wire:model="password_confirmation" label="Confirm Password" type="password" autocomplete="new-password" viewable />
+                    <flux:input wire:model="picture" label="Profile Image" type="file" accept="image/*" />
+                    <flux:input wire:model="digital_signature" label="Digital Signature" type="file" accept="image/*" />
 
                     <flux:select wire:model="designation_id" label="Designation" required>
                         <flux:select.option value="">{{ __('Select Designation') }}</flux:select.option>
@@ -38,6 +42,27 @@
                         <flux:select.option value="super_admin">Super Admin</flux:select.option>
                     </flux:select>
                 </div>
+
+                @if($current_picture || $current_signature)
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-lg border border-zinc-200 dark:border-zinc-700 p-4">
+                        @if($current_picture)
+                            <div>
+                                <p class="text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">{{ __('Current Profile Image') }}</p>
+                                <img src="{{ asset('storage/' . $current_picture) }}" alt="Profile image" class="h-20 w-20 rounded-full object-cover">
+                            </div>
+                        @endif
+
+                        @if($current_signature)
+                            <div>
+                                <p class="text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">{{ __('Current Signature') }}</p>
+                                <div class="inline-block rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700">
+                                    <img src="{{ asset('storage/' . $current_signature) }}" alt="Signature" class="h-16 object-contain">
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="flex justify-end gap-2 mt-4">
                     <flux:button type="button" variant="outline" wire:click="resetFields">Cancel</flux:button>
                     <flux:button type="submit" variant="primary" icon="check">Update</flux:button>
