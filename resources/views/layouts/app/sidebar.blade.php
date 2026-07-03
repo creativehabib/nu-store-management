@@ -34,11 +34,7 @@
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
                                 <span class="flex w-full items-center justify-between gap-2">
                                     <span>{{ __('Initiator Queue') }}</span>
-                                    @if(($workflowQueueCounts['initiator'] ?? 0) > 0)
-                                        <span class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold leading-none text-white">
-                                            {{ $workflowQueueCounts['initiator'] }}
-                                        </span>
-                                    @endif
+                                    <livewire:layout.workflow-queue-badge type="initiator" wire:key="sidebar-initiator-queue-badge" />
                                 </span>
                             </flux:sidebar.item>
                         @endif
@@ -46,11 +42,7 @@
                             <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
                                 <span class="flex w-full items-center justify-between gap-2">
                                     <span>{{ __('Approval Queue') }}</span>
-                                    @if(($workflowQueueCounts['approval'] ?? 0) > 0)
-                                        <span class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold leading-none text-white">
-                                            {{ $workflowQueueCounts['approval'] }}
-                                        </span>
-                                    @endif
+                                    <livewire:layout.workflow-queue-badge type="approval" wire:key="sidebar-approval-queue-badge" />
                                 </span>
                             </flux:sidebar.item>
                         @endif

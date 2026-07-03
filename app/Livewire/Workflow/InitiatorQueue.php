@@ -119,6 +119,7 @@ class InitiatorQueue extends Component
         }
 
         Flux::toast(__('Requisition successfully forwarded!'));
+        $this->dispatch('workflow-queue-updated');
         Flux::modal('view-action-modal')->close();
 
         $this->selectedRequisition = null;

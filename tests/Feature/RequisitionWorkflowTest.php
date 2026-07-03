@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Layout\WorkflowQueueBadge;
 use App\Livewire\Workflow\ApprovalQueue;
 use App\Livewire\Workflow\InitiatorQueue;
 use App\Models\Department;
@@ -155,6 +156,8 @@ it('counts sidebar workflow queue notifications for the current user', function 
         'initiator' => 0,
         'approval' => 1,
     ]);
+    Livewire::test(WorkflowQueueBadge::class, ['type' => 'approval'])
+        ->assertSet('count', 1);
 
     $this->actingAs($departmentInitiator);
     expect($counter->countsFor($departmentInitiator))->toBe([
@@ -167,4 +170,6 @@ it('counts sidebar workflow queue notifications for the current user', function 
         'initiator' => 1,
         'approval' => 0,
     ]);
+    Livewire::test(WorkflowQueueBadge::class, ['type' => 'initiator'])
+        ->assertSet('count', 1);
 });

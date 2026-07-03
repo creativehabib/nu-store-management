@@ -167,6 +167,7 @@ class ApprovalQueue extends Component
         ]);
 
         Flux::toast($msg);
+        $this->dispatch('workflow-queue-updated');
         Flux::modal('view-action-modal')->close();
         $this->selectedRequisition = null;
     }

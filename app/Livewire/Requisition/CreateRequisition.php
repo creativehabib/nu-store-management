@@ -76,6 +76,7 @@ class CreateRequisition extends Component
         });
 
         Flux::toast('চাহিদা সফলভাবে জমা দেওয়া হয়েছে!');
+        $this->dispatch('workflow-queue-updated');
         $this->requisitionItems = [];
         $this->selectedCategories = [];
         $this->addRow();
