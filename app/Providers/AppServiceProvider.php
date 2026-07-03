@@ -5,10 +5,13 @@ namespace App\Providers;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Observers\ProductObserver;
+use App\Support\WorkflowQueueCounter;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -32,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
 
         // মেইল সেটিংস ডাটাবেস থেকে লোড করা
         $this->loadMailSettings();
+        $this->shareWorkflowQueueCounts();
     }
 
     /**
@@ -96,6 +100,19 @@ class AppServiceProvider extends ServiceProvider
             'mail.mailers.smtp.password' => $settings->get('mail_password', config('mail.mailers.smtp.password')),
             'mail.from.address' => $settings->get('mail_from_address', config('mail.from.address')),
         ]);
+    }
+
+    protected function shareWorkflowQueueCounts(): void
+    {
+        View::composer(
+            ['layouts.app.sidebar', 'layouts::app.sidebar', 'components.layouts.app.sidebar'],
+            function ($view): void {
+                $view->with(
+                    'workflowQueueCounts',
+                    app(WorkflowQueueCounter::class)->countsFor(Auth::user()),
+                );
+            },
+        );
     }
 
     /**
