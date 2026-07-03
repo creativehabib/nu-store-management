@@ -20,7 +20,9 @@
                         <td class="p-3">{{ $req->created_at->format('d M, Y (h:i A)') }}</td>
                         <td class="p-3">{{ $req->items()->count() }} {{ __('items') }}</td>
                         <td class="p-3">
-                            @if($req->status === 'pending')
+                            @if($req->status === 'department_director_review')
+                                <flux:badge color="purple">{{ __('Pending (with Department Director)') }}</flux:badge>
+                            @elseif($req->status === 'pending')
                                 <flux:badge color="amber">{{ __('Pending (with Initiator)') }}</flux:badge>
                             @elseif($req->status === 'initiator_checked')
                                 <flux:badge color="blue">{{ __('Checked (with AD)') }}</flux:badge>
