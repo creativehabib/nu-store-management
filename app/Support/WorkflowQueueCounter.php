@@ -35,7 +35,7 @@ class WorkflowQueueCounter
         }
 
         return Requisition::forUserDepartment()
-            ->whereIn('status', ['pending', 'returned', 'director_approved', 'distributed'])
+            ->whereIn('status', ['pending', 'returned', 'director_approved'])
             ->count();
     }
 

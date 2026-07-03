@@ -149,6 +149,13 @@ it('counts sidebar workflow queue notifications for the current user', function 
         'approval_history' => [],
     ]);
 
+    Requisition::create([
+        'requisition_no' => 'REQ-SIDEBAR-003',
+        'user_id' => $requisitioner->id,
+        'status' => 'distributed',
+        'approval_history' => [],
+    ]);
+
     $counter = app(WorkflowQueueCounter::class);
 
     $this->actingAs($departmentDirector);
