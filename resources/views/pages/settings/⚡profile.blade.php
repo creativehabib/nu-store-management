@@ -1,13 +1,10 @@
 <?php
 
 use App\Concerns\ProfileValidationRules;
-use App\Models\Department;
-use App\Models\Designation;
 /* @chisel-email-verification */
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 /* @end-chisel-email-verification */
 use Flux\Flux;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -22,10 +19,6 @@ new #[Title('Profile settings')] class extends Component {
 
     public string $name = '';
     public string $email = '';
-    public string $pf_no = '';
-    public $designation_id = null;
-    public $department_id = null;
-    public string $role = '';
 
     // নতুন প্রোপার্টিসমূহ
     public ?string $mobile_no = '';
@@ -37,16 +30,10 @@ new #[Title('Profile settings')] class extends Component {
      */
     public function mount(): void
     {
-        $user = Auth::user();
-
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->pf_no = $user->pf_no;
-        $this->designation_id = $user->designation_id;
-        $this->department_id = $user->department_id;
-        $this->role = $user->role;
-        $this->mobile_no = $user->mobile_no;
-        $this->current_signature = $user->digital_signature;
+        $this->name = Auth::user()->name;
+        $this->email = Auth::user()->email;
+        $this->mobile_no = Auth::user()->mobile_no;
+        $this->current_signature = Auth::user()->digital_signature;
     }
 
     /**
@@ -56,9 +43,17 @@ new #[Title('Profile settings')] class extends Component {
     {
         $user = Auth::user();
 
+        // ডিফল্ট ভ্যালিডেশন (নাম ও ইমেইল)
         $validated = $this->validate($this->profileRules($user->id));
 
+        // কাস্টম ফিল্ড ভ্যালিডেশন
+        $customValidated = $this->validate([
+            'mobile_no' => ['required', 'string', 'max:20'],
+            'digital_signature' => ['nullable', 'image', 'max:2048'], // সর্বোচ্চ ২ মেগাবাইট
+        ]);
+
         $user->fill($validated);
+        $user->mobile_no = $customValidated['mobile_no'];
 
         // সিগনেচার আপলোড লজিক
         if ($this->digital_signature) {
@@ -83,24 +78,6 @@ new #[Title('Profile settings')] class extends Component {
 
         // ফাইল ইনপুট ক্লিয়ার করা
         $this->reset('digital_signature');
-    }
-
-    /**
-     * Get the departments available for profile updates.
-     */
-    #[Computed]
-    public function departments(): Collection
-    {
-        return Department::orderBy('name')->get();
-    }
-
-    /**
-     * Get the designations available for profile updates.
-     */
-    #[Computed]
-    public function designations(): Collection
-    {
-        return Designation::orderBy('rank')->get();
     }
 
     /* @chisel-email-verification */
@@ -142,13 +119,10 @@ new #[Title('Profile settings')] class extends Component {
 
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
-    <x-pages::settings.layout :heading="__('Profile and Signature')" :subheading="__('Update your personal, official, contact, role, and signature information')">
+    <x-pages::settings.layout :heading="__('Profile and Signature')" :subheading="__('Update your name, email, mobile number, and digital signature')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
-                <flux:input wire:model="pf_no" :label="__('PF No (ID)')" type="text" required />
-            </div>
+            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
@@ -174,33 +148,7 @@ new #[Title('Profile settings')] class extends Component {
                 {{-- @end-chisel-email-verification --}}
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <flux:input wire:model="mobile_no" :label="__('Mobile Number')" type="text" required />
-
-                <flux:select wire:model="designation_id" :label="__('Designation')" required>
-                    <flux:select.option value="">{{ __('Select Designation') }}</flux:select.option>
-                    @foreach($this->designations as $designation)
-                        <flux:select.option value="{{ $designation->id }}">{{ $designation->title }}</flux:select.option>
-                    @endforeach
-                </flux:select>
-
-                <flux:select wire:model="department_id" :label="__('Department')" required>
-                    <flux:select.option value="">{{ __('Select Department') }}</flux:select.option>
-                    @foreach($this->departments as $department)
-                        <flux:select.option value="{{ $department->id }}">{{ $department->name }}</flux:select.option>
-                    @endforeach
-                </flux:select>
-
-                <flux:select wire:model="role" :label="__('System Role')" required>
-                    <flux:select.option value="requisitioner">{{ __('Requisitioner') }}</flux:select.option>
-                    <flux:select.option value="initiator">{{ __('Initiator') }}</flux:select.option>
-                    <flux:select.option value="assistant_director">{{ __('Assistant Director') }}</flux:select.option>
-                    <flux:select.option value="deputy_director">{{ __('Deputy Director') }}</flux:select.option>
-                    <flux:select.option value="director">{{ __('Director') }}</flux:select.option>
-                    <flux:select.option value="admin">{{ __('Admin') }}</flux:select.option>
-                    <flux:select.option value="super_admin">{{ __('Super Admin') }}</flux:select.option>
-                </flux:select>
-            </div>
+            <flux:input wire:model="mobile_no" :label="__('Mobile Number')" type="text" required />
 
             <div class="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
                 <flux:heading size="lg">{{ __('Digital Signature') }}</flux:heading>
