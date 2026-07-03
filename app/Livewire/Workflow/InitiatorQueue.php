@@ -40,6 +40,12 @@ class InitiatorQueue extends Component
             ->whereIn('status', ['pending', 'returned', 'director_approved', 'distributed'])
             ->forUserDepartment();
 
+        if (setting('store_mode', 'departmental') === 'centralized'
+            && Auth::user()->role === 'initiator'
+            && (int) Auth::user()->department_id !== (int) setting('central_store_dept_id', 1)) {
+            $query->whereRaw('1 = 0');
+        }
+
         if (! empty($this->search)) {
             $query->where(function ($q) {
                 $q->where('requisition_no', 'like', '%'.$this->search.'%')
@@ -100,11 +106,7 @@ class InitiatorQueue extends Component
         $message = __('New requisition (:req_no) is waiting for your approval.', ['req_no' => $this->selectedRequisition->requisition_no]);
         $url = route('workflow.approval');
 
-        // আবেদনকারীর ডিপার্টমেন্ট আইডি বের করা
-        $applicantDeptId = $this->selectedRequisition->user->department_id;
-
-        // আমাদের গ্লোবাল হেল্পার মেথড দিয়ে সঠিক (অ্যাপ্রুভিং) ডিপার্টমেন্ট বের করা
-        $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
+        $approvingDeptId = Department::getApprovingDepartmentId($this->selectedRequisition->user->department_id);
 
         // সঠিক দপ্তরের Assistant Director (AD) কে নোটিফিকেশন পাঠানো
         $targetUsers = User::where('role', 'assistant_director')
@@ -117,6 +119,7 @@ class InitiatorQueue extends Component
         }
 
         Flux::toast(__('Requisition successfully forwarded!'));
+        $this->dispatch('workflow-queue-updated');
         Flux::modal('view-action-modal')->close();
 
         $this->selectedRequisition = null;

@@ -61,7 +61,7 @@ class CreateRequisition extends Component
             $requisition = Requisition::create([
                 'requisition_no' => 'REQ-'.date('Ymd').'-'.strtoupper(Str::random(4)),
                 'user_id' => Auth::id(),
-                'status' => 'pending',
+                'status' => Requisition::initialStatus(Auth::user()?->department_id),
                 'approval_history' => [],
             ]);
 
@@ -76,6 +76,7 @@ class CreateRequisition extends Component
         });
 
         Flux::toast('চাহিদা সফলভাবে জমা দেওয়া হয়েছে!');
+        $this->dispatch('workflow-queue-updated');
         $this->requisitionItems = [];
         $this->selectedCategories = [];
         $this->addRow();

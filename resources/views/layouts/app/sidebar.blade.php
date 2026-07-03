@@ -31,12 +31,18 @@
                     <flux:sidebar.group heading="{{ __('Workflow') }}" class="grid">
                         @if(auth()->user()->role === 'initiator')
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
-                                {{ __('Initiator Queue') }}
+                                <span class="flex w-full items-center justify-between gap-2">
+                                    <span>{{ __('Initiator Queue') }}</span>
+                                    <livewire:layout.workflow-queue-badge type="initiator" wire:key="sidebar-initiator-queue-badge" />
+                                </span>
                             </flux:sidebar.item>
                         @endif
                         @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
                             <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
-                                {{ __('Approval Queue') }}
+                                <span class="flex w-full items-center justify-between gap-2">
+                                    <span>{{ __('Approval Queue') }}</span>
+                                    <livewire:layout.workflow-queue-badge type="approval" wire:key="sidebar-approval-queue-badge" />
+                                </span>
                             </flux:sidebar.item>
                         @endif
                         @if(auth()->user()->role === 'initiator')

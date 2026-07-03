@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('requisitions')) {
+            return;
+        }
+
         Schema::create('requisitions', function (Blueprint $table) {
             $table->id();
             $table->string('requisition_no')->unique(); // System Auto Fill
@@ -14,6 +18,7 @@ return new class extends Migration {
             // রিকুইজিশন ফ্লো এর স্ট্যাটাস
             $table->enum('status', [
                 'pending',             // Initiator-এর কিউতে
+                'department_director_review', // Applicant department Director-এর কিউতে
                 'initiator_checked',   // AD-এর কিউতে
                 'ad_approved',         // DD-এর কিউতে
                 'dd_approved',         // Director-এর কিউতে

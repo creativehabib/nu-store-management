@@ -24,6 +24,23 @@ test('users can authenticate using the login screen', function () {
     $this->assertAuthenticated();
 });
 
+test('users can authenticate using pf no', function () {
+    $user = User::factory()->create([
+        'pf_no' => 'PF12345',
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => 'PF12345',
+        'password' => 'password',
+    ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('dashboard', absolute: false));
+
+    $this->assertAuthenticatedAs($user);
+});
+
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
