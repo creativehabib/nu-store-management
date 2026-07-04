@@ -15,6 +15,8 @@ class GeneralSettings extends Component
     public $site_name, $site_email, $site_phone, $site_address;
     public $facebook_url, $twitter_url, $instagram_url;
     public $logo, $favicon;
+    public ?string $current_logo = null;
+    public ?string $current_favicon = null;
 
     public $show_print_footer;
     public $store_mode;
@@ -29,6 +31,8 @@ class GeneralSettings extends Component
         $this->facebook_url = setting('facebook_url');
         $this->twitter_url = setting('twitter_url');
         $this->instagram_url = setting('instagram_url');
+        $this->current_logo = setting('site_logo');
+        $this->current_favicon = setting('site_favicon');
 
         $this->show_print_footer = (bool) setting('show_print_footer', true);
         // স্টোর মোড লোড করা
@@ -55,11 +59,13 @@ class GeneralSettings extends Component
         if ($this->logo) {
             $path = $this->logo->store('settings', 'public');
             set_setting('site_logo', $path);
+            $this->current_logo = $path;
         }
 
         if ($this->favicon) {
             $path = $this->favicon->store('settings', 'public');
             set_setting('site_favicon', $path);
+            $this->current_favicon = $path;
         }
 
         set_setting('site_name', $this->site_name);
@@ -74,6 +80,8 @@ class GeneralSettings extends Component
         // নতুন সেটিংস সেভ করা
         set_setting('store_mode', $this->store_mode);
         set_setting('central_store_dept_id', $this->central_store_dept_id);
+
+        $this->reset('logo', 'favicon');
 
         Flux::toast(__('General settings updated successfully!'));
     }

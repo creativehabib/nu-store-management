@@ -3,7 +3,9 @@
 use App\Livewire\Layout\WorkflowQueueBadge;
 use App\Livewire\Workflow\ApprovalQueue;
 use App\Livewire\Workflow\InitiatorQueue;
+use App\Models\Category;
 use App\Models\Department;
+use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\Setting;
 use App\Models\User;
@@ -119,6 +121,58 @@ it('sends centralized requisitions from central store requisitioners directly to
     $this->actingAs($centralInitiator);
     Livewire::test(InitiatorQueue::class)
         ->assertSet('requisitions', fn ($requisitions) => $requisitions->pluck('id')->contains($requisition->id));
+});
+
+it('shows enhanced initiator queue columns and filters by status and product search', function () {
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Enhanced Queue Department', 'code' => 'EQD']);
+    $category = Category::create(['name' => 'Office Supplies']);
+    $product = Product::create([
+        'category_id' => $category->id,
+        'name_bn' => 'স্ট্যাপলার',
+        'name_en' => 'Stapler',
+        'stock' => 25,
+    ]);
+
+    workflowSetting('store_mode', 'departmental');
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+
+    $pendingRequisition = Requisition::create([
+        'requisition_no' => 'REQ-ENHANCED-001',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+    $pendingRequisition->items()->create([
+        'product_id' => $product->id,
+        'demanded_qty' => 7,
+        'supplied_qty' => 0,
+        'purpose' => 'Official Use',
+    ]);
+
+    Requisition::create([
+        'requisition_no' => 'REQ-ENHANCED-002',
+        'user_id' => $requisitioner->id,
+        'status' => 'distributed',
+        'approval_history' => [],
+    ]);
+
+    $this->actingAs($initiator);
+
+    Livewire::test(InitiatorQueue::class)
+        ->assertSee('Items Summary')
+        ->assertSee('Demand')
+        ->assertSee('Age')
+        ->assertSee('Stapler')
+        ->assertSee('7')
+        ->set('statusFilter', 'pending')
+        ->assertSee('REQ-ENHANCED-001')
+        ->assertDontSee('REQ-ENHANCED-002')
+        ->set('search', 'Stapler')
+        ->assertSee('REQ-ENHANCED-001');
 });
 
 it('counts sidebar workflow queue notifications for the current user', function () {
