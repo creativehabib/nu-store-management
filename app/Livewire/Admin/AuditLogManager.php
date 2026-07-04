@@ -132,7 +132,7 @@ class AuditLogManager extends Component
 
     public function canDeleteAuditLogs(): bool
     {
-        return auth()->user()?->role === 'super_admin';
+        return auth()->user()?->role === 'admin';
     }
 
     public function render(): mixed
