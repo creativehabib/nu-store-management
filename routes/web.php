@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Install\InstallController;
+use App\Http\Controllers\Workflow\RequisitionVerificationController;
+use App\Livewire\Admin\AuditLogManager;
 use App\Livewire\Admin\BackupManagement;
 use App\Livewire\Admin\CacheManagement;
 use App\Livewire\Admin\GeneralSettings;
@@ -41,6 +43,9 @@ Route::group(['prefix' => 'install', 'as' => 'install.'], function () {
 });
 
 Route::view('/', 'welcome')->name('home');
+Route::get('/requisition/verify/{requisition}', RequisitionVerificationController::class)
+    ->middleware('signed')
+    ->name('requisition.verify');
 
 Route::middleware(['auth', 'approved'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
@@ -52,6 +57,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/inventory/products', ProductManager::class)->name('inventory.products');
     Route::get('/admin/purposes', PurposeManager::class)->name('admin.purposes');
     Route::get('/admin/user-approvals', UserApprovalManager::class)->name('admin.user_approvals');
+    Route::get('/admin/audit-logs', AuditLogManager::class)->name('admin.audit_logs');
     Route::get('/requisition/create', CreateRequisition::class)->name('requisition.create');
     Route::get('/requisition/my-history', MyRequisitions::class)->name('requisition.my_history');
     Route::get('/workflow/initiator-queue', InitiatorQueue::class)->name('workflow.initiator');
