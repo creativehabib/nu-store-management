@@ -54,6 +54,7 @@
             <flux:spacer />
             <flux:navbar class="me-4">
                 <flux:navbar.item icon="magnifying-glass" href="#" label="Search" />
+                <flux:navbar.item icon="globe-alt" :href="route('home')" target="_blank" label="{{ __('Visit Website') }}" />
                 <flux:button type="button" variant="ghost" icon="cog-6-tooth" class="max-lg:hidden" x-on:click="settingsOpen = true" aria-label="{{ __('Open settings') }}" />
             </flux:navbar>
 
@@ -341,125 +342,6 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            {{-- SECONDARY LINKS --}}
-            <flux:sidebar.nav>
-                <flux:sidebar.item
-                    icon="globe-alt"
-                    :href="route('home')"
-                    :current="request()->routeIs('home')"
-                    target="_blank"
-                    tooltip="{{ __('Visit Website') }}"
-                >
-                    {{ __('Visit Website') }}
-                </flux:sidebar.item>
-
-                <div
-                    x-data="{
-                    mode: localStorage.getItem('flux.appearance') || localStorage.getItem('theme') || 'system',
-                    apply(selected) {
-                        this.mode = selected;
-
-                        if (this.$flux) {
-                            this.$flux.appearance = selected;
-                        }
-
-                        if (selected === 'dark') {
-                            localStorage.setItem('theme', 'dark');
-                            localStorage.setItem('flux.appearance', 'dark');
-                            document.documentElement.classList.add('dark');
-                        } else if (selected === 'light') {
-                            localStorage.setItem('theme', 'light');
-                            localStorage.setItem('flux.appearance', 'light');
-                            document.documentElement.classList.remove('dark');
-                        } else {
-                            localStorage.removeItem('theme');
-                            localStorage.setItem('flux.appearance', 'system');
-                            document.documentElement.classList.toggle(
-                                'dark',
-                                window.matchMedia('(prefers-color-scheme: dark)').matches
-                            );
-                        }
-
-                        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: selected } }));
-                    }
-                }"
-                    class="mt-2 in-data-flux-sidebar-collapsed-desktop:hidden"
-                >
-
-                    <div class="grid grid-cols-3 gap-1">
-                        <button type="button" @click="apply('light')"
-                                :class="mode === 'light' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'"
-                                class="flex items-center justify-center rounded-md border px-2 py-1.5 text-xs font-medium transition">
-                            <flux:icon.sun class="size-4" />
-                        </button>
-
-                        <button type="button" @click="apply('dark')"
-                                :class="mode === 'dark' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'"
-                                class="flex items-center justify-center rounded-md border px-2 py-1.5 text-xs font-medium transition">
-                            <flux:icon.moon class="size-4" />
-                        </button>
-
-                        <button type="button" @click="apply('system')"
-                                :class="mode === 'system' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'"
-                                class="flex items-center justify-center rounded-md border px-2 py-1.5 text-xs font-medium transition">
-                            <flux:icon.computer-desktop class="size-4" />
-                        </button>
-                    </div>
-                </div>
-
-                <div
-                    x-data="{
-                    mode: localStorage.getItem('flux.appearance') || localStorage.getItem('theme') || 'system',
-                    apply(selected) {
-                        this.mode = selected;
-
-                        if (this.$flux) {
-                            this.$flux.appearance = selected;
-                        }
-
-                        if (selected === 'dark') {
-                            localStorage.setItem('theme', 'dark');
-                            localStorage.setItem('flux.appearance', 'dark');
-                            document.documentElement.classList.add('dark');
-                        } else if (selected === 'light') {
-                            localStorage.setItem('theme', 'light');
-                            localStorage.setItem('flux.appearance', 'light');
-                            document.documentElement.classList.remove('dark');
-                        } else {
-                            localStorage.removeItem('theme');
-                            localStorage.setItem('flux.appearance', 'system');
-                            document.documentElement.classList.toggle(
-                                'dark',
-                                window.matchMedia('(prefers-color-scheme: dark)').matches
-                            );
-                        }
-
-                        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: selected } }));
-                    }
-                }"
-                    class="mt-2 hidden flex-col gap-1 in-data-flux-sidebar-collapsed-desktop:flex"
-                >
-                    <button type="button" @click="apply('light')" title="{{ __('Light') }}"
-                            :class="mode === 'light' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-md border transition">
-                        <flux:icon.sun class="size-4" />
-                    </button>
-
-                    <button type="button" @click="apply('dark')" title="{{ __('Dark') }}"
-                            :class="mode === 'dark' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-md border transition">
-                        <flux:icon.moon class="size-4" />
-                    </button>
-
-                    <button type="button" @click="apply('system')" title="{{ __('System') }}"
-                            :class="mode === 'system' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600'"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-md border transition">
-                        <flux:icon.computer-desktop class="size-4" />
-                    </button>
-                </div>
-            </flux:sidebar.nav>
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
         <!-- Mobile User Menu -->

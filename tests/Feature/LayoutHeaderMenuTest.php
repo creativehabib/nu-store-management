@@ -21,6 +21,7 @@ it('renders profile details, settings shortcuts, theme modes, and logout in the 
         ->assertSee('Profile Settings')
         ->assertSee('Security Settings')
         ->assertSee('Quick Settings')
+        ->assertSee('Visit Website')
         ->assertSee('Light')
         ->assertSee('Dark')
         ->assertSee('System')
