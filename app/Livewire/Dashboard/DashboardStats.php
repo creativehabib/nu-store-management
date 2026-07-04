@@ -122,6 +122,10 @@ class DashboardStats extends Component
             $stats['ready_to_print'] = Requisition::forUserDepartment()->whereIn('status', ['director_approved', 'distributed'])->count();
             $stats['pending_approval'] = Requisition::forUserDepartment()->whereIn('status', $queueStatuses)->count();
             $stats['total_requisitions'] = Requisition::forUserDepartment()->count();
+
+            if ($role === 'initiator') {
+                $stats['stock_out_products'] = Product::where('stock', '<=', 0)->count();
+            }
         }
 
         $trendData = $this->getTrendData();
