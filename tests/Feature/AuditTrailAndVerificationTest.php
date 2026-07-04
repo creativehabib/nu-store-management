@@ -8,6 +8,7 @@ use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
 use Livewire\Livewire;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 function auditTrailUser(array $attributes = []): User
 {
@@ -83,8 +84,8 @@ test('signed requisition verification link shows live status', function () {
         ->assertSee('Distributed');
 });
 
-test('admins can bulk delete selected audit logs and delete all records', function () {
-    $admin = auditTrailUser();
+test('super admins can bulk delete selected audit logs and delete all records', function () {
+    $admin = auditTrailUser(['role' => 'super_admin']);
     $this->actingAs($admin);
 
     $firstLog = AuditLog::create([
@@ -116,4 +117,54 @@ test('admins can bulk delete selected audit logs and delete all records', functi
         ->call('deleteAllRecords');
 
     expect(AuditLog::query()->count())->toBe(0);
+});
+
+test('admins can view but cannot delete audit logs', function () {
+    $admin = auditTrailUser(['role' => 'admin']);
+    $this->actingAs($admin);
+
+    $auditLog = AuditLog::create([
+        'user_id' => $admin->id,
+        'event' => 'auth.login',
+        'description' => 'Protected audit log',
+    ]);
+
+    Livewire::test(\App\Livewire\Admin\AuditLogManager::class)
+        ->assertSee('Only super admin can delete logs')
+        ->assertDontSee('Delete all records');
+
+    expect(fn () => Livewire::test(\App\Livewire\Admin\AuditLogManager::class)
+        ->set('selectedAuditLogs', [$auditLog->id])
+        ->call('deleteSelected'))
+        ->toThrow(HttpException::class);
+
+    expect(AuditLog::query()->whereKey($auditLog->id)->exists())->toBeTrue();
+});
+
+test('audit logs can be filtered by date range while keeping backend records intact', function () {
+    $superAdmin = auditTrailUser(['role' => 'super_admin']);
+    $this->actingAs($superAdmin);
+
+    AuditLog::create([
+        'user_id' => $superAdmin->id,
+        'event' => 'auth.login',
+        'description' => 'Outside range audit log',
+        'created_at' => now()->subDays(10),
+        'updated_at' => now()->subDays(10),
+    ]);
+    AuditLog::create([
+        'user_id' => $superAdmin->id,
+        'event' => 'auth.login',
+        'description' => 'Inside range audit log',
+        'created_at' => now()->subDay(),
+        'updated_at' => now()->subDay(),
+    ]);
+
+    Livewire::test(\App\Livewire\Admin\AuditLogManager::class)
+        ->set('startDate', now()->subDays(2)->toDateString())
+        ->set('endDate', now()->toDateString())
+        ->assertSee('Inside range audit log')
+        ->assertDontSee('Outside range audit log');
+
+    expect(AuditLog::query()->count())->toBe(2);
 });

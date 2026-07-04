@@ -16,6 +16,10 @@ class AuditLogManager extends Component
 
     public string $eventFilter = '';
 
+    public string $startDate = '';
+
+    public string $endDate = '';
+
     public string $bulkAction = '';
 
     public bool $selectPage = false;
@@ -23,20 +27,39 @@ class AuditLogManager extends Component
     /** @var array<int, int> */
     public array $selectedAuditLogs = [];
 
+    public function mount(): void
+    {
+        abort_unless(in_array(auth()->user()?->role, ['admin', 'super_admin'], true), 403);
+    }
+
     public function updatingSearch(): void
     {
-        $this->resetPage();
-        $this->clearSelection();
+        $this->resetPageAndSelection();
     }
 
     public function updatingEventFilter(): void
     {
-        $this->resetPage();
-        $this->clearSelection();
+        $this->resetPageAndSelection();
+    }
+
+    public function updatingStartDate(): void
+    {
+        $this->resetPageAndSelection();
+    }
+
+    public function updatingEndDate(): void
+    {
+        $this->resetPageAndSelection();
     }
 
     public function updatedSelectPage(bool $selected): void
     {
+        if (! $this->canDeleteAuditLogs()) {
+            $this->clearSelection();
+
+            return;
+        }
+
         $this->selectedAuditLogs = $selected ? $this->currentPageIds() : [];
     }
 
@@ -51,6 +74,8 @@ class AuditLogManager extends Component
 
     public function deleteSelected(): void
     {
+        $this->authorizeAuditLogDeletion();
+
         if ($this->selectedAuditLogs === []) {
             Flux::toast(__('Please select at least one audit log.'), variant: 'danger');
 
@@ -68,6 +93,8 @@ class AuditLogManager extends Component
 
     public function deleteRecord(int $auditLogId): void
     {
+        $this->authorizeAuditLogDeletion();
+
         AuditLog::query()->whereKey($auditLogId)->delete();
 
         Flux::toast(__('Audit log deleted successfully.'));
@@ -76,6 +103,8 @@ class AuditLogManager extends Component
 
     public function deleteAllRecords(): void
     {
+        $this->authorizeAuditLogDeletion();
+
         $count = AuditLog::query()->count();
 
         if ($count === 0) {
@@ -87,14 +116,23 @@ class AuditLogManager extends Component
         AuditLog::query()->delete();
 
         Flux::toast(__('All audit logs deleted successfully.'));
-        $this->resetPage();
-        $this->clearSelection();
+        $this->resetPageAndSelection();
     }
 
     public function reloadLogs(): void
     {
-        $this->resetPage();
-        $this->clearSelection();
+        $this->resetPageAndSelection();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'eventFilter', 'startDate', 'endDate']);
+        $this->resetPageAndSelection();
+    }
+
+    public function canDeleteAuditLogs(): bool
+    {
+        return auth()->user()?->role === 'super_admin';
     }
 
     public function render(): mixed
@@ -105,6 +143,7 @@ class AuditLogManager extends Component
             'auditLogs' => $query->paginate(15),
             'events' => AuditLog::query()->distinct()->orderBy('event')->pluck('event'),
             'totalAuditLogs' => AuditLog::query()->count(),
+            'canDeleteAuditLogs' => $this->canDeleteAuditLogs(),
         ])->layout('layouts.app', ['title' => 'Audit Trail']);
     }
 
@@ -116,6 +155,14 @@ class AuditLogManager extends Component
 
         if ($this->eventFilter !== '') {
             $query->where('event', $this->eventFilter);
+        }
+
+        if ($this->startDate !== '') {
+            $query->whereDate('created_at', '>=', $this->startDate);
+        }
+
+        if ($this->endDate !== '') {
+            $query->whereDate('created_at', '<=', $this->endDate);
         }
 
         if ($this->search !== '') {
@@ -145,6 +192,17 @@ class AuditLogManager extends Component
             ->pluck('id')
             ->map(fn (int $id): int => $id)
             ->all();
+    }
+
+    protected function authorizeAuditLogDeletion(): void
+    {
+        abort_unless($this->canDeleteAuditLogs(), 403);
+    }
+
+    protected function resetPageAndSelection(): void
+    {
+        $this->resetPage();
+        $this->clearSelection();
     }
 
     protected function clearSelection(): void
