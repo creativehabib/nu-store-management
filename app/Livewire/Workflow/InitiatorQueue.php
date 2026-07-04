@@ -24,13 +24,26 @@ class InitiatorQueue extends Component
 
     public string $search = '';
 
+    public string $statusFilter = '';
+
     public function mount()
     {
         $this->loadRequisitions();
     }
 
-    public function updatedSearch()
+    public function updatedSearch(): void
     {
+        $this->loadRequisitions();
+    }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->loadRequisitions();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'statusFilter']);
         $this->loadRequisitions();
     }
 
@@ -46,11 +59,23 @@ class InitiatorQueue extends Component
             $query->whereRaw('1 = 0');
         }
 
+        if ($this->statusFilter !== '') {
+            $query->where('status', $this->statusFilter);
+        }
+
         if (! empty($this->search)) {
             $query->where(function ($q) {
                 $q->where('requisition_no', 'like', '%'.$this->search.'%')
                     ->orWhereHas('user', function ($userQuery) {
-                        $userQuery->where('name', 'like', '%'.$this->search.'%');
+                        $userQuery->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('pf_no', 'like', '%'.$this->search.'%')
+                            ->orWhereHas('department', function ($departmentQuery) {
+                                $departmentQuery->where('name', 'like', '%'.$this->search.'%');
+                            });
+                    })
+                    ->orWhereHas('items.product', function ($productQuery) {
+                        $productQuery->where('name_bn', 'like', '%'.$this->search.'%')
+                            ->orWhere('name_en', 'like', '%'.$this->search.'%');
                     });
             });
         }
