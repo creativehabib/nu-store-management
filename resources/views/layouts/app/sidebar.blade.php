@@ -132,6 +132,9 @@
                         <flux:sidebar.item icon="cube" :href="route('admin.products')" :current="request()->routeIs('admin.products')" wire:navigate>
                             {{ __('Products') }}
                         </flux:sidebar.item>
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.purposes')" :current="request()->routeIs('admin.purposes')" wire:navigate>
+                            {{ __('Purposes') }}
+                        </flux:sidebar.item>
                         <flux:sidebar.item icon="building-office" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>
                             {{ __('Departments') }}
                         </flux:sidebar.item>
