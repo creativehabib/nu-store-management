@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+<div class="space-y-6">
     <div>
         <flux:heading size="xl">{{ __('Activity Log & Audit Trail') }}</flux:heading>
         <flux:subheading>{{ __('Review logins, requisition status changes, and inventory stock changes.') }}</flux:subheading>
