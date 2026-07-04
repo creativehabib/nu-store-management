@@ -40,8 +40,9 @@
 
                         <div class="w-full md:w-36">
                             <flux:select wire:model="requisitionItems.{{ $index }}.purpose" label="{{ __('Purpose') }}">
-                                <flux:select.option value="Official Use">Official Use</flux:select.option>
-                                <flux:select.option value="Training Purpose">Training Purpose</flux:select.option>
+                                @foreach($purposes as $purpose)
+                                    <flux:select.option value="{{ $purpose->name }}" wire:key="purpose-option-{{ $index }}-{{ $purpose->id }}">{{ $purpose->name }}</flux:select.option>
+                                @endforeach
                             </flux:select>
                         </div>
 
