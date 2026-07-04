@@ -103,7 +103,7 @@
     @endif
 
     @if(in_array($role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @if($role === 'initiator')
                 <flux:card class="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                     <div class="flex items-center justify-between">
@@ -124,6 +124,19 @@
                         <flux:icon.printer class="w-10 h-10 text-green-500 opacity-50" />
                     </div>
                 </flux:card>
+
+                <a href="{{ route('inventory.products', ['stock_out' => 1]) }}" wire:navigate class="block">
+                    <flux:card class="h-full cursor-pointer bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 transition hover:border-red-400 hover:bg-red-100 dark:hover:bg-red-900/30">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-red-600 dark:text-red-400">{{ __('Stock Out Products') }}</p>
+                                <p class="text-3xl font-bold mt-2">{{ $stats['stock_out_products'] }}</p>
+                                <p class="mt-2 text-xs font-medium text-red-500">{{ __('Click to view stock out products') }}</p>
+                            </div>
+                            <flux:icon.exclamation-triangle class="w-10 h-10 text-red-500 opacity-50" />
+                        </div>
+                    </flux:card>
+                </a>
             @else
                 <flux:card class="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                     <div class="flex items-center justify-between">

@@ -49,6 +49,7 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     Route::get('/admin/categories', CategoryManager::class)->name('admin.categories');
     Route::get('/admin/products', ProductManager::class)->name('admin.products');
+    Route::get('/inventory/products', ProductManager::class)->name('inventory.products');
     Route::get('/admin/purposes', PurposeManager::class)->name('admin.purposes');
     Route::get('/admin/user-approvals', UserApprovalManager::class)->name('admin.user_approvals');
     Route::get('/requisition/create', CreateRequisition::class)->name('requisition.create');
