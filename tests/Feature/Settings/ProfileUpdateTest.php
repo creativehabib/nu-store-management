@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 function profileTestUser(array $attributes = []): User
 {
@@ -32,7 +33,9 @@ function profileTestUser(array $attributes = []): User
 test('profile page is displayed', function () {
     $this->actingAs($user = profileTestUser());
 
-    $this->get(route('profile.edit'))->assertOk();
+    $this->get(route('profile.edit'))
+        ->assertOk()
+        ->assertDontSee('Delete account');
 });
 
 test('profile information can be updated', function () {
@@ -40,23 +43,10 @@ test('profile information can be updated', function () {
 
     $this->actingAs($user);
 
-    $department = Department::create([
-        'name' => 'Updated Department',
-        'code' => 'UPD',
-    ]);
-    $designation = Designation::create([
-        'title' => 'Updated Designation',
-        'rank' => 50,
-    ]);
-
     $response = Livewire::test('pages::settings.profile')
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
-        ->set('pf_no', 'PF99999')
         ->set('mobile_no', '01999999999')
-        ->set('designation_id', $designation->id)
-        ->set('department_id', $department->id)
-        ->set('role', 'initiator')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
@@ -65,12 +55,36 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toEqual('Test User');
     expect($user->email)->toEqual('test@example.com');
-    expect($user->pf_no)->toEqual('PF99999');
     expect($user->mobile_no)->toEqual('01999999999');
-    expect($user->designation_id)->toEqual($designation->id);
-    expect($user->department_id)->toEqual($department->id);
-    expect($user->role)->toEqual('initiator');
     expect($user->email_verified_at)->toBeNull();
+});
+
+test('profile image can be updated', function () {
+    Storage::fake('public');
+
+    $user = profileTestUser([
+        'picture' => 'profile-images/old-profile.png',
+    ]);
+
+    Storage::disk('public')->put($user->picture, 'old profile');
+
+    $this->actingAs($user);
+
+    $response = Livewire::test('pages::settings.profile')
+        ->set('name', $user->name)
+        ->set('email', $user->email)
+        ->set('mobile_no', $user->mobile_no)
+        ->set('picture', UploadedFile::fake()->image('new-profile.png'))
+        ->call('updateProfileInformation');
+
+    $response->assertHasNoErrors();
+
+    $user->refresh();
+
+    expect($user->picture)->not->toBe('profile-images/old-profile.png');
+
+    Storage::disk('public')->assertMissing('profile-images/old-profile.png');
+    Storage::disk('public')->assertExists($user->picture);
 });
 
 test('profile signature can be updated', function () {
@@ -87,11 +101,7 @@ test('profile signature can be updated', function () {
     $response = Livewire::test('pages::settings.profile')
         ->set('name', $user->name)
         ->set('email', $user->email)
-        ->set('pf_no', $user->pf_no)
         ->set('mobile_no', $user->mobile_no)
-        ->set('designation_id', $user->designation_id)
-        ->set('department_id', $user->department_id)
-        ->set('role', $user->role)
         ->set('digital_signature', UploadedFile::fake()->image('new-signature.png'))
         ->call('updateProfileInformation');
 
@@ -113,11 +123,7 @@ test('email verification status is unchanged when email address is unchanged', f
     $response = Livewire::test('pages::settings.profile')
         ->set('name', 'Test User')
         ->set('email', $user->email)
-        ->set('pf_no', $user->pf_no)
         ->set('mobile_no', $user->mobile_no)
-        ->set('designation_id', $user->designation_id)
-        ->set('department_id', $user->department_id)
-        ->set('role', $user->role)
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
@@ -125,33 +131,29 @@ test('email verification status is unchanged when email address is unchanged', f
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
-test('user can delete their account', function () {
+test('user cannot delete their own account from the self-service modal', function () {
     $user = profileTestUser();
 
     $this->actingAs($user);
 
-    $response = Livewire::test('pages::settings.delete-user-modal')
+    expect(fn () => Livewire::test('pages::settings.delete-user-modal')
         ->set('password', 'password')
-        ->call('deleteUser');
+        ->call('deleteUser'))
+        ->toThrow(HttpException::class);
 
-    $response
-        ->assertHasNoErrors()
-        ->assertRedirect('/');
-
-    expect($user->fresh())->toBeNull();
-    expect(auth()->check())->toBeFalse();
+    expect($user->fresh())->not->toBeNull();
+    expect(auth()->check())->toBeTrue();
 });
 
-test('correct password must be provided to delete account', function () {
+test('self-service account deletion stays blocked even with an incorrect password', function () {
     $user = profileTestUser();
 
     $this->actingAs($user);
 
-    $response = Livewire::test('pages::settings.delete-user-modal')
+    expect(fn () => Livewire::test('pages::settings.delete-user-modal')
         ->set('password', 'wrong-password')
-        ->call('deleteUser');
-
-    $response->assertHasErrors(['password']);
+        ->call('deleteUser'))
+        ->toThrow(HttpException::class);
 
     expect($user->fresh())->not->toBeNull();
 });

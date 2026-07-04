@@ -2,28 +2,52 @@
 
 namespace App\Livewire\Layout;
 
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class NotificationBell extends Component
 {
-    // নোটিফিকেশনে ক্লিক করলে সেটি Read হিসেবে মার্ক হবে এবং নির্দিষ্ট লিংকে রিডাইরেক্ট করবে
-    public function markAsRead($notificationId, $url)
+    public function openNotification(string $notificationId)
     {
-        $notification = Auth::user()->notifications()->find($notificationId);
+        $notification = Auth::user()?->notifications()->find($notificationId);
 
-        if ($notification) {
-            $notification->markAsRead();
+        if (! $notification) {
+            return redirect()->route('dashboard');
         }
 
-        return redirect()->to($url);
+        $notification->markAsRead();
+
+        return redirect()->to($notification->data['url'] ?? route('dashboard'));
+    }
+
+    public function markAsRead(string $notificationId): void
+    {
+        Auth::user()?->notifications()->find($notificationId)?->markAsRead();
+    }
+
+    public function markAllAsRead(): void
+    {
+        Auth::user()?->unreadNotifications()->update(['read_at' => now()]);
+    }
+
+    public function deleteNotification(string $notificationId): void
+    {
+        Auth::user()?->notifications()->find($notificationId)?->delete();
+    }
+
+    public function clearRead(): void
+    {
+        Auth::user()?->readNotifications()->delete();
     }
 
     public function render()
     {
+        $user = Auth::user();
+
         return view('livewire.layout.notification-bell', [
-            // শুধুমাত্র আনরিড নোটিফিকেশনগুলো আনা হচ্ছে
-            'notifications' => Auth::user()->unreadNotifications
+            'notifications' => $user?->notifications()->latest()->take(10)->get() ?? collect(),
+            'unreadCount' => $user?->unreadNotifications()->count() ?? 0,
+            'readCount' => $user?->readNotifications()->count() ?? 0,
         ]);
     }
 }

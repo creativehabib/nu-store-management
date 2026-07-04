@@ -48,9 +48,46 @@
 
             <div class="border-t pt-6">
                 <flux:heading size="md" class="mb-4">{{ __('Branding') }}</flux:heading>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <flux:input wire:model="logo" type="file" label="{{ __('Site Logo') }}" accept="image/*" />
-                    <flux:input wire:model="favicon" type="file" label="{{ __('Favicon') }}" accept="image/*" />
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div class="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                        <div>
+                            <flux:heading size="sm">{{ __('Site Logo') }}</flux:heading>
+                            <flux:text size="sm" class="text-zinc-500">{{ __('Preview updates immediately after selecting a new image.') }}</flux:text>
+                        </div>
+
+                        <div class="flex h-28 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+                            @if($logo)
+                                <img src="{{ $logo->temporaryUrl() }}" alt="{{ __('New Site Logo Preview') }}" class="max-h-20 max-w-full object-contain">
+                            @elseif($current_logo)
+                                <img src="{{ asset('storage/' . $current_logo) }}" alt="{{ __('Current Site Logo') }}" class="max-h-20 max-w-full object-contain">
+                            @else
+                                <span class="text-sm text-zinc-500">{{ __('No logo uploaded yet.') }}</span>
+                            @endif
+                        </div>
+
+                        <flux:input wire:model="logo" type="file" label="{{ __('Upload Site Logo') }}" accept="image/*" />
+                        <div wire:loading wire:target="logo" class="text-sm text-indigo-600">{{ __('Generating logo preview...') }}</div>
+                    </div>
+
+                    <div class="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                        <div>
+                            <flux:heading size="sm">{{ __('Favicon') }}</flux:heading>
+                            <flux:text size="sm" class="text-zinc-500">{{ __('Preview updates immediately after selecting a new favicon.') }}</flux:text>
+                        </div>
+
+                        <div class="flex h-28 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+                            @if($favicon)
+                                <img src="{{ $favicon->temporaryUrl() }}" alt="{{ __('New Favicon Preview') }}" class="h-16 w-16 object-contain">
+                            @elseif($current_favicon)
+                                <img src="{{ asset('storage/' . $current_favicon) }}" alt="{{ __('Current Favicon') }}" class="h-16 w-16 object-contain">
+                            @else
+                                <span class="text-sm text-zinc-500">{{ __('No favicon uploaded yet.') }}</span>
+                            @endif
+                        </div>
+
+                        <flux:input wire:model="favicon" type="file" label="{{ __('Upload Favicon') }}" accept="image/*" />
+                        <div wire:loading wire:target="favicon" class="text-sm text-indigo-600">{{ __('Generating favicon preview...') }}</div>
+                    </div>
                 </div>
             </div>
 

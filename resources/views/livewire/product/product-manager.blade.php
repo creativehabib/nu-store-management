@@ -2,19 +2,29 @@
     <div class="flex flex-col gap-3 border-b pb-2 md:flex-row md:items-center md:justify-between">
         <flux:heading size="xl">{{ __('Product / Inventory Management') }}</flux:heading>
 
-        @if($lowStockOnly)
-            <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+            @if($lowStockOnly)
                 <flux:badge color="red">{{ __('Showing Low Stock Products') }}</flux:badge>
                 <flux:button size="sm" variant="outline" wire:click="clearLowStockFilter">
                     {{ __('Show All Products') }}
                 </flux:button>
-            </div>
-        @endif
+            @endif
+
+            @if($stockOutOnly)
+                <flux:badge color="red">{{ __('Showing Stock Out Products') }}</flux:badge>
+                @if($canManageProducts)
+                    <flux:button size="sm" variant="outline" wire:click="clearStockOutFilter">
+                        {{ __('Show All Products') }}
+                    </flux:button>
+                @endif
+            @endif
+        </div>
     </div>
 
-    <flux:card>
-        <form wire:submit="save" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+    @if($canManageProducts)
+        <flux:card>
+            <form wire:submit="save" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
                 <div>
                     <flux:select wire:model="category_id" :label="__('Category')" :placeholder="__('Select Category')" required>
                         @foreach($categories as $category)
@@ -31,18 +41,23 @@
                 <div>
                     <flux:input type="number" wire:model="stock" :label="__('Initial Stock')" min="0" required />
                 </div>
-            </div>
+                </div>
 
-            <div class="flex justify-end gap-2 mt-4">
+                <div class="flex justify-end gap-2 mt-4">
                 @if($isEditMode)
                     <flux:button type="button" variant="outline" wire:click="resetFields">{{ __('Cancel') }}</flux:button>
                 @endif
                 <flux:button type="submit" variant="primary">
                     {{ $isEditMode ? __('Update') : __('Save') }}
                 </flux:button>
-            </div>
-        </form>
-    </flux:card>
+                </div>
+            </form>
+        </flux:card>
+    @else
+        <flux:card>
+            <flux:text>{{ __('You can view stock out products, but only admins can add, edit, or delete products.') }}</flux:text>
+        </flux:card>
+    @endif
 
     <flux:card>
         <div class="overflow-x-auto">
@@ -54,7 +69,9 @@
                     <th class="p-3 text-sm font-semibold">{{ __('Name (Bangla)') }}</th>
                     <th class="p-3 text-sm font-semibold">{{ __('Name (English)') }}</th>
                     <th class="p-3 text-sm font-semibold text-center">{{ __('Stock Quantity') }}</th>
-                    <th class="p-3 text-sm font-semibold text-right">{{ __('Action') }}</th>
+                    @if($canManageProducts)
+                        <th class="p-3 text-sm font-semibold text-right">{{ __('Action') }}</th>
+                    @endif
                 </tr>
                 </thead>
                 <tbody>
@@ -67,14 +84,16 @@
                         <td class="p-3 text-center font-bold {{ $product->stock > 0 ? 'text-green-600' : 'text-red-600' }}">
                             {{ $product->stock }}
                         </td>
-                        <td class="p-3 text-right flex justify-end gap-2">
-                            <flux:button size="sm" variant="outline" icon="pencil" wire:click="edit({{ $product->id }})" />
-                            <flux:button size="sm" variant="danger" icon="trash" wire:click="confirmDelete({{ $product->id }})" />
-                        </td>
+                        @if($canManageProducts)
+                            <td class="p-3 text-right flex justify-end gap-2">
+                                <flux:button size="sm" variant="outline" icon="pencil" wire:click="edit({{ $product->id }})" />
+                                <flux:button size="sm" variant="danger" icon="trash" wire:click="confirmDelete({{ $product->id }})" />
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-4 text-center text-zinc-500">
+                        <td colspan="{{ $canManageProducts ? 6 : 5 }}" class="p-4 text-center text-zinc-500">
                             {{ __('No products found.') }}
                         </td>
                     </tr>
@@ -88,5 +107,7 @@
         </div>
     </flux:card>
 
-    <x-delete-modal name="delete-produt-modal" action="executeDelete"/>
+    @if($canManageProducts)
+        <x-delete-modal name="delete-produt-modal" action="executeDelete"/>
+    @endif
 </div>

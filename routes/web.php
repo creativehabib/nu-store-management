@@ -14,6 +14,7 @@ use App\Livewire\Department\DepartmentManager;
 use App\Livewire\Designation\DesignationManager;
 use App\Livewire\Inventory\StockInManager;
 use App\Livewire\Product\ProductManager;
+use App\Livewire\Purpose\PurposeManager;
 use App\Livewire\Report\ReportManager;
 use App\Livewire\Requisition\CreateRequisition;
 use App\Livewire\Requisition\MyRequisitions;
@@ -48,6 +49,8 @@ Route::middleware(['auth', 'approved'])->group(function () {
 
     Route::get('/admin/categories', CategoryManager::class)->name('admin.categories');
     Route::get('/admin/products', ProductManager::class)->name('admin.products');
+    Route::get('/inventory/products', ProductManager::class)->name('inventory.products');
+    Route::get('/admin/purposes', PurposeManager::class)->name('admin.purposes');
     Route::get('/admin/user-approvals', UserApprovalManager::class)->name('admin.user_approvals');
     Route::get('/requisition/create', CreateRequisition::class)->name('requisition.create');
     Route::get('/requisition/my-history', MyRequisitions::class)->name('requisition.my_history');
