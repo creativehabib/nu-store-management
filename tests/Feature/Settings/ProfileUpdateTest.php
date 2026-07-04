@@ -43,23 +43,10 @@ test('profile information can be updated', function () {
 
     $this->actingAs($user);
 
-    $department = Department::create([
-        'name' => 'Updated Department',
-        'code' => 'UPD',
-    ]);
-    $designation = Designation::create([
-        'title' => 'Updated Designation',
-        'rank' => 50,
-    ]);
-
     $response = Livewire::test('pages::settings.profile')
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
-        ->set('pf_no', 'PF99999')
         ->set('mobile_no', '01999999999')
-        ->set('designation_id', $designation->id)
-        ->set('department_id', $department->id)
-        ->set('role', 'initiator')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
@@ -68,11 +55,7 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toEqual('Test User');
     expect($user->email)->toEqual('test@example.com');
-    expect($user->pf_no)->toEqual('PF99999');
     expect($user->mobile_no)->toEqual('01999999999');
-    expect($user->designation_id)->toEqual($designation->id);
-    expect($user->department_id)->toEqual($department->id);
-    expect($user->role)->toEqual('initiator');
     expect($user->email_verified_at)->toBeNull();
 });
 
@@ -90,11 +73,7 @@ test('profile image can be updated', function () {
     $response = Livewire::test('pages::settings.profile')
         ->set('name', $user->name)
         ->set('email', $user->email)
-        ->set('pf_no', $user->pf_no)
         ->set('mobile_no', $user->mobile_no)
-        ->set('designation_id', $user->designation_id)
-        ->set('department_id', $user->department_id)
-        ->set('role', $user->role)
         ->set('picture', UploadedFile::fake()->image('new-profile.png'))
         ->call('updateProfileInformation');
 
@@ -122,11 +101,7 @@ test('profile signature can be updated', function () {
     $response = Livewire::test('pages::settings.profile')
         ->set('name', $user->name)
         ->set('email', $user->email)
-        ->set('pf_no', $user->pf_no)
         ->set('mobile_no', $user->mobile_no)
-        ->set('designation_id', $user->designation_id)
-        ->set('department_id', $user->department_id)
-        ->set('role', $user->role)
         ->set('digital_signature', UploadedFile::fake()->image('new-signature.png'))
         ->call('updateProfileInformation');
 
@@ -148,11 +123,7 @@ test('email verification status is unchanged when email address is unchanged', f
     $response = Livewire::test('pages::settings.profile')
         ->set('name', 'Test User')
         ->set('email', $user->email)
-        ->set('pf_no', $user->pf_no)
         ->set('mobile_no', $user->mobile_no)
-        ->set('designation_id', $user->designation_id)
-        ->set('department_id', $user->department_id)
-        ->set('role', $user->role)
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();

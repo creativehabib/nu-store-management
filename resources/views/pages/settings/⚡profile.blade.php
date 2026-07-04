@@ -46,8 +46,10 @@ new #[Title('Profile settings')] class extends Component {
     {
         $user = Auth::user();
 
-        // ডিফল্ট ভ্যালিডেশন (নাম ও ইমেইল)
-        $validated = $this->validate($this->profileRules($user->id));
+        $validated = $this->validate([
+            'name' => $this->nameRules(),
+            'email' => $this->emailRules($user->id),
+        ]);
 
         // কাস্টম ফিল্ড ভ্যালিডেশন
         $customValidated = $this->validate([
