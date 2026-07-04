@@ -46,6 +46,33 @@ class UserApprovalManager extends Component
 
     public $isEditMode = false;
 
+    public string $search = '';
+
+    public string $roleFilter = '';
+
+    public string $statusFilter = '';
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedRoleFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'roleFilter', 'statusFilter']);
+        $this->resetPage();
+    }
+
     // Properties for Modal
     public $targetUserId = null;
 
@@ -180,6 +207,26 @@ class UserApprovalManager extends Component
     {
         // N+1 কুয়েরি সমস্যা সমাধানের জন্য eager loading (with) যুক্ত করা হলো
         $users = User::with(['department', 'designation'])
+            ->when($this->search !== '', function ($query) {
+                $query->where(function ($userQuery) {
+                    $userQuery->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('pf_no', 'like', '%'.$this->search.'%')
+                        ->orWhere('mobile_no', 'like', '%'.$this->search.'%')
+                        ->orWhereHas('department', function ($departmentQuery) {
+                            $departmentQuery->where('name', 'like', '%'.$this->search.'%');
+                        })
+                        ->orWhereHas('designation', function ($designationQuery) {
+                            $designationQuery->where('title', 'like', '%'.$this->search.'%');
+                        });
+                });
+            })
+            ->when($this->roleFilter !== '', function ($query) {
+                $query->where('role', $this->roleFilter);
+            })
+            ->when($this->statusFilter !== '', function ($query) {
+                $query->where('is_approved', $this->statusFilter === 'approved');
+            })
             ->orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
             ->latest()
             ->paginate(10);
@@ -188,6 +235,10 @@ class UserApprovalManager extends Component
             'users' => $users,
             'departments' => Department::orderBy('name')->get(),     // ড্রপডাউনের জন্য
             'designations' => Designation::orderBy('rank')->get(),   // ড্রপডাউনের জন্য
+            'totalUsers' => User::count(),
+            'approvedUsers' => User::where('is_approved', true)->count(),
+            'pendingUsers' => User::where('is_approved', false)->count(),
+            'adminUsers' => User::whereIn('role', ['admin', 'super_admin'])->count(),
         ])->layout('layouts.app', ['title' => 'User Manager']);
     }
 }
