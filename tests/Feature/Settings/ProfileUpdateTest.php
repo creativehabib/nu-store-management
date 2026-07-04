@@ -73,6 +73,38 @@ test('profile information can be updated', function () {
     expect($user->email_verified_at)->toBeNull();
 });
 
+test('profile image can be updated', function () {
+    Storage::fake('public');
+
+    $user = profileTestUser([
+        'picture' => 'profile-images/old-profile.png',
+    ]);
+
+    Storage::disk('public')->put($user->picture, 'old profile');
+
+    $this->actingAs($user);
+
+    $response = Livewire::test('pages::settings.profile')
+        ->set('name', $user->name)
+        ->set('email', $user->email)
+        ->set('pf_no', $user->pf_no)
+        ->set('mobile_no', $user->mobile_no)
+        ->set('designation_id', $user->designation_id)
+        ->set('department_id', $user->department_id)
+        ->set('role', $user->role)
+        ->set('picture', UploadedFile::fake()->image('new-profile.png'))
+        ->call('updateProfileInformation');
+
+    $response->assertHasNoErrors();
+
+    $user->refresh();
+
+    expect($user->picture)->not->toBe('profile-images/old-profile.png');
+
+    Storage::disk('public')->assertMissing('profile-images/old-profile.png');
+    Storage::disk('public')->assertExists($user->picture);
+});
+
 test('profile signature can be updated', function () {
     Storage::fake('public');
 
