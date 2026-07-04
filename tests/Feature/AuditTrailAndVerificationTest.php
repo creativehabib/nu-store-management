@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
+use Livewire\Livewire;
 
 function auditTrailUser(array $attributes = []): User
 {
@@ -80,4 +81,39 @@ test('signed requisition verification link shows live status', function () {
         ->assertOk()
         ->assertSee('REQ-VERIFY-001')
         ->assertSee('Distributed');
+});
+
+test('admins can bulk delete selected audit logs and delete all records', function () {
+    $admin = auditTrailUser();
+    $this->actingAs($admin);
+
+    $firstLog = AuditLog::create([
+        'user_id' => $admin->id,
+        'event' => 'auth.login',
+        'description' => 'First audit log',
+    ]);
+    $secondLog = AuditLog::create([
+        'user_id' => $admin->id,
+        'event' => 'inventory.stock_changed',
+        'description' => 'Second audit log',
+    ]);
+    $thirdLog = AuditLog::create([
+        'user_id' => $admin->id,
+        'event' => 'requisition.status_changed',
+        'description' => 'Third audit log',
+    ]);
+
+    Livewire::test(\App\Livewire\Admin\AuditLogManager::class)
+        ->set('selectedAuditLogs', [$firstLog->id, $secondLog->id])
+        ->call('deleteSelected')
+        ->assertSet('selectedAuditLogs', []);
+
+    expect(AuditLog::query()->whereKey($firstLog->id)->exists())->toBeFalse()
+        ->and(AuditLog::query()->whereKey($secondLog->id)->exists())->toBeFalse()
+        ->and(AuditLog::query()->whereKey($thirdLog->id)->exists())->toBeTrue();
+
+    Livewire::test(\App\Livewire\Admin\AuditLogManager::class)
+        ->call('deleteAllRecords');
+
+    expect(AuditLog::query()->count())->toBe(0);
 });
