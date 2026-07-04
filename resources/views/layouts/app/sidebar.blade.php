@@ -344,6 +344,10 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
+            <flux:sidebar.nav>
+                <flux:text class="text-center" size="sm">Developed By <br></flux:text>
+                <flux:badge color="green" size="sm" class="text-center">Habibur Rahaman, PF No-2125</flux:badge>
+            </flux:sidebar.nav>
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
