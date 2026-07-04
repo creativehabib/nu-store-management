@@ -8,6 +8,7 @@ use App\Models\Requisition;
 use App\Models\User;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Livewire\Component;
 
 class FinalPrint extends Component
@@ -16,14 +17,21 @@ class FinalPrint extends Component
 
     public $officerDetails = [];
 
-    public function mount($id)
+    public string $verificationUrl = '';
+
+    public string $verificationQrUrl = '';
+
+    public function mount(int $id): void
     {
         $this->requisition = Requisition::with(['user.department', 'user.designation', 'items.product'])
             ->forUserDepartment()
             ->findOrFail($id);
 
+        $this->verificationUrl = URL::signedRoute('requisition.verify', ['requisition' => $this->requisition]);
+        $this->verificationQrUrl = 'https://quickchart.io/qr?size=180&margin=1&text='.rawurlencode($this->verificationUrl);
+
         $user = auth()->user();
-        $isGlobalAdmin = in_array($user->role, ['admin', 'super_admin','initiator']);
+        $isGlobalAdmin = in_array($user->role, ['admin', 'super_admin', 'initiator']);
         if (! $isGlobalAdmin) {
             abort(403, 'Unauthorized access.');
         }
@@ -49,7 +57,7 @@ class FinalPrint extends Component
         }
     }
 
-    public function getSignature($role)
+    public function getSignature(string $role): ?string
     {
         $history = $this->requisition->approval_history ?? [];
         foreach ($history as $h) {
@@ -61,7 +69,7 @@ class FinalPrint extends Component
         return null;
     }
 
-    public function distributeStock()
+    public function distributeStock(): void
     {
         if ($this->requisition->status !== 'director_approved') {
             Flux::toast('রিকুইজিশনটি এখনো চূড়ান্ত অনুমোদন পায়নি বা ইতিমধ্যে বিতরণ হয়েছে!', 'error');
@@ -84,7 +92,7 @@ class FinalPrint extends Component
         $this->requisition->refresh();
     }
 
-    public function render()
+    public function render(): mixed
     {
         return view('livewire.workflow.final-print')->layout('layouts.app', ['title' => 'Final Print']);
     }
