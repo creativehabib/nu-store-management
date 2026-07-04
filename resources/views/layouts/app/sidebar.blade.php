@@ -69,16 +69,12 @@
                 <flux:menu class="min-w-72">
                     <div class="px-3 py-3">
                         <div class="flex items-start gap-3">
-                            <flux:avatar
-                                :name="auth()->user()->name"
-                                :initials="auth()->user()->initials()"
-                            />
                             <div class="min-w-0 flex-1">
                                 <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
                                 <flux:text size="sm" class="truncate">{{ auth()->user()->email }}</flux:text>
                                 <div class="mt-2 flex flex-wrap gap-1.5">
-                                    <flux:badge color="blue">{{ __('Role:') }} {{ __(ucwords(str_replace('_', ' ', auth()->user()->role))) }}</flux:badge>
-                                    <flux:badge color="zinc">{{ __('PF No:') }} {{ auth()->user()->pf_no ?? 'N/A' }}</flux:badge>
+                                    <flux:badge color="blue" size="sm">{{ __('Role:') }} {{ __(ucwords(str_replace('_', ' ', auth()->user()->role))) }}</flux:badge>
+                                    <flux:badge color="zinc" size="sm">{{ __('PF No:') }} {{ auth()->user()->pf_no ?? 'N/A' }}</flux:badge>
                                 </div>
                             </div>
                         </div>
@@ -141,10 +137,6 @@
                 <div class="flex-1 space-y-6 overflow-y-auto p-5">
                     <flux:card>
                         <div class="flex items-start gap-3">
-                            <flux:avatar
-                                :name="auth()->user()->name"
-                                :initials="auth()->user()->initials()"
-                            />
                             <div class="min-w-0 flex-1">
                                 <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
                                 <flux:text size="sm" class="truncate">{{ auth()->user()->email }}</flux:text>
