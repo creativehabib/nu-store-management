@@ -74,7 +74,10 @@
                             <div class="min-w-0 flex-1">
                                 <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
                                 <flux:text size="sm" class="truncate">{{ auth()->user()->email }}</flux:text>
-                                <flux:text size="xs" class="mt-1 text-zinc-500">{{ __('PF No:') }} {{ auth()->user()->pf_no ?? 'N/A' }}</flux:text>
+                                <div class="mt-2 flex flex-wrap gap-1.5">
+                                    <flux:badge color="blue">{{ __('Role:') }} {{ __(ucwords(str_replace('_', ' ', auth()->user()->role))) }}</flux:badge>
+                                    <flux:badge color="zinc">{{ __('PF No:') }} {{ auth()->user()->pf_no ?? 'N/A' }}</flux:badge>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -143,7 +146,10 @@
                             <div class="min-w-0 flex-1">
                                 <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
                                 <flux:text size="sm" class="truncate">{{ auth()->user()->email }}</flux:text>
-                                <flux:text size="xs" class="mt-1 text-zinc-500">{{ __('PF No:') }} {{ auth()->user()->pf_no ?? 'N/A' }}</flux:text>
+                                <div class="mt-2 flex flex-wrap gap-1.5">
+                                    <flux:badge color="blue">{{ __('Role:') }} {{ __(ucwords(str_replace('_', ' ', auth()->user()->role))) }}</flux:badge>
+                                    <flux:badge color="zinc">{{ __('PF No:') }} {{ auth()->user()->pf_no ?? 'N/A' }}</flux:badge>
+                                </div>
                             </div>
                         </div>
                     </flux:card>

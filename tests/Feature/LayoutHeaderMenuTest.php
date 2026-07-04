@@ -18,6 +18,8 @@ it('renders profile details, settings shortcuts, theme modes, and logout in the 
         ->assertSee('Header User')
         ->assertSee('header@example.com')
         ->assertSee('PF-HEADER-001')
+        ->assertSee('Role:')
+        ->assertSee('Admin')
         ->assertSee('Profile Settings')
         ->assertSee('Security Settings')
         ->assertSee('Quick Settings')
