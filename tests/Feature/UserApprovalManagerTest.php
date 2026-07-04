@@ -139,3 +139,64 @@ it('keeps the existing password, profile image, and signature when upload fields
     Storage::disk('public')->assertExists('profile-images/existing-profile.png');
     Storage::disk('public')->assertExists('signatures/existing-signature.png');
 });
+
+it('shows user management dashboard stats and filters users by search role and status', function () {
+    $department = Department::create([
+        'name' => 'Quality Assurance',
+        'code' => 'QA',
+    ]);
+
+    $designation = Designation::create([
+        'title' => 'Quality Officer',
+        'rank' => 20,
+    ]);
+
+    $admin = User::factory()->create([
+        'role' => 'admin',
+        'pf_no' => 'ADMIN-UX-001',
+        'mobile_no' => '01700005001',
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'is_approved' => true,
+    ]);
+
+    User::factory()->create([
+        'name' => 'Pending Initiator',
+        'email' => 'pending.initiator@example.com',
+        'role' => 'initiator',
+        'pf_no' => 'INIT-UX-001',
+        'mobile_no' => '01700005002',
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'is_approved' => false,
+    ]);
+
+    User::factory()->create([
+        'name' => 'Approved Director',
+        'email' => 'approved.director@example.com',
+        'role' => 'director',
+        'pf_no' => 'DIR-UX-001',
+        'mobile_no' => '01700005003',
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'is_approved' => true,
+    ]);
+
+    $this->actingAs($admin);
+
+    Livewire::test(UserApprovalManager::class)
+        ->assertSee('Total Users')
+        ->assertSee('Search Users')
+        ->assertSee('All Roles')
+        ->set('roleFilter', 'initiator')
+        ->assertSee('Pending Initiator')
+        ->assertDontSee('Approved Director')
+        ->set('statusFilter', 'pending')
+        ->assertSee('Pending Initiator')
+        ->set('search', 'INIT-UX-001')
+        ->assertSee('Pending Initiator')
+        ->call('clearFilters')
+        ->assertSet('search', '')
+        ->assertSet('roleFilter', '')
+        ->assertSet('statusFilter', '');
+});

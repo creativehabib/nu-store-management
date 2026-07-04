@@ -4,10 +4,12 @@ namespace App\Livewire\Requisition;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Purpose;
 use App\Models\Requisition;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -16,11 +18,13 @@ class CreateRequisition extends Component
     public $requisitionItems = [];
 
     public $categories = [];
+    public $purposes = [];
     public $selectedCategories = [];
 
     public function mount()
     {
         $this->categories = Category::orderBy('name')->get();
+        $this->purposes = Purpose::active()->orderBy('name')->get();
 
         $this->requisitionItems = [];
         $this->selectedCategories = [];
@@ -33,7 +37,7 @@ class CreateRequisition extends Component
         $this->requisitionItems[] = [
             'product_id' => '',
             'demanded_qty' => 1,
-            'purpose' => 'Official Use',
+            'purpose' => $this->purposes->first()?->name ?? '',
         ];
 
         $this->selectedCategories[] = '';
@@ -54,7 +58,7 @@ class CreateRequisition extends Component
 
             'requisitionItems.*.product_id' => 'required|exists:products,id',
             'requisitionItems.*.demanded_qty' => 'required|integer|min:1',
-            'requisitionItems.*.purpose' => 'required|in:Training Purpose,Official Use',
+            'requisitionItems.*.purpose' => ['required', Rule::exists('purposes', 'name')->where('is_active', true)],
         ]);
 
         DB::transaction(function () {
