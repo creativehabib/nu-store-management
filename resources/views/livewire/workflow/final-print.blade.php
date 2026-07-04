@@ -34,9 +34,13 @@
                     <p><strong>{{ __('Department:') }}</strong> {{ $requisition->user->department->name ?? 'N/A' }}</p>
                     <p><strong>{{ __('PF No:') }}</strong> {{ $requisition->user->pf_no ?? 'N/A' }}</p>
                 </div>
-                <div class="space-y-1 text-right">
+                <div class="space-y-2 text-right">
                     <p><strong>{{ __('Serial No:') }}</strong> {{ $requisition->requisition_no }}</p>
                     <p><strong>{{ __('Date:') }}</strong> {{ $requisition->created_at->format('d M, Y') }}</p>
+                    <div class="inline-flex flex-col items-end gap-1">
+                        <img src="{{ $verificationQrUrl }}" alt="{{ __('Requisition verification QR code') }}" class="w-24 h-24 border border-black p-1 bg-white">
+                        <p class="text-[10px] leading-tight max-w-40">{{ __('Scan to verify live status') }}</p>
+                    </div>
                 </div>
             </div>
 

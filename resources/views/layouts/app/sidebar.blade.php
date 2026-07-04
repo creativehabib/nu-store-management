@@ -299,11 +299,15 @@
                             icon="cog-8-tooth"
                             :heading="__('Settings & Manage')"
                             class="grid"
-                            :expanded="request()->routeIs('admin.user_approvals', 'admin.language_settings', 'admin.mail_settings', 'admin.general_settings', 'admin.system_info', 'admin.cache_management', 'admin.backup')"
+                            :expanded="request()->routeIs('admin.user_approvals', 'admin.audit_logs', 'admin.language_settings', 'admin.mail_settings', 'admin.general_settings', 'admin.system_info', 'admin.cache_management', 'admin.backup')"
                         >
 
                             <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
                                 {{ __('User Manage') }}
+                            </flux:sidebar.item>
+
+                            <flux:sidebar.item icon="shield-check" :href="route('admin.audit_logs')" :current="request()->routeIs('admin.audit_logs')" wire:navigate>
+                                {{ __('Audit Trail') }}
                             </flux:sidebar.item>
 
                             <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>

@@ -2,14 +2,19 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogSuccessfulLogin;
 use App\Models\Product;
+use App\Models\Requisition;
 use App\Models\Setting;
 use App\Observers\ProductObserver;
+use App\Observers\RequisitionObserver;
 use App\Support\WorkflowQueueCounter;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Product::observe(ProductObserver::class);
+        Requisition::observe(RequisitionObserver::class);
+        Event::listen(Login::class, LogSuccessfulLogin::class);
 
         // মেইল সেটিংস ডাটাবেস থেকে লোড করা
         $this->loadMailSettings();
