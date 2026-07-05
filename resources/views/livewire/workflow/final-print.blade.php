@@ -22,7 +22,13 @@
                         {{ $headerDeptName }}
                     </p>
 
-                    <h2 class="text-lg font-bold mt-2 underline inline-block">{{ __('Store Requisition Form') }}</h2>
+                    <div class="mt-2 inline-flex items-start justify-center gap-3">
+                        <h2 class="text-lg font-bold underline inline-block">{{ __('Store Requisition Form') }}</h2>
+                        <div class="inline-flex flex-col items-center gap-1">
+                            <img src="{{ $verificationQrUrl }}" alt="{{ __('Requisition verification QR code') }}" class="w-20 h-20 border border-black p-1 bg-white">
+                            <p class="text-[10px] leading-tight max-w-32">{{ __('Scan to verify live status') }}</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="w-20 pr-44"></div>
             </div>
@@ -37,10 +43,6 @@
                 <div class="space-y-2 text-right">
                     <p><strong>{{ __('Serial No:') }}</strong> {{ $requisition->requisition_no }}</p>
                     <p><strong>{{ __('Date:') }}</strong> {{ $requisition->created_at->format('d M, Y') }}</p>
-                    <div class="inline-flex flex-col items-end gap-1">
-                        <img src="{{ $verificationQrUrl }}" alt="{{ __('Requisition verification QR code') }}" class="w-24 h-24 border border-black p-1 bg-white">
-                        <p class="text-[10px] leading-tight max-w-40">{{ __('Scan to verify live status') }}</p>
-                    </div>
                 </div>
             </div>
 
