@@ -30,7 +30,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="w-20 pr-44"></div>
+
+                <div class="flex-shrink-0 pr-36 self-start mt-1 inline-flex flex-col items-center gap-1">
+                    <img src="{{ $verificationQrUrl }}" alt="{{ __('Requisition verification QR code') }}" class="w-20 h-20 border border-black p-1 bg-white">
+                    <p class="text-[10px] leading-tight max-w-32 text-center">{{ __('Scan to verify live status') }}</p>
+                </div>
             </div>
 
             <div class="flex justify-between items-start mb-6 text-sm">
