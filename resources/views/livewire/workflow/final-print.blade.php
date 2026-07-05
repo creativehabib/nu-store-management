@@ -24,7 +24,11 @@
 
                     <h2 class="text-lg font-bold mt-2 underline inline-block">{{ __('Store Requisition Form') }}</h2>
                 </div>
-                <div class="w-20 pr-44"></div>
+
+                <div class="flex-shrink-0 pr-36 self-start mt-1 inline-flex flex-col items-center gap-1">
+                    <img src="{{ $verificationQrUrl }}" alt="{{ __('Requisition verification QR code') }}" class="w-20 h-20 border border-black p-1 bg-white">
+                    <p class="text-[10px] leading-tight max-w-32 text-center">{{ __('Scan to verify live status') }}</p>
+                </div>
             </div>
 
             <div class="flex justify-between items-start mb-6 text-sm">
@@ -37,10 +41,6 @@
                 <div class="space-y-2 text-right">
                     <p><strong>{{ __('Serial No:') }}</strong> {{ $requisition->requisition_no }}</p>
                     <p><strong>{{ __('Date:') }}</strong> {{ $requisition->created_at->format('d M, Y') }}</p>
-                    <div class="inline-flex flex-col items-end gap-1">
-                        <img src="{{ $verificationQrUrl }}" alt="{{ __('Requisition verification QR code') }}" class="w-24 h-24 border border-black p-1 bg-white">
-                        <p class="text-[10px] leading-tight max-w-40">{{ __('Scan to verify live status') }}</p>
-                    </div>
                 </div>
             </div>
 
