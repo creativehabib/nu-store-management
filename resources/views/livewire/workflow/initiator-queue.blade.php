@@ -184,7 +184,7 @@
                     </flux:modal.close>
 
                     <flux:button variant="primary" icon="check-circle" wire:click="forwardRequisition" wire:confirm="{{ __('Are you sure you want to forward this to the next step?') }}">
-                        {{ __('Forward to AD') }}
+                        {{ __('Forwarded for Approval') }}
                     </flux:button>
                 </div>
             </div>
