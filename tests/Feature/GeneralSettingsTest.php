@@ -47,3 +47,32 @@ it('stores logo and favicon uploads and refreshes current preview paths', functi
     Storage::disk('public')->assertExists(setting('site_logo'));
     Storage::disk('public')->assertExists(setting('site_favicon'));
 });
+
+it('stores configurable approval flow roles from general settings', function () {
+    $this->actingAs(generalSettingsAdmin());
+
+    Livewire::test(GeneralSettings::class)
+        ->set('site_name', 'NU Store')
+        ->set('site_email', 'store@example.com')
+        ->set('show_print_footer', true)
+        ->set('store_mode', 'departmental')
+        ->set('central_store_dept_id', null)
+        ->set('approval_flow_roles', ['deputy_director', 'director'])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(setting('approval_flow_roles'))->toBe(['deputy_director', 'director']);
+});
+
+it('normalizes approval flow builder steps with director as the final approver', function () {
+    $this->actingAs(generalSettingsAdmin());
+
+    Livewire::test(GeneralSettings::class)
+        ->set('approval_flow_roles', ['director'])
+        ->call('addApprovalStep')
+        ->assertSet('approval_flow_roles', ['assistant_director', 'director'])
+        ->call('addApprovalStep')
+        ->assertSet('approval_flow_roles', ['assistant_director', 'deputy_director', 'director'])
+        ->call('removeApprovalStep', 1)
+        ->assertSet('approval_flow_roles', ['assistant_director', 'director']);
+});

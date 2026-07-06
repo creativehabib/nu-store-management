@@ -54,23 +54,9 @@ class WorkflowQueueCounter
 
     private function approvalStatusFor(User $user): ?string
     {
-        if ($user->role === 'assistant_director') {
-            return 'initiator_checked';
-        }
+        $isDepartmentDirectorReview = setting('store_mode', 'departmental') === 'centralized'
+            && (int) $user->department_id !== (int) setting('central_store_dept_id', 1);
 
-        if ($user->role === 'deputy_director') {
-            return 'ad_approved';
-        }
-
-        if ($user->role === 'director') {
-            if (setting('store_mode', 'departmental') === 'centralized'
-                && (int) $user->department_id !== (int) setting('central_store_dept_id', 1)) {
-                return 'department_director_review';
-            }
-
-            return 'dd_approved';
-        }
-
-        return null;
+        return ApprovalWorkflow::statusForRole($user->role, $isDepartmentDirectorReview);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\User;
+use App\Support\ApprovalWorkflow;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -26,17 +27,9 @@ class DashboardStats extends Component
         if ($role === 'initiator') {
             return ['pending', 'returned', 'director_approved', 'distributed'];
         }
-        if ($role === 'assistant_director') {
-            return ['initiator_checked'];
-        }
-        if ($role === 'deputy_director') {
-            return ['ad_approved'];
-        }
-        if ($role === 'director') {
-            return ['dd_approved'];
-        }
+        $status = ApprovalWorkflow::statusForRole($role);
 
-        return [];
+        return $status ? [$status] : [];
     }
 
     // ফিল্টার অনুযায়ী ডাটা বের করার হেল্পার মেথড (Database Agnostic)

@@ -6,6 +6,7 @@ use App\Models\Department; // Department মডেলটি যুক্ত ক�
 use App\Models\Requisition;
 use App\Models\User;
 use App\Notifications\RequisitionNotification;
+use App\Support\ApprovalWorkflow;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -122,7 +123,7 @@ class InitiatorQueue extends Component
             ];
 
             $this->selectedRequisition->update([
-                'status' => 'initiator_checked',
+                'status' => ApprovalWorkflow::firstStatus(),
                 'approval_history' => $history,
             ]);
         });
@@ -133,8 +134,9 @@ class InitiatorQueue extends Component
 
         $approvingDeptId = Department::getApprovingDepartmentId($this->selectedRequisition->user->department_id);
 
-        // সঠিক দপ্তরের Assistant Director (AD) কে নোটিফিকেশন পাঠানো
-        $targetUsers = User::where('role', 'assistant_director')
+        $targetRole = ApprovalWorkflow::roles()[0];
+
+        $targetUsers = User::where('role', $targetRole)
             ->where('department_id', $approvingDeptId)
             ->whereNotNull('email')
             ->get();
