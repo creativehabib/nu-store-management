@@ -24,7 +24,6 @@ class SettingManager
         $settings = self::autoloadSettings();
 
         if (! array_key_exists($key, $settings)) {
-            self::$runtime[$key] = $default;
             return $default;
         }
 

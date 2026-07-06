@@ -67,7 +67,7 @@
                 </tbody>
             </table>
 
-            <div class="grid grid-cols-5 gap-4 mt-24 text-center text-xs font-semibold">
+            <div class="grid gap-4 mt-24 text-center text-xs font-semibold" style="grid-template-columns: repeat({{ count($signatureRoles) + 1 }}, minmax(0, 1fr));">
                 <div class="flex flex-col justify-end items-center w-full">
                     <div class="h-10 mb-1"></div>
                     <p class="border-t border-black pt-2 w-full mx-2 h-10 flex items-start justify-center leading-tight">
@@ -75,49 +75,18 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col justify-end items-center w-full">
-                    @if($this->getSignature('initiator'))
-                        <img src="{{ $this->getSignature('initiator') }}" class="h-10 mb-1 object-contain" alt="signature" />
-                    @else
-                        <div class="h-10 mb-1"></div>
-                    @endif
-                    <p class="border-t border-black pt-2 w-full mx-2 h-10 flex items-start justify-center">
-                        {{ __('Prepared By') }}
-                    </p>
-                </div>
-
-                <div class="flex flex-col justify-end items-center w-full">
-                    @if($this->getSignature('assistant_director'))
-                        <img src="{{ $this->getSignature('assistant_director') }}" class="h-10 mb-1 object-contain" alt="signature" />
-                    @else
-                        <div class="h-10 mb-1"></div>
-                    @endif
-                    <p class="border-t border-black pt-2 w-full mx-2 h-10 flex items-start justify-center text-xs">
-                        {{ $officerDetails['assistant_director']['designation'] }}
-                    </p>
-                </div>
-
-                <div class="flex flex-col justify-end items-center w-full">
-                    @if($this->getSignature('deputy_director'))
-                        <img src="{{ $this->getSignature('deputy_director') }}" class="h-10 mb-1 object-contain" alt="signature" />
-                    @else
-                        <div class="h-10 mb-1"></div>
-                    @endif
-                    <p class="border-t border-black pt-2 w-full mx-2 h-10 flex items-start justify-center text-xs">
-                        {{ $officerDetails['deputy_director']['designation'] }}
-                    </p>
-                </div>
-
-                <div class="flex flex-col justify-end items-center w-full">
-                    @if($this->getSignature('director'))
-                        <img src="{{ $this->getSignature('director') }}" class="h-10 mb-1 object-contain" alt="signature" />
-                    @else
-                        <div class="h-10 mb-1"></div>
-                    @endif
-                    <p class="border-t border-black pt-2 w-full mx-2 h-10 flex items-start justify-center text-xs">
-                        {{ $officerDetails['director']['designation'] }}
-                    </p>
-                </div>
+                @foreach($signatureRoles as $role)
+                    <div class="flex flex-col justify-end items-center w-full" wire:key="final-print-signature-{{ $role }}">
+                        @if($this->getSignature($role))
+                            <img src="{{ $this->getSignature($role) }}" class="h-10 mb-1 object-contain" alt="signature" />
+                        @else
+                            <div class="h-10 mb-1"></div>
+                        @endif
+                        <p class="border-t border-black pt-2 w-full mx-2 h-10 flex items-start justify-center text-xs">
+                            {{ $role === 'initiator' ? __('Prepared By') : ($officerDetails[$role]['designation'] ?? ucfirst(str_replace('_', ' ', $role))) }}
+                        </p>
+                    </div>
+                @endforeach
             </div>
         </div> {{-- flex-1 div এর শেষ --}}
 

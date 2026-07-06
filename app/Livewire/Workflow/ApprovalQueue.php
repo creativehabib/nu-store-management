@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\Requisition;
 use App\Models\User;
 use App\Notifications\RequisitionNotification;
+use App\Support\ApprovalWorkflow;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -49,24 +50,10 @@ class ApprovalQueue extends Component
     {
         $role = Auth::user()->role;
 
-        if ($role === 'assistant_director') {
-            return 'initiator_checked';
-        }
+        $isDepartmentDirectorReview = setting('store_mode', 'departmental') === 'centralized'
+            && (int) Auth::user()->department_id !== (int) setting('central_store_dept_id', 1);
 
-        if ($role === 'deputy_director') {
-            return 'ad_approved';
-        }
-
-        if ($role === 'director') {
-            if (setting('store_mode', 'departmental') === 'centralized'
-                && (int) Auth::user()->department_id !== (int) setting('central_store_dept_id', 1)) {
-                return 'department_director_review';
-            }
-
-            return 'dd_approved';
-        }
-
-        return null;
+        return ApprovalWorkflow::statusForRole($role, $isDepartmentDirectorReview);
     }
 
     public function viewRequisition($id)
@@ -92,18 +79,10 @@ class ApprovalQueue extends Component
             $nextStatus = 'returned';
             $msg = 'রিকুইজিশনটি Initiator-এর কাছে ফেরত পাঠানো হয়েছে!';
         } else {
-            if ($role === 'assistant_director') {
-                $nextStatus = 'ad_approved';
-            }
-
-            if ($role === 'deputy_director') {
-                $nextStatus = 'dd_approved';
-            }
-
-            if ($role === 'director') {
-                $nextStatus = $this->selectedRequisition->status === 'department_director_review'
-                    ? 'pending'
-                    : 'director_approved';
+            if ($role === 'director' && $this->selectedRequisition->status === 'department_director_review') {
+                $nextStatus = 'pending';
+            } else {
+                $nextStatus = ApprovalWorkflow::nextStatusAfter($role);
             }
 
             $msg = 'রিকুইজিশনটি সফলভাবে অনুমোদিত হয়েছে!';
@@ -118,10 +97,10 @@ class ApprovalQueue extends Component
             $message = "নতুন রিকুইজিশন ({$this->selectedRequisition->requisition_no}) আপনার অনুমোদনের অপেক্ষায় আছে।";
             $url = route('workflow.approval');
 
-            if ($nextStatus === 'ad_approved') {
-                $targetRole = 'deputy_director';
-            } elseif ($nextStatus === 'dd_approved') {
-                $targetRole = 'director';
+            $workflowTargetRole = ApprovalWorkflow::roleWaitingForStatus($nextStatus);
+
+            if ($workflowTargetRole) {
+                $targetRole = $workflowTargetRole;
             } elseif ($nextStatus === 'pending') {
                 $targetRole = 'initiator';
                 $message = "রিকুইজিশন ({$this->selectedRequisition->requisition_no}) সেন্ট্রাল স্টোরে যাচাইয়ের অপেক্ষায় আছে।";
