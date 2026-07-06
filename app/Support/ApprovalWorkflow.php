@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Models\Setting;
+use Illuminate\Support\Facades\Schema;
+
 class ApprovalWorkflow
 {
     /**
@@ -21,11 +24,15 @@ class ApprovalWorkflow
      */
     public static function roles(): array
     {
-        $roles = setting('approval_flow_roles', ['assistant_director', 'deputy_director', 'director']);
+        $roles = ['assistant_director', 'deputy_director', 'director'];
 
-        if (is_string($roles)) {
-            $decodedRoles = json_decode($roles, true);
-            $roles = json_last_error() === JSON_ERROR_NONE ? $decodedRoles : [$roles];
+        if (is_installed() && Schema::hasTable('settings')) {
+            $savedRoles = Setting::where('key', 'approval_flow_roles')->value('value');
+
+            if ($savedRoles !== null) {
+                $decodedRoles = json_decode($savedRoles, true);
+                $roles = json_last_error() === JSON_ERROR_NONE ? $decodedRoles : [$savedRoles];
+            }
         }
 
         return is_array($roles) ? self::normalizeRoles($roles) : ['director'];

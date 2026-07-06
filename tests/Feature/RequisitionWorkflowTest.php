@@ -367,3 +367,32 @@ it('allows settings to skip deputy director while keeping assistant director bef
     Livewire::test(ApprovalQueue::class)
         ->assertSee('REQ-FLOW-003');
 });
+
+it('uses the latest saved approval flow when initiator forwards a requisition', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Latest Flow Department', 'code' => 'LFD']);
+
+    workflowSetting('store_mode', 'departmental');
+    setting('approval_flow_roles', ['assistant_director', 'deputy_director', 'director']);
+    workflowSetting('approval_flow_roles', json_encode(['director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-FLOW-004',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    $this->actingAs($initiator);
+
+    Livewire::test(InitiatorQueue::class)
+        ->set('selectedRequisition', $requisition)
+        ->call('forwardRequisition');
+
+    expect($requisition->refresh()->status)->toBe('dd_approved');
+});
