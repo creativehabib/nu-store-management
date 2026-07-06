@@ -47,6 +47,44 @@
             </div>
 
             <div class="border-t pt-6">
+                <flux:heading size="md" class="mb-2">{{ __('Approval Flow') }}</flux:heading>
+                <flux:subheading class="mb-4">{{ __('Choose which approval roles are required after the initiator forwards a requisition. Director is always required as the final approver.') }}</flux:subheading>
+
+                <div class="space-y-3">
+                    <div class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                        <div class="mb-3 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                            <span class="rounded-full bg-zinc-100 px-3 py-1 font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">{{ __('Initiator') }}</span>
+                            <span>→</span>
+                            <span>{{ __('Selected approval steps') }}</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            @foreach($approval_flow_roles as $index => $selectedRole)
+                                <div class="grid grid-cols-1 items-end gap-3 md:grid-cols-[1fr_auto]" wire:key="approval-flow-role-{{ $index }}-{{ $selectedRole }}">
+                                    <flux:select wire:model.live="approval_flow_roles.{{ $index }}" label="{{ __('Step :number', ['number' => $index + 1]) }}" @disabled($selectedRole === 'director')>
+                                        @foreach($approvalApprovers as $role => $label)
+                                            <flux:select.option value="{{ $role }}" @disabled(in_array($role, $approval_flow_roles, true) && $role !== $selectedRole)>{{ __($label) }}</flux:select.option>
+                                        @endforeach
+                                    </flux:select>
+
+                                    @if($selectedRole !== 'director')
+                                        <flux:button type="button" variant="danger" wire:click="removeApprovalStep({{ $index }})">{{ __('Remove') }}</flux:button>
+                                    @else
+                                        <flux:button type="button" variant="filled" disabled>{{ __('Final') }}</flux:button>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <p class="text-sm text-zinc-500">{{ __('Examples: Initiator → Assistant Director → Deputy Director → Director, Initiator → Assistant Director → Director, or Initiator → Director.') }}</p>
+                        <flux:button type="button" variant="filled" wire:click="addApprovalStep">{{ __('Add Approval Step') }}</flux:button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t pt-6">
                 <flux:heading size="md" class="mb-4">{{ __('Branding') }}</flux:heading>
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div class="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
