@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\User;
+use App\Support\ApprovalWorkflow;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -16,6 +17,9 @@ class FinalPrint extends Component
     public $requisition;
 
     public $officerDetails = [];
+
+    /** @var list<string> */
+    public array $signatureRoles = [];
 
     public string $verificationUrl = '';
 
@@ -41,10 +45,9 @@ class FinalPrint extends Component
         // সেন্ট্রাল স্টোর বা নিজ দপ্তরের আইডি ডাইনামিকভাবে বের করা
         $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
 
-        // initiator রোলটি যুক্ত করা হলো
-        $roles = ['initiator', 'assistant_director', 'deputy_director', 'director'];
+        $this->signatureRoles = ['initiator', ...ApprovalWorkflow::roles()];
 
-        foreach ($roles as $role) {
+        foreach ($this->signatureRoles as $role) {
             $user = User::with('designation')
                 ->where('role', $role)
                 ->where('department_id', $approvingDeptId)

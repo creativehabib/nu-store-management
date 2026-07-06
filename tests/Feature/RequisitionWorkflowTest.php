@@ -2,6 +2,7 @@
 
 use App\Livewire\Layout\WorkflowQueueBadge;
 use App\Livewire\Workflow\ApprovalQueue;
+use App\Livewire\Workflow\FinalPrint;
 use App\Livewire\Workflow\InitiatorQueue;
 use App\Models\Category;
 use App\Models\Department;
@@ -395,4 +396,39 @@ it('uses the latest saved approval flow when initiator forwards a requisition', 
         ->call('forwardRequisition');
 
     expect($requisition->refresh()->status)->toBe('dd_approved');
+});
+
+it('shows only configured approval signatures on the final print layout', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Print Flow Department', 'code' => 'PFD']);
+
+    workflowSetting('store_mode', 'departmental');
+    workflowSetting('approval_flow_roles', json_encode(['director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+    workflowUser('assistant_director', $department);
+    workflowUser('deputy_director', $department);
+    workflowUser('director', $department);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-PRINT-FLOW-001',
+        'user_id' => $requisitioner->id,
+        'status' => 'director_approved',
+        'approval_history' => [
+            ['role' => 'initiator', 'signature' => 'signatures/initiator.png'],
+            ['role' => 'director', 'signature' => 'signatures/director.png'],
+        ],
+    ]);
+
+    $this->actingAs($initiator);
+
+    Livewire::test(FinalPrint::class, ['id' => $requisition->id])
+        ->assertSet('signatureRoles', ['initiator', 'director'])
+        ->assertSee('Prepared By')
+        ->assertSee('Director')
+        ->assertDontSee('Assistant director')
+        ->assertDontSee('Deputy director');
 });
