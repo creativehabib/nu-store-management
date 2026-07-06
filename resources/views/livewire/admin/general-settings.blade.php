@@ -61,11 +61,18 @@
                         <div class="space-y-3">
                             @foreach($approval_flow_roles as $index => $selectedRole)
                                 <div class="grid grid-cols-1 items-end gap-3 md:grid-cols-[1fr_auto]" wire:key="approval-flow-role-{{ $index }}-{{ $selectedRole }}">
-                                    <flux:select wire:model.live="approval_flow_roles.{{ $index }}" label="{{ __('Step :number', ['number' => $index + 1]) }}" @disabled($selectedRole === 'director')>
-                                        @foreach($approvalApprovers as $role => $label)
-                                            <flux:select.option value="{{ $role }}" @disabled(in_array($role, $approval_flow_roles, true) && $role !== $selectedRole)>{{ __($label) }}</flux:select.option>
-                                        @endforeach
-                                    </flux:select>
+                                    <label class="space-y-2">
+                                        <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ __('Step') }} {{ $index + 1 }}</span>
+                                        <select
+                                            wire:model.live="approval_flow_roles.{{ $index }}"
+                                            @disabled($selectedRole === 'director')
+                                            class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                                        >
+                                            @foreach($approvalApprovers as $role => $label)
+                                                <option value="{{ $role }}" @disabled(in_array($role, $approval_flow_roles, true) && $role !== $selectedRole)>{{ __($label) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </label>
 
                                     @if($selectedRole !== 'director')
                                         <flux:button type="button" variant="danger" wire:click="removeApprovalStep({{ $index }})">{{ __('Remove') }}</flux:button>
