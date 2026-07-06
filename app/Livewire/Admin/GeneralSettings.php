@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Department;
+use App\Support\ApprovalWorkflow;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -21,6 +22,7 @@ class GeneralSettings extends Component
     public $show_print_footer;
     public $store_mode;
     public $central_store_dept_id;
+    public array $approval_flow_roles = [];
 
     public function mount(): void
     {
@@ -38,10 +40,40 @@ class GeneralSettings extends Component
         // স্টোর মোড লোড করা
         $this->store_mode = setting('store_mode', 'departmental');
         $this->central_store_dept_id = setting('central_store_dept_id', 1);
+        $this->approval_flow_roles = ApprovalWorkflow::roles();
+    }
+
+    public function addApprovalStep(): void
+    {
+        $roles = array_filter($this->approval_flow_roles, fn ($role): bool => $role !== 'director');
+
+        foreach (array_keys(ApprovalWorkflow::availableApprovers()) as $role) {
+            if ($role !== 'director' && ! in_array($role, $roles, true)) {
+                $roles[] = $role;
+                break;
+            }
+        }
+
+        $roles[] = 'director';
+        $this->approval_flow_roles = ApprovalWorkflow::rolesFromSelection(array_values($roles));
+    }
+
+    public function removeApprovalStep(int $index): void
+    {
+        unset($this->approval_flow_roles[$index]);
+
+        $this->approval_flow_roles = ApprovalWorkflow::rolesFromSelection(array_values($this->approval_flow_roles));
+    }
+
+    public function updatedApprovalFlowRoles(): void
+    {
+        $this->approval_flow_roles = ApprovalWorkflow::rolesFromSelection($this->approval_flow_roles);
     }
 
     public function save(): void
     {
+        $this->approval_flow_roles = ApprovalWorkflow::rolesFromSelection($this->approval_flow_roles);
+
         $this->validate([
             'site_name' => 'required|string|max:255',
             'site_email' => 'nullable|email',
@@ -54,6 +86,8 @@ class GeneralSettings extends Component
             // নতুন ভ্যালিডেশন
             'store_mode' => 'required|in:departmental,centralized',
             'central_store_dept_id' => 'required_if:store_mode,centralized|nullable|integer',
+            'approval_flow_roles' => 'required|array|min:1',
+            'approval_flow_roles.*' => 'in:assistant_director,deputy_director,director',
         ]);
 
         if ($this->logo) {
@@ -80,6 +114,7 @@ class GeneralSettings extends Component
         // নতুন সেটিংস সেভ করা
         set_setting('store_mode', $this->store_mode);
         set_setting('central_store_dept_id', $this->central_store_dept_id);
+        set_setting('approval_flow_roles', ApprovalWorkflow::rolesFromSelection($this->approval_flow_roles));
 
         $this->reset('logo', 'favicon');
 
@@ -89,7 +124,8 @@ class GeneralSettings extends Component
     public function render(): View
     {
         return view('livewire.admin.general-settings', [
-            'departments' => Department::orderBy('name')->get()
+            'departments' => Department::orderBy('name')->get(),
+            'approvalApprovers' => ApprovalWorkflow::availableApprovers(),
         ]);
     }
 }

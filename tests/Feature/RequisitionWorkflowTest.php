@@ -234,3 +234,165 @@ it('counts sidebar workflow queue notifications for the current user', function 
     Livewire::test(WorkflowQueueBadge::class, ['type' => 'initiator'])
         ->assertSet('count', 1);
 });
+
+it('allows settings to skip assistant director in the approval flow', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Configurable Flow Department', 'code' => 'CFD']);
+
+    workflowSetting('store_mode', 'departmental');
+    workflowSetting('approval_flow_roles', json_encode(['deputy_director', 'director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+    $assistantDirector = workflowUser('assistant_director', $department);
+    $deputyDirector = workflowUser('deputy_director', $department);
+    $director = workflowUser('director', $department);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-FLOW-001',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    $this->actingAs($initiator);
+    Livewire::test(InitiatorQueue::class)
+        ->set('selectedRequisition', $requisition)
+        ->call('forwardRequisition');
+
+    expect($requisition->refresh()->status)->toBe('ad_approved');
+
+    $this->actingAs($assistantDirector);
+    Livewire::test(ApprovalQueue::class)
+        ->assertDontSee('REQ-FLOW-001');
+
+    $this->actingAs($deputyDirector);
+    Livewire::test(ApprovalQueue::class)
+        ->assertSee('REQ-FLOW-001')
+        ->set('selectedRequisition', $requisition->refresh())
+        ->call('processAction', 'approve');
+
+    expect($requisition->refresh()->status)->toBe('dd_approved');
+
+    $this->actingAs($director);
+    Livewire::test(ApprovalQueue::class)
+        ->assertSee('REQ-FLOW-001');
+});
+
+it('allows settings to send requisitions from initiator directly to director', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Direct Director Flow', 'code' => 'DDF']);
+
+    workflowSetting('store_mode', 'departmental');
+    workflowSetting('approval_flow_roles', json_encode(['director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+    $deputyDirector = workflowUser('deputy_director', $department);
+    $director = workflowUser('director', $department);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-FLOW-002',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    $this->actingAs($initiator);
+    Livewire::test(InitiatorQueue::class)
+        ->set('selectedRequisition', $requisition)
+        ->call('forwardRequisition');
+
+    expect($requisition->refresh()->status)->toBe('dd_approved');
+
+    $this->actingAs($deputyDirector);
+    Livewire::test(ApprovalQueue::class)
+        ->assertDontSee('REQ-FLOW-002');
+
+    $this->actingAs($director);
+    Livewire::test(ApprovalQueue::class)
+        ->assertSee('REQ-FLOW-002')
+        ->set('selectedRequisition', $requisition->refresh())
+        ->call('processAction', 'approve');
+
+    expect($requisition->refresh()->status)->toBe('director_approved');
+});
+
+it('allows settings to skip deputy director while keeping assistant director before director', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Assistant Direct Flow', 'code' => 'ADF']);
+
+    workflowSetting('store_mode', 'departmental');
+    workflowSetting('approval_flow_roles', json_encode(['assistant_director', 'director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+    $assistantDirector = workflowUser('assistant_director', $department);
+    $deputyDirector = workflowUser('deputy_director', $department);
+    $director = workflowUser('director', $department);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-FLOW-003',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    $this->actingAs($initiator);
+    Livewire::test(InitiatorQueue::class)
+        ->set('selectedRequisition', $requisition)
+        ->call('forwardRequisition');
+
+    expect($requisition->refresh()->status)->toBe('initiator_checked');
+
+    $this->actingAs($assistantDirector);
+    Livewire::test(ApprovalQueue::class)
+        ->assertSee('REQ-FLOW-003')
+        ->set('selectedRequisition', $requisition->refresh())
+        ->call('processAction', 'approve');
+
+    expect($requisition->refresh()->status)->toBe('dd_approved');
+
+    $this->actingAs($deputyDirector);
+    Livewire::test(ApprovalQueue::class)
+        ->assertDontSee('REQ-FLOW-003');
+
+    $this->actingAs($director);
+    Livewire::test(ApprovalQueue::class)
+        ->assertSee('REQ-FLOW-003');
+});
+
+it('uses the latest saved approval flow when initiator forwards a requisition', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Latest Flow Department', 'code' => 'LFD']);
+
+    workflowSetting('store_mode', 'departmental');
+    setting('approval_flow_roles', ['assistant_director', 'deputy_director', 'director']);
+    workflowSetting('approval_flow_roles', json_encode(['director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    $initiator = workflowUser('initiator', $department);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-FLOW-004',
+        'user_id' => $requisitioner->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    $this->actingAs($initiator);
+
+    Livewire::test(InitiatorQueue::class)
+        ->set('selectedRequisition', $requisition)
+        ->call('forwardRequisition');
+
+    expect($requisition->refresh()->status)->toBe('dd_approved');
+});
