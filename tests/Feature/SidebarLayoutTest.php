@@ -18,6 +18,6 @@ it('allows the application sidebar to collapse on desktop and mobile', function 
         ->toContain('x-on:mouseenter="open = true"')
         ->toContain('<flux:button type="button" variant="ghost" icon="cog-8-tooth" class="w-full justify-center"')
         ->toContain("{{ __('Settings & Manage') }}")
-        ->toContain('absolute left-full bottom-0 z-50 ms-2')
+        ->toContain('fixed bottom-20 left-16 z-50')
         ->toContain('in-data-flux-sidebar-collapsed-desktop:hidden');
 });
