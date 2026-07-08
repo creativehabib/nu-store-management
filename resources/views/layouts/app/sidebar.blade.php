@@ -211,10 +211,10 @@
             </aside>
         </div>
 
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
+                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
@@ -224,7 +224,7 @@
                 </flux:sidebar.item>
 
                 {{-- রিকুইজিশন ম্যানেজমেন্ট (গ্রুপ করা) --}}
-                <flux:sidebar.group heading="{{ __('Requisition Management') }}" class="grid">
+                <flux:sidebar.group icon="document-plus" heading="{{ __('Requisition Management') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                     <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
                         {{ __('Submit Demand') }}
                     </flux:sidebar.item>
@@ -235,7 +235,7 @@
 
                 {{-- ওয়ার্কফ্লো / অ্যাপ্রুভাল কিউ --}}
                 @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
-                    <flux:sidebar.group heading="{{ __('Workflow') }}" class="grid">
+                    <flux:sidebar.group icon="clipboard-document-list" heading="{{ __('Workflow') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                         @if(auth()->user()->role === 'initiator')
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
                                 <span class="flex w-full items-center justify-between gap-2">
@@ -262,7 +262,7 @@
 
                 {{-- রিপোর্টস --}}
                 @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
-                    <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
+                    <flux:sidebar.group icon="chart-pie" heading="{{ __('Reports') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                         <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
                             {{ __('Reports & Export') }}
                         </flux:sidebar.item>
@@ -270,7 +270,7 @@
                 @endif
 
                 @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.group heading="{{ __('System Administration') }}">
+                    <flux:sidebar.group icon="cog-8-tooth" heading="{{ __('System Administration') }}" class="in-data-flux-sidebar-collapsed-desktop:hidden">
                         <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
                             {{ __('Categories') }}
                         </flux:sidebar.item>
@@ -343,10 +343,96 @@
 
             </flux:sidebar.nav>
 
+            <flux:sidebar.nav class="hidden in-data-flux-sidebar-collapsed-desktop:grid">
+                <div class="relative" x-data="{ open: false }" x-on:mouseenter="open = true" x-on:mouseleave="open = false">
+                    <flux:button type="button" variant="ghost" icon="document-plus" class="w-full justify-center" x-on:focus="open = true" x-on:blur="open = false" aria-label="{{ __('Requisition Management') }}" />
+                    <div x-cloak x-show="open" x-transition.origin.left class="absolute left-full top-0 z-50 ms-2 min-w-56 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                        <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ __('Requisition Management') }}</div>
+                        <a href="{{ route('requisition.create') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('requisition.create') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                            <flux:icon.document-plus class="size-4 text-zinc-500" />
+                            <span>{{ __('Submit Demand') }}</span>
+                        </a>
+                        <a href="{{ route('requisition.my_history') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('requisition.my_history') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                            <flux:icon.clock class="size-4 text-zinc-500" />
+                            <span>{{ __('My Requisitions') }}</span>
+                        </a>
+                    </div>
+                </div>
+
+                @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
+                    <div class="relative" x-data="{ open: false }" x-on:mouseenter="open = true" x-on:mouseleave="open = false">
+                        <flux:button type="button" variant="ghost" icon="clipboard-document-list" class="w-full justify-center" x-on:focus="open = true" x-on:blur="open = false" aria-label="{{ __('Workflow') }}" />
+                        <div x-cloak x-show="open" x-transition.origin.left class="absolute left-full top-0 z-50 ms-2 min-w-56 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                            <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ __('Workflow') }}</div>
+                            @if(auth()->user()->role === 'initiator')
+                                <a href="{{ route('workflow.initiator') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('workflow.initiator') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                    <flux:icon.clipboard-document-list class="size-4 text-zinc-500" />
+                                    <span>{{ __('Initiator Queue') }}</span>
+                                </a>
+                                <a href="{{ route('inventory.stock_in') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('inventory.stock_in') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                    <flux:icon.plus-circle class="size-4 text-zinc-500" />
+                                    <span>{{ __('Stock In Entry') }}</span>
+                                </a>
+                            @endif
+                            @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
+                                <a href="{{ route('workflow.approval') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('workflow.approval') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                    <flux:icon.clipboard-document-check class="size-4 text-zinc-500" />
+                                    <span>{{ __('Approval Queue') }}</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
+                    <div class="relative" x-data="{ open: false }" x-on:mouseenter="open = true" x-on:mouseleave="open = false">
+                        <flux:button type="button" variant="ghost" icon="chart-pie" class="w-full justify-center" x-on:focus="open = true" x-on:blur="open = false" aria-label="{{ __('Reports') }}" />
+                        <div x-cloak x-show="open" x-transition.origin.left class="absolute left-full top-0 z-50 ms-2 min-w-56 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                            <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ __('Reports') }}</div>
+                            <a href="{{ route('report.summary') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('report.summary') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.chart-pie class="size-4 text-zinc-500" />
+                                <span>{{ __('Reports & Export') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                @endif
+
+                @if(auth()->user()->role === 'admin')
+                    <div class="relative" x-data="{ open: false }" x-on:mouseenter="open = true" x-on:mouseleave="open = false">
+                        <flux:button type="button" variant="ghost" icon="cog-8-tooth" class="w-full justify-center" x-on:focus="open = true" x-on:blur="open = false" aria-label="{{ __('System Administration') }}" />
+                        <div x-cloak x-show="open" x-transition.origin.left class="absolute left-full top-0 z-50 ms-2 min-w-64 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                            <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ __('System Administration') }}</div>
+                            @foreach([
+                                ['route' => 'admin.categories', 'active' => 'admin.categories', 'icon' => 'rectangle-group', 'label' => __('Categories')],
+                                ['route' => 'admin.products', 'active' => 'admin.products', 'icon' => 'cube', 'label' => __('Products')],
+                                ['route' => 'admin.purposes', 'active' => 'admin.purposes', 'icon' => 'clipboard-document-list', 'label' => __('Purposes')],
+                                ['route' => 'departments.index', 'active' => 'departments.*', 'icon' => 'building-office', 'label' => __('Departments')],
+                                ['route' => 'designations.index', 'active' => 'designations.*', 'icon' => 'briefcase', 'label' => __('Designations')],
+                                ['route' => 'inventory.stock_in', 'active' => 'inventory.stock_in', 'icon' => 'plus-circle', 'label' => __('Stock In Entry')],
+                                ['route' => 'admin.product_summary', 'active' => 'admin.product_summary', 'icon' => 'chart-pie', 'label' => __('Products Summary')],
+                                ['route' => 'admin.user_approvals', 'active' => 'admin.user_approvals', 'icon' => 'users', 'label' => __('User Manage')],
+                                ['route' => 'admin.audit_logs', 'active' => 'admin.audit_logs', 'icon' => 'shield-check', 'label' => __('Audit Trail')],
+                                ['route' => 'admin.language_settings', 'active' => 'admin.language_settings', 'icon' => 'language', 'label' => __('Language Settings')],
+                                ['route' => 'admin.mail_settings', 'active' => 'admin.mail_settings', 'icon' => 'envelope', 'label' => __('Mail Settings')],
+                                ['route' => 'admin.general_settings', 'active' => 'admin.general_settings', 'icon' => 'cog-6-tooth', 'label' => __('General Settings')],
+                                ['route' => 'admin.system_info', 'active' => 'admin.system_info', 'icon' => 'server-stack', 'label' => __('System Info')],
+                                ['route' => 'admin.cache_management', 'active' => 'admin.cache_management', 'icon' => 'archive-box', 'label' => __('Cache Management')],
+                                ['route' => 'admin.backup', 'active' => 'admin.backup', 'icon' => 'circle-stack', 'label' => __('Database Backup')],
+                            ] as $menuItem)
+                                <a href="{{ route($menuItem['route']) }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs($menuItem['active']) ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                    <flux:icon :name="$menuItem['icon']" class="size-4 text-zinc-500" />
+                                    <span>{{ $menuItem['label'] }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </flux:sidebar.nav>
+
             <flux:spacer />
             <flux:sidebar.nav>
-                <flux:text class="text-center" size="sm">Developed By <br></flux:text>
-                <flux:badge color="green" size="sm" class="text-center">Habibur Rahaman, PF No-2125</flux:badge>
+                <flux:text class="text-center in-data-flux-sidebar-collapsed-desktop:hidden" size="sm">Developed By <br></flux:text>
+                <flux:badge color="green" size="sm" class="text-center in-data-flux-sidebar-collapsed-desktop:hidden">Habibur Rahaman, PF No-2125</flux:badge>
             </flux:sidebar.nav>
         </flux:sidebar>
 
