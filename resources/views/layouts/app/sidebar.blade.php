@@ -399,7 +399,15 @@
                     </flux:sidebar.item>
 
                     <div class="relative" x-data="{ open: false }" x-on:mouseenter="open = true" x-on:mouseleave="open = false">
-                        <flux:button type="button" variant="ghost" icon="cog-8-tooth" class="w-full justify-center" x-on:focus="open = true" x-on:blur="open = false" aria-label="{{ __('Settings & Manage') }}" />
+                        <flux:button
+                            type="button"
+                            variant="ghost"
+                            icon="cog-8-tooth"
+                            class="w-full justify-center {{ request()->routeIs('admin.user_approvals', 'admin.audit_logs', 'admin.language_settings', 'admin.mail_settings', 'admin.general_settings', 'admin.system_info', 'admin.cache_management', 'admin.backup') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}"
+                            x-on:focus="open = true"
+                            x-on:blur="open = false"
+                            aria-label="{{ __('Settings & Manage') }}"
+                        />
                         <div x-cloak x-show="open" x-transition.origin.left class="fixed bottom-20 left-16 z-50 min-w-64 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
                             <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ __('Settings & Manage') }}</div>
                             <a href="{{ route('admin.user_approvals') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.user_approvals') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">

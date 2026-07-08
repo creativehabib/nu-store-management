@@ -16,7 +16,8 @@ it('allows the application sidebar to collapse on desktop and mobile', function 
         ->toContain('<flux:sidebar.item icon="document-plus" :href="route(\'requisition.create\')" :current="request()->routeIs(\'requisition.create\')" wire:navigate>')
         ->toContain('<flux:sidebar.item icon="rectangle-group" :href="route(\'admin.categories\')" :current="request()->routeIs(\'admin.categories\')" wire:navigate>')
         ->toContain('x-on:mouseenter="open = true"')
-        ->toContain('<flux:button type="button" variant="ghost" icon="cog-8-tooth" class="w-full justify-center"')
+        ->toContain("request()->routeIs('admin.user_approvals', 'admin.audit_logs', 'admin.language_settings', 'admin.mail_settings', 'admin.general_settings', 'admin.system_info', 'admin.cache_management', 'admin.backup')")
+        ->toContain("bg-zinc-100 dark:bg-zinc-800")
         ->toContain("{{ __('Settings & Manage') }}")
         ->toContain('fixed bottom-20 left-16 z-50')
         ->toContain('in-data-flux-sidebar-collapsed-desktop:hidden');
