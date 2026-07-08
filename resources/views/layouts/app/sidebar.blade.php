@@ -211,10 +211,10 @@
             </aside>
         </div>
 
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
+                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
@@ -224,7 +224,7 @@
                 </flux:sidebar.item>
 
                 {{-- রিকুইজিশন ম্যানেজমেন্ট (গ্রুপ করা) --}}
-                <flux:sidebar.group heading="{{ __('Requisition Management') }}" class="grid">
+                <flux:sidebar.group icon="document-plus" heading="{{ __('Requisition Management') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                     <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
                         {{ __('Submit Demand') }}
                     </flux:sidebar.item>
@@ -235,7 +235,7 @@
 
                 {{-- ওয়ার্কফ্লো / অ্যাপ্রুভাল কিউ --}}
                 @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
-                    <flux:sidebar.group heading="{{ __('Workflow') }}" class="grid">
+                    <flux:sidebar.group icon="clipboard-document-list" heading="{{ __('Workflow') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                         @if(auth()->user()->role === 'initiator')
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
                                 <span class="flex w-full items-center justify-between gap-2">
@@ -262,7 +262,7 @@
 
                 {{-- রিপোর্টস --}}
                 @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
-                    <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
+                    <flux:sidebar.group icon="chart-pie" heading="{{ __('Reports') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                         <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
                             {{ __('Reports & Export') }}
                         </flux:sidebar.item>
@@ -270,7 +270,7 @@
                 @endif
 
                 @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.group heading="{{ __('System Administration') }}">
+                    <flux:sidebar.group icon="cog-8-tooth" heading="{{ __('System Administration') }}" class="in-data-flux-sidebar-collapsed-desktop:hidden">
                         <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
                             {{ __('Categories') }}
                         </flux:sidebar.item>
@@ -343,10 +343,106 @@
 
             </flux:sidebar.nav>
 
+            <flux:sidebar.nav class="hidden in-data-flux-sidebar-collapsed-desktop:grid">
+                <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
+                    {{ __('Submit Demand') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="clock" :href="route('requisition.my_history')" :current="request()->routeIs('requisition.my_history')" wire:navigate>
+                    {{ __('My Requisitions') }}
+                </flux:sidebar.item>
+
+                @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
+                    @if(auth()->user()->role === 'initiator')
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
+                            {{ __('Initiator Queue') }}
+                        </flux:sidebar.item>
+                    @endif
+                    @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
+                        <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
+                            {{ __('Approval Queue') }}
+                        </flux:sidebar.item>
+                    @endif
+                    @if(auth()->user()->role === 'initiator')
+                        <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
+                            {{ __('Stock In Entry') }}
+                        </flux:sidebar.item>
+                    @endif
+                @endif
+
+                @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
+                    <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
+                        {{ __('Reports & Export') }}
+                    </flux:sidebar.item>
+                @endif
+
+                @if(auth()->user()->role === 'admin')
+                    <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
+                        {{ __('Categories') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="cube" :href="route('admin.products')" :current="request()->routeIs('admin.products')" wire:navigate>
+                        {{ __('Products') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.purposes')" :current="request()->routeIs('admin.purposes')" wire:navigate>
+                        {{ __('Purposes') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="building-office" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>
+                        {{ __('Departments') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="briefcase" :href="route('designations.index')" :current="request()->routeIs('designations.*')" wire:navigate>
+                        {{ __('Designations') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
+                        {{ __('Stock In Entry') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="chart-pie" :href="route('admin.product_summary')" :current="request()->routeIs('admin.product_summary')" wire:navigate>
+                        {{ __('Products Summary') }}
+                    </flux:sidebar.item>
+
+                    <div class="relative" x-data="{ open: false }" x-on:mouseenter="open = true" x-on:mouseleave="open = false">
+                        <flux:button type="button" variant="ghost" icon="cog-8-tooth" class="w-full justify-center" x-on:focus="open = true" x-on:blur="open = false" aria-label="{{ __('Settings & Manage') }}" />
+                        <div x-cloak x-show="open" x-transition.origin.left class="fixed bottom-20 left-16 z-50 min-w-64 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                            <div class="px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{{ __('Settings & Manage') }}</div>
+                            <a href="{{ route('admin.user_approvals') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.user_approvals') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.users class="size-4 text-zinc-500" />
+                                <span>{{ __('User Manage') }}</span>
+                            </a>
+                            <a href="{{ route('admin.audit_logs') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.audit_logs') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.shield-check class="size-4 text-zinc-500" />
+                                <span>{{ __('Audit Trail') }}</span>
+                            </a>
+                            <a href="{{ route('admin.language_settings') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.language_settings') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.language class="size-4 text-zinc-500" />
+                                <span>{{ __('Language Settings') }}</span>
+                            </a>
+                            <a href="{{ route('admin.mail_settings') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.mail_settings') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.envelope class="size-4 text-zinc-500" />
+                                <span>{{ __('Mail Settings') }}</span>
+                            </a>
+                            <a href="{{ route('admin.general_settings') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.general_settings') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.cog-6-tooth class="size-4 text-zinc-500" />
+                                <span>{{ __('General Settings') }}</span>
+                            </a>
+                            <a href="{{ route('admin.system_info') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.system_info') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.server-stack class="size-4 text-zinc-500" />
+                                <span>{{ __('System Info') }}</span>
+                            </a>
+                            <a href="{{ route('admin.cache_management') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.cache_management') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.archive-box class="size-4 text-zinc-500" />
+                                <span>{{ __('Cache Management') }}</span>
+                            </a>
+                            <a href="{{ route('admin.backup') }}" wire:navigate class="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800 {{ request()->routeIs('admin.backup') ? 'bg-zinc-100 dark:bg-zinc-800' : '' }}">
+                                <flux:icon.circle-stack class="size-4 text-zinc-500" />
+                                <span>{{ __('Database Backup') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                @endif
+            </flux:sidebar.nav>
+
             <flux:spacer />
             <flux:sidebar.nav>
-                <flux:text class="text-center" size="sm">Developed By <br></flux:text>
-                <flux:badge color="green" size="sm" class="text-center">Habibur Rahaman, PF No-2125</flux:badge>
+                <flux:text class="text-center in-data-flux-sidebar-collapsed-desktop:hidden" size="sm">Developed By <br></flux:text>
+                <flux:badge color="green" size="sm" class="text-center in-data-flux-sidebar-collapsed-desktop:hidden">Habibur Rahaman, PF No-2125</flux:badge>
             </flux:sidebar.nav>
         </flux:sidebar>
 
