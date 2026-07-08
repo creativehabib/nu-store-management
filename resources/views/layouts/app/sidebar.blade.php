@@ -224,7 +224,7 @@
                 </flux:sidebar.item>
 
                 {{-- রিকুইজিশন ম্যানেজমেন্ট (গ্রুপ করা) --}}
-                <flux:sidebar.group icon="document-plus" heading="{{ __('Requisition Management') }}" class="grid">
+                <flux:sidebar.group icon="document-plus" heading="{{ __('Requisition Management') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                     <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
                         {{ __('Submit Demand') }}
                     </flux:sidebar.item>
@@ -235,7 +235,7 @@
 
                 {{-- ওয়ার্কফ্লো / অ্যাপ্রুভাল কিউ --}}
                 @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
-                    <flux:sidebar.group icon="clipboard-document-list" heading="{{ __('Workflow') }}" class="grid">
+                    <flux:sidebar.group icon="clipboard-document-list" heading="{{ __('Workflow') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                         @if(auth()->user()->role === 'initiator')
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
                                 <span class="flex w-full items-center justify-between gap-2">
@@ -262,7 +262,7 @@
 
                 {{-- রিপোর্টস --}}
                 @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
-                    <flux:sidebar.group icon="chart-pie" heading="{{ __('Reports') }}" class="grid">
+                    <flux:sidebar.group icon="chart-pie" heading="{{ __('Reports') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">
                         <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
                             {{ __('Reports & Export') }}
                         </flux:sidebar.item>
@@ -270,7 +270,7 @@
                 @endif
 
                 @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.group icon="cog-8-tooth" heading="{{ __('System Administration') }}">
+                    <flux:sidebar.group icon="cog-8-tooth" heading="{{ __('System Administration') }}" class="in-data-flux-sidebar-collapsed-desktop:hidden">
                         <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
                             {{ __('Categories') }}
                         </flux:sidebar.item>
@@ -341,6 +341,87 @@
                 @endif
 
 
+            </flux:sidebar.nav>
+
+            <flux:sidebar.nav class="hidden in-data-flux-sidebar-collapsed-desktop:grid">
+                <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
+                    {{ __('Submit Demand') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="clock" :href="route('requisition.my_history')" :current="request()->routeIs('requisition.my_history')" wire:navigate>
+                    {{ __('My Requisitions') }}
+                </flux:sidebar.item>
+
+                @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
+                    @if(auth()->user()->role === 'initiator')
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
+                            {{ __('Initiator Queue') }}
+                        </flux:sidebar.item>
+                    @endif
+                    @if(in_array(auth()->user()->role, ['assistant_director', 'deputy_director', 'director']))
+                        <flux:sidebar.item icon="clipboard-document-check" :href="route('workflow.approval')" :current="request()->routeIs('workflow.approval')" wire:navigate>
+                            {{ __('Approval Queue') }}
+                        </flux:sidebar.item>
+                    @endif
+                    @if(auth()->user()->role === 'initiator')
+                        <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
+                            {{ __('Stock In Entry') }}
+                        </flux:sidebar.item>
+                    @endif
+                @endif
+
+                @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
+                    <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
+                        {{ __('Reports & Export') }}
+                    </flux:sidebar.item>
+                @endif
+
+                @if(auth()->user()->role === 'admin')
+                    <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
+                        {{ __('Categories') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="cube" :href="route('admin.products')" :current="request()->routeIs('admin.products')" wire:navigate>
+                        {{ __('Products') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.purposes')" :current="request()->routeIs('admin.purposes')" wire:navigate>
+                        {{ __('Purposes') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="building-office" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>
+                        {{ __('Departments') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="briefcase" :href="route('designations.index')" :current="request()->routeIs('designations.*')" wire:navigate>
+                        {{ __('Designations') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="plus-circle" :href="route('inventory.stock_in')" :current="request()->routeIs('inventory.stock_in')" wire:navigate>
+                        {{ __('Stock In Entry') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="chart-pie" :href="route('admin.product_summary')" :current="request()->routeIs('admin.product_summary')" wire:navigate>
+                        {{ __('Products Summary') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('admin.user_approvals')" :current="request()->routeIs('admin.user_approvals')" wire:navigate>
+                        {{ __('User Manage') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="shield-check" :href="route('admin.audit_logs')" :current="request()->routeIs('admin.audit_logs')" wire:navigate>
+                        {{ __('Audit Trail') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="language" :href="route('admin.language_settings')" :current="request()->routeIs('admin.language_settings')" wire:navigate>
+                        {{ __('Language Settings') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="envelope" :href="route('admin.mail_settings')" :current="request()->routeIs('admin.mail_settings')" wire:navigate>
+                        {{ __('Mail Settings') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="cog-6-tooth" :href="route('admin.general_settings')" :current="request()->routeIs('admin.general_settings')" wire:navigate>
+                        {{ __('General Settings') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="server-stack" :href="route('admin.system_info')" :current="request()->routeIs('admin.system_info')" wire:navigate>
+                        {{ __('System Info') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="archive-box" :href="route('admin.cache_management')" :current="request()->routeIs('admin.cache_management')" wire:navigate>
+                        {{ __('Cache Management') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="circle-stack" :href="route('admin.backup')" :current="request()->routeIs('admin.backup')" wire:navigate>
+                        {{ __('Database Backup') }}
+                    </flux:sidebar.item>
+                @endif
             </flux:sidebar.nav>
 
             <flux:spacer />
