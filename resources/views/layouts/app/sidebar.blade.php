@@ -211,10 +211,10 @@
             </aside>
         </div>
 
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
+                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
@@ -345,8 +345,8 @@
 
             <flux:spacer />
             <flux:sidebar.nav>
-                <flux:text class="text-center" size="sm">Developed By <br></flux:text>
-                <flux:badge color="green" size="sm" class="text-center">Habibur Rahaman, PF No-2125</flux:badge>
+                <flux:text class="text-center in-data-flux-sidebar-collapsed-desktop:hidden" size="sm">Developed By <br></flux:text>
+                <flux:badge color="green" size="sm" class="text-center in-data-flux-sidebar-collapsed-desktop:hidden">Habibur Rahaman, PF No-2125</flux:badge>
             </flux:sidebar.nav>
         </flux:sidebar>
 
