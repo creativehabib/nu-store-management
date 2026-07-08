@@ -13,9 +13,11 @@ it('allows the application sidebar to collapse on desktop and mobile', function 
         ->toContain('<flux:sidebar.group icon="chart-pie" heading="{{ __(\'Reports\') }}" class="grid in-data-flux-sidebar-collapsed-desktop:hidden">')
         ->toContain('<flux:sidebar.group icon="cog-8-tooth" heading="{{ __(\'System Administration\') }}" class="in-data-flux-sidebar-collapsed-desktop:hidden">')
         ->toContain('<flux:sidebar.nav class="hidden in-data-flux-sidebar-collapsed-desktop:grid">')
+        ->toContain('<flux:sidebar.item icon="document-plus" :href="route(\'requisition.create\')" :current="request()->routeIs(\'requisition.create\')" wire:navigate>')
+        ->toContain('<flux:sidebar.item icon="rectangle-group" :href="route(\'admin.categories\')" :current="request()->routeIs(\'admin.categories\')" wire:navigate>')
         ->toContain('x-on:mouseenter="open = true"')
-        ->toContain('<flux:button type="button" variant="ghost" icon="document-plus" class="w-full justify-center"')
         ->toContain('<flux:button type="button" variant="ghost" icon="cog-8-tooth" class="w-full justify-center"')
-        ->toContain('absolute left-full top-0 z-50 ms-2')
+        ->toContain("{{ __('Settings & Manage') }}")
+        ->toContain('absolute left-full bottom-0 z-50 ms-2')
         ->toContain('in-data-flux-sidebar-collapsed-desktop:hidden');
 });
