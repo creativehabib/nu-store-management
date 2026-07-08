@@ -224,7 +224,7 @@
                 </flux:sidebar.item>
 
                 {{-- রিকুইজিশন ম্যানেজমেন্ট (গ্রুপ করা) --}}
-                <flux:sidebar.group heading="{{ __('Requisition Management') }}" class="grid">
+                <flux:sidebar.group icon="document-plus" heading="{{ __('Requisition Management') }}" class="grid">
                     <flux:sidebar.item icon="document-plus" :href="route('requisition.create')" :current="request()->routeIs('requisition.create')" wire:navigate>
                         {{ __('Submit Demand') }}
                     </flux:sidebar.item>
@@ -235,7 +235,7 @@
 
                 {{-- ওয়ার্কফ্লো / অ্যাপ্রুভাল কিউ --}}
                 @if(in_array(auth()->user()->role, ['initiator', 'assistant_director', 'deputy_director', 'director']))
-                    <flux:sidebar.group heading="{{ __('Workflow') }}" class="grid">
+                    <flux:sidebar.group icon="clipboard-document-list" heading="{{ __('Workflow') }}" class="grid">
                         @if(auth()->user()->role === 'initiator')
                             <flux:sidebar.item icon="clipboard-document-list" :href="route('workflow.initiator')" :current="request()->routeIs('workflow.initiator')" wire:navigate>
                                 <span class="flex w-full items-center justify-between gap-2">
@@ -262,7 +262,7 @@
 
                 {{-- রিপোর্টস --}}
                 @if(in_array(auth()->user()->role, ['admin','super_admin', 'director', 'assistant_director', 'deputy_director', 'initiator']))
-                    <flux:sidebar.group heading="{{ __('Reports') }}" class="grid">
+                    <flux:sidebar.group icon="chart-pie" heading="{{ __('Reports') }}" class="grid">
                         <flux:sidebar.item icon="chart-pie" :href="route('report.summary')" :current="request()->routeIs('report.summary')" wire:navigate>
                             {{ __('Reports & Export') }}
                         </flux:sidebar.item>
@@ -270,7 +270,7 @@
                 @endif
 
                 @if(auth()->user()->role === 'admin')
-                    <flux:sidebar.group heading="{{ __('System Administration') }}">
+                    <flux:sidebar.group icon="cog-8-tooth" heading="{{ __('System Administration') }}">
                         <flux:sidebar.item icon="rectangle-group" :href="route('admin.categories')" :current="request()->routeIs('admin.categories')" wire:navigate>
                             {{ __('Categories') }}
                         </flux:sidebar.item>
