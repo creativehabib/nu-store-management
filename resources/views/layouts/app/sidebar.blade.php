@@ -253,7 +253,23 @@
                             <div class="grid gap-2 text-sm text-zinc-700 dark:text-zinc-300">
                                 <div class="flex justify-between gap-3">
                                     <span class="text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</span>
-                                    <span class="font-medium">Habibur Rahaman</span>
+                                    <span class="font-medium">{{__('Habibur Rahaman')}}</span>
+                                </div>
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-zinc-500 dark:text-zinc-400">{{ __('Designation') }}</span>
+                                    <span class="font-medium">{{__('Administrative Officer')}}</span>
+                                </div>
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-zinc-500 dark:text-zinc-400">{{ __('Department') }}</span>
+                                    <span class="font-medium">{{__('Office of the Teachers Training ')}}</span>
+                                </div>
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-zinc-500 dark:text-zinc-400">{{ __('Mobile') }}</span>
+                                    <span class="font-medium">{{__('01914120688 ')}}</span>
+                                </div>
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</span>
+                                    <span class="font-medium">{{__('iamhabib84@gmail.com')}}</span>
                                 </div>
                                 <div class="flex justify-between gap-3">
                                     <span class="text-zinc-500 dark:text-zinc-400">{{ __('PF No') }}</span>
@@ -523,10 +539,6 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
-            <flux:sidebar.nav>
-                <flux:text class="text-center in-data-flux-sidebar-collapsed-desktop:hidden" size="sm">Developed By <br></flux:text>
-                <flux:badge color="green" size="sm" class="text-center in-data-flux-sidebar-collapsed-desktop:hidden">Habibur Rahaman, PF No-2125</flux:badge>
-            </flux:sidebar.nav>
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
