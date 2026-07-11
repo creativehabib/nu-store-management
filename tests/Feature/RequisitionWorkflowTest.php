@@ -6,6 +6,7 @@ use App\Livewire\Workflow\FinalPrint;
 use App\Livewire\Workflow\InitiatorQueue;
 use App\Models\Category;
 use App\Models\Department;
+use App\Models\Designation;
 use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\Setting;
@@ -431,4 +432,62 @@ it('shows only configured approval signatures on the final print layout', functi
         ->assertSee('Director')
         ->assertDontSee('Assistant director')
         ->assertDontSee('Deputy director');
+});
+
+it('keeps finalized print officer details from the approval history when current officers change', function () {
+    Notification::fake();
+    touch(storage_path('installed'));
+
+    $department = Department::create(['name' => 'Historical Print Department', 'code' => 'HPD']);
+    $initiatorDesignation = Designation::create(['title' => 'Historical Initiator', 'rank' => 1]);
+    $directorDesignation = Designation::create(['title' => 'Historical Director', 'rank' => 2]);
+    $newInitiatorDesignation = Designation::create(['title' => 'New Initiator', 'rank' => 3]);
+    $newDirectorDesignation = Designation::create(['title' => 'New Director', 'rank' => 4]);
+
+    workflowSetting('store_mode', 'departmental');
+    workflowSetting('approval_flow_roles', json_encode(['director']));
+
+    $requisitioner = workflowUser('requisitioner', $department);
+    workflowUser('initiator', $department)->update([
+        'name' => 'Current Initiator',
+        'designation_id' => $newInitiatorDesignation->id,
+        'digital_signature' => 'signatures/current-initiator.png',
+    ]);
+    workflowUser('director', $department)->update([
+        'name' => 'Current Director',
+        'designation_id' => $newDirectorDesignation->id,
+        'digital_signature' => 'signatures/current-director.png',
+    ]);
+
+    $requisition = Requisition::create([
+        'requisition_no' => 'REQ-HISTORY-PRINT-001',
+        'user_id' => $requisitioner->id,
+        'status' => 'director_approved',
+        'approval_history' => [
+            [
+                'role' => 'initiator',
+                'name' => 'Original Initiator',
+                'designation' => $initiatorDesignation->title,
+                'signature' => 'signatures/original-initiator.png',
+            ],
+            [
+                'role' => 'director',
+                'name' => 'Original Director',
+                'designation' => $directorDesignation->title,
+                'signature' => 'signatures/original-director.png',
+            ],
+        ],
+    ]);
+
+    $this->actingAs(User::where('role', 'initiator')->where('department_id', $department->id)->first());
+
+    Livewire::test(FinalPrint::class, ['id' => $requisition->id])
+        ->assertSet('officerDetails.initiator.name', 'Original Initiator')
+        ->assertSet('officerDetails.initiator.designation', 'Historical Initiator')
+        ->assertSet('officerDetails.director.name', 'Original Director')
+        ->assertSet('officerDetails.director.designation', 'Historical Director')
+        ->assertSee('Historical Initiator')
+        ->assertSee('Historical Director')
+        ->assertDontSee('New Initiator')
+        ->assertDontSee('New Director');
 });

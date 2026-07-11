@@ -137,6 +137,7 @@ class ApprovalQueue extends Component
             'action' => $actionType,
             'comment' => $this->comment,
             'date' => now()->toDateTimeString(),
+            'designation' => Auth::user()->designation?->title,
             'signature' => Auth::user()->digital_signature,
         ];
 
