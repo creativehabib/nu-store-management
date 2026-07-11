@@ -3,7 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Requisition Verification') }}</title>
+    <title>
+        {{ filled($title ?? null) ? $title . ' | ' : '' }}{{ setting('site_name', config('app.name', __('Store Management System'))) }} | {{ __('National University') }}
+    </title>
+    <link rel="icon" href="{{ setting('site_favicon') ? asset('storage/' . setting('site_favicon')) : asset('logo.png') }}" sizes="any">র
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-zinc-100 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">

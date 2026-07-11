@@ -3,8 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ setting('site_name', 'Store Management System') }} | {{ __('National University') }}</title>
-    <link rel="icon" href="{{ ('storage/' . setting('site_favicon') ?? 'logo.png') }}" sizes="any">
+    <title>
+        {{ filled($title ?? null) ? $title . ' | ' : '' }}{{ setting('site_name', config('app.name', __('Store Management System'))) }} | {{ __('National University') }}
+    </title>
+    <link rel="icon" href="{{ setting('site_favicon') ? asset('storage/' . setting('site_favicon')) : asset('logo.png') }}" sizes="any">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
