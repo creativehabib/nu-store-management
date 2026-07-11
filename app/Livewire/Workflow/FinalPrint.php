@@ -45,31 +45,65 @@ class FinalPrint extends Component
         // সেন্ট্রাল স্টোর বা নিজ দপ্তরের আইডি ডাইনামিকভাবে বের করা
         $approvingDeptId = Department::getApprovingDepartmentId($applicantDeptId);
 
-        $this->signatureRoles = ['initiator', ...ApprovalWorkflow::roles()];
+        $this->signatureRoles = $this->signatureRoles();
 
         foreach ($this->signatureRoles as $role) {
+            $officer = $this->approvalHistoryForRole($role);
             $user = User::with('designation')
                 ->where('role', $role)
                 ->where('department_id', $approvingDeptId)
                 ->first();
 
             $this->officerDetails[$role] = [
-                'name' => $user->name ?? 'N/A',
-                'designation' => $user->designation->title ?? ucfirst(str_replace('_', ' ', $role)),
+                'name' => $officer['name'] ?? $user->name ?? 'N/A',
+                'designation' => $officer['designation'] ?? $user->designation->title ?? ucfirst(str_replace('_', ' ', $role)),
             ];
         }
     }
 
     public function getSignature(string $role): ?string
     {
-        $history = $this->requisition->approval_history ?? [];
-        foreach ($history as $h) {
-            if ($h['role'] === $role && isset($h['signature'])) {
-                return asset('storage/'.$h['signature']);
-            }
+        $history = $this->approvalHistoryForRole($role);
+
+        if (isset($history['signature'])) {
+            return asset('storage/'.$history['signature']);
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function signatureRoles(): array
+    {
+        $historyRoles = collect($this->requisition->approval_history ?? [])
+            ->pluck('role')
+            ->filter(fn ($role): bool => is_string($role) && $role !== '')
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($historyRoles === []) {
+            return ['initiator', ...ApprovalWorkflow::roles()];
+        }
+
+        $roleOrder = ['initiator', ...array_keys(ApprovalWorkflow::availableApprovers())];
+
+        return collect($roleOrder)
+            ->filter(fn (string $role): bool => in_array($role, $historyRoles, true))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array{role?: string, name?: string, designation?: string, action?: string, comment?: string, date?: string, signature?: string}
+     */
+    private function approvalHistoryForRole(string $role): array
+    {
+        return collect($this->requisition->approval_history ?? [])
+            ->filter(fn (mixed $history): bool => is_array($history) && ($history['role'] ?? null) === $role)
+            ->last() ?? [];
     }
 
     public function distributeStock(): void
