@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
-use Illuminate\Support\Facades\File;
-use Symfony\Component\Finder\Finder;
+use App\Services\AutoTranslator;
 use Flux\Flux;
+use Illuminate\Support\Facades\File;
+use Livewire\Component;
+use Symfony\Component\Finder\Finder;
 
 class LanguageManager extends Component
 {
@@ -168,6 +169,62 @@ class LanguageManager extends Component
         $this->loadTranslations();
     }
 
+    public function autoTranslate(AutoTranslator $translator): void
+    {
+        if ($this->locale === 'en') {
+            foreach ($this->baseTranslations as $key => $value) {
+                $this->translations[$key] = $value;
+            }
+
+            $this->saveTranslations();
+            $this->loadTranslations();
+            Flux::toast('English translations have been synced from the base language.');
+
+            return;
+        }
+
+        $translatedCount = 0;
+        $failedCount = 0;
+
+        foreach ($this->baseTranslations as $key => $value) {
+            if (! empty($this->translations[$key] ?? '')) {
+                continue;
+            }
+
+            $translatedText = $translator->translate($value ?: $key, $this->locale);
+
+            if ($translatedText === null) {
+                $failedCount++;
+
+                continue;
+            }
+
+            $this->translations[$key] = $translatedText;
+            $translatedCount++;
+        }
+
+        if ($translatedCount > 0) {
+            $this->saveTranslations();
+            $this->loadTranslations();
+        } else {
+            $this->calculateStats();
+        }
+
+        if ($translatedCount > 0 && $failedCount === 0) {
+            Flux::toast("Auto translation complete! {$translatedCount} missing item(s) translated.");
+
+            return;
+        }
+
+        if ($translatedCount > 0) {
+            Flux::toast("{$translatedCount} item(s) translated. {$failedCount} item(s) could not be translated automatically.", variant: 'warning');
+
+            return;
+        }
+
+        Flux::toast('No missing translations could be auto translated. Please try again later.', variant: 'danger');
+    }
+
     public function deleteTranslation($key)
     {
         if (isset($this->translations[$key])) {
@@ -188,12 +245,15 @@ class LanguageManager extends Component
     public function render()
     {
         $filteredTranslations = collect($this->translations)->filter(function ($value, $key) {
-            if (empty($this->search)) return true;
+            if (empty($this->search)) {
+                return true;
+            }
+
             return stripos($key, $this->search) !== false || stripos($value, $this->search) !== false;
         })->toArray();
 
         return view('livewire.admin.language-manager', [
-            'filteredTranslations' => $filteredTranslations
+            'filteredTranslations' => $filteredTranslations,
         ])->layout('layouts.app', ['title' => 'Language Manager']);
     }
 }
