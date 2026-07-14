@@ -10,6 +10,8 @@ use Symfony\Component\Finder\Finder;
 
 class LanguageManager extends Component
 {
+    private const AUTO_TRANSLATE_BATCH_SIZE = 10;
+
     public $locale = 'bn';
     public $search = '';
 
@@ -185,12 +187,18 @@ class LanguageManager extends Component
 
         $translatedCount = 0;
         $failedCount = 0;
+        $processedCount = 0;
 
         foreach ($this->baseTranslations as $key => $value) {
             if (! empty($this->translations[$key] ?? '')) {
                 continue;
             }
 
+            if ($processedCount >= self::AUTO_TRANSLATE_BATCH_SIZE) {
+                break;
+            }
+
+            $processedCount++;
             $translatedText = $translator->translate($value ?: $key, $this->locale);
 
             if ($translatedText === null) {
@@ -211,18 +219,18 @@ class LanguageManager extends Component
         }
 
         if ($translatedCount > 0 && $failedCount === 0) {
-            Flux::toast("Auto translation complete! {$translatedCount} missing item(s) translated.");
+            Flux::toast("Auto translation complete! {$translatedCount} missing item(s) translated. Click again to continue if more translations are missing.");
 
             return;
         }
 
         if ($translatedCount > 0) {
-            Flux::toast("{$translatedCount} item(s) translated. {$failedCount} item(s) could not be translated automatically.", variant: 'warning');
+            Flux::toast("{$translatedCount} item(s) translated. {$failedCount} item(s) could not be translated automatically. Click again to continue if more translations are missing.", variant: 'warning');
 
             return;
         }
 
-        Flux::toast('No missing translations could be auto translated. Please try again later.', variant: 'danger');
+        Flux::toast('No missing translations could be auto translated in this batch. Please try again later.', variant: 'danger');
     }
 
     public function deleteTranslation($key)

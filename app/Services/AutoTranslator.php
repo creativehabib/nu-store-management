@@ -20,8 +20,7 @@ class AutoTranslator
         }
 
         try {
-            $response = Http::timeout(15)
-                ->retry(2, 300)
+            $response = Http::timeout(5)
                 ->acceptJson()
                 ->get('https://api.mymemory.translated.net/get', [
                     'q' => $text,
