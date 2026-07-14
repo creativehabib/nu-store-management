@@ -44,6 +44,11 @@
                     <span wire:loading wire:target="scanCodebase">{{ __('Scanning...') }}</span>
                 </flux:button>
 
+                <flux:button variant="outline" icon="language" wire:click="autoTranslate" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="autoTranslate">{{ __('Auto Translate') }}</span>
+                    <span wire:loading wire:target="autoTranslate">{{ __('Translating...') }}</span>
+                </flux:button>
+
                 <div class="w-32">
                     <flux:select wire:model.live="locale">
                         <flux:select.option value="bn">{{ __('BN - Bengali') }}</flux:select.option>
