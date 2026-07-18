@@ -136,6 +136,58 @@
                 </div>
             </div>
 
+            <div class="border-t pt-6">
+                <flux:heading size="md" class="mb-2">{{ __('API Settings') }}</flux:heading>
+                <flux:subheading class="mb-4">{{ __('Generate a bearer token for the mobile app. API routes will reject every request without this token.') }}</flux:subheading>
+
+                <div class="space-y-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h4 class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ __('API Access') }}</h4>
+                            <p class="text-sm text-zinc-500">
+                                {{ $api_token_enabled ? __('A token is active for app API access.') : __('No API token is active yet.') }}
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            <flux:button type="button" variant="primary" wire:click="generateApiToken">
+                                {{ $api_token_enabled ? __('Regenerate Token') : __('Generate Token') }}
+                            </flux:button>
+
+                            @if($api_token_enabled)
+                                <flux:button type="button" variant="danger" wire:click="revokeApiToken">{{ __('Revoke Token') }}</flux:button>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($new_api_token)
+                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/30">
+                            <p class="mb-2 text-sm font-medium text-amber-900 dark:text-amber-200">{{ __('Copy this token now. For security, it will not be shown again after refresh.') }}</p>
+                            <code class="block break-all rounded bg-white p-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">{{ $new_api_token }}</code>
+                            <p class="mt-2 text-xs text-amber-800 dark:text-amber-300">{{ __('Send it with every app request as: X-App-Token: YOUR_TOKEN. Read-only endpoints also accept Authorization: Bearer YOUR_TOKEN.') }}</p>
+                        </div>
+                    @endif
+
+                    <div class="text-sm text-zinc-500">
+                        <p>{{ __('Available endpoints:') }}</p>
+                        <ul class="mt-2 list-disc space-y-1 ps-5">
+                            <li><code>POST /api/v1/auth/register</code></li>
+                            <li><code>POST /api/v1/auth/login</code></li>
+                            <li><code>GET /api/v1/auth/me</code></li>
+                            <li><code>POST /api/v1/auth/logout</code></li>
+                            <li><code>GET /api/v1/inventory</code></li>
+                            <li><code>GET /api/v1/products</code></li>
+                            <li><code>GET /api/v1/categories</code></li>
+                            <li><code>GET /api/v1/departments</code></li>
+                            <li><code>GET /api/v1/designations</code></li>
+                            <li><code>GET /api/v1/purposes</code></li>
+                            <li><code>GET /api/v1/requisitions</code></li>
+                            <li><code>GET /api/v1/stock-entries</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex justify-end mt-4">
                 <flux:button type="submit" variant="primary">{{ __('Save Changes') }}</flux:button>
             </div>
