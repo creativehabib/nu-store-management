@@ -182,6 +182,7 @@
                             <li><code>GET /api/v1/designations</code></li>
                             <li><code>GET /api/v1/purposes</code></li>
                             <li><code>GET /api/v1/requisitions</code></li>
+                            <li><code>GET /api/v1/settings</code></li>
                             <li><code>GET /api/v1/stock-entries</code></li>
                         </ul>
                     </div>
