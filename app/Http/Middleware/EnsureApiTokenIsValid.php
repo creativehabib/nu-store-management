@@ -12,7 +12,7 @@ class EnsureApiTokenIsValid
     public function handle(Request $request, Closure $next): Response
     {
         $configuredTokenHash = setting('api_token_hash');
-        $providedToken = $request->bearerToken();
+        $providedToken = $request->header('X-App-Token') ?: $request->bearerToken();
 
         if (! is_string($configuredTokenHash) || $configuredTokenHash === '' || ! is_string($providedToken) || $providedToken === '') {
             return $this->unauthorizedResponse();
@@ -28,7 +28,7 @@ class EnsureApiTokenIsValid
     protected function unauthorizedResponse(): JsonResponse
     {
         return response()->json([
-            'message' => 'Valid API bearer token is required.',
+            'message' => 'Valid API app token is required.',
         ], 401);
     }
 }

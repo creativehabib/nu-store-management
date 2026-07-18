@@ -164,13 +164,17 @@
                         <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/30">
                             <p class="mb-2 text-sm font-medium text-amber-900 dark:text-amber-200">{{ __('Copy this token now. For security, it will not be shown again after refresh.') }}</p>
                             <code class="block break-all rounded bg-white p-3 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">{{ $new_api_token }}</code>
-                            <p class="mt-2 text-xs text-amber-800 dark:text-amber-300">{{ __('Send it with every app request as: Authorization: Bearer YOUR_TOKEN') }}</p>
+                            <p class="mt-2 text-xs text-amber-800 dark:text-amber-300">{{ __('Send it with every app request as: X-App-Token: YOUR_TOKEN. Read-only endpoints also accept Authorization: Bearer YOUR_TOKEN.') }}</p>
                         </div>
                     @endif
 
                     <div class="text-sm text-zinc-500">
                         <p>{{ __('Available endpoints:') }}</p>
                         <ul class="mt-2 list-disc space-y-1 ps-5">
+                            <li><code>POST /api/v1/auth/register</code></li>
+                            <li><code>POST /api/v1/auth/login</code></li>
+                            <li><code>GET /api/v1/auth/me</code></li>
+                            <li><code>POST /api/v1/auth/logout</code></li>
                             <li><code>GET /api/v1/inventory</code></li>
                             <li><code>GET /api/v1/products</code></li>
                             <li><code>GET /api/v1/categories</code></li>

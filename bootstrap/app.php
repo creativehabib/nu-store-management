@@ -3,6 +3,7 @@
 use App\Http\Middleware\CheckIfApproved;
 use App\Http\Middleware\CheckIfInstalled;
 use App\Http\Middleware\EnsureApiTokenIsValid;
+use App\Http\Middleware\EnsureApiUserTokenIsValid;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'approved' => CheckIfApproved::class,
             'api.token' => EnsureApiTokenIsValid::class,
+            'api.user.token' => EnsureApiUserTokenIsValid::class,
         ]);
         $middleware->web(append: [
             SetLocale::class,
