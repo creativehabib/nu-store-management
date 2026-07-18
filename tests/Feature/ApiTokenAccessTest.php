@@ -131,3 +131,27 @@ it('does not log in users awaiting admin approval', function (): void {
         'X-App-Token' => 'app-token',
     ])->assertForbidden();
 });
+
+it('returns application settings through the api without exposing secret settings', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+    set_setting('site_name', 'NU Store');
+    set_setting('site_email', 'store@example.com');
+    set_setting('site_logo', 'settings/logo.png');
+    set_setting('mail_password', 'secret-mail-password', 'mail');
+    set_setting('store_mode', 'centralized');
+    set_setting('central_store_dept_id', 7);
+    set_setting('approval_flow_roles', ['deputy_director', 'director']);
+
+    getJson('/api/v1/settings', [
+        'X-App-Token' => 'app-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.site.name', 'NU Store')
+        ->assertJsonPath('data.site.email', 'store@example.com')
+        ->assertJsonPath('data.site.logo', 'settings/logo.png')
+        ->assertJsonPath('data.requisition.store_mode', 'centralized')
+        ->assertJsonPath('data.requisition.central_store_dept_id', 7)
+        ->assertJsonPath('data.requisition.approval_flow_roles.0', 'deputy_director')
+        ->assertJsonMissing(['api_token_hash' => hash('sha256', 'app-token')])
+        ->assertJsonMissing(['mail_password' => 'secret-mail-password']);
+});

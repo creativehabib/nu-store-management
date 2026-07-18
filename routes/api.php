@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\InventoryDataController;
+use App\Http\Controllers\Api\V1\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
@@ -21,5 +22,6 @@ Route::prefix('v1')
         Route::get('products', [InventoryDataController::class, 'products'])->name('api.v1.products.index');
         Route::get('purposes', [InventoryDataController::class, 'purposes'])->name('api.v1.purposes.index');
         Route::get('requisitions', [InventoryDataController::class, 'requisitions'])->name('api.v1.requisitions.index');
+        Route::get('settings', [SettingsController::class, 'index'])->name('api.v1.settings.index');
         Route::get('stock-entries', [InventoryDataController::class, 'stockEntries'])->name('api.v1.stock_entries.index');
     });
