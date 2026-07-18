@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Support\ApprovalWorkflow;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -23,6 +24,8 @@ class GeneralSettings extends Component
     public $store_mode;
     public $central_store_dept_id;
     public array $approval_flow_roles = [];
+    public bool $api_token_enabled = false;
+    public ?string $new_api_token = null;
 
     public function mount(): void
     {
@@ -41,6 +44,7 @@ class GeneralSettings extends Component
         $this->store_mode = setting('store_mode', 'departmental');
         $this->central_store_dept_id = setting('central_store_dept_id', 1);
         $this->approval_flow_roles = ApprovalWorkflow::roles();
+        $this->api_token_enabled = filled(setting('api_token_hash'));
     }
 
     public function addApprovalStep(): void
@@ -68,6 +72,32 @@ class GeneralSettings extends Component
     public function updatedApprovalFlowRoles(): void
     {
         $this->approval_flow_roles = ApprovalWorkflow::rolesFromSelection($this->approval_flow_roles);
+    }
+
+    public function generateApiToken(): void
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        $token = Str::random(64);
+
+        set_setting('api_token_hash', hash('sha256', $token), 'api');
+
+        $this->new_api_token = $token;
+        $this->api_token_enabled = true;
+
+        Flux::toast(__('API token generated successfully. Copy it now; it will not be shown again.'));
+    }
+
+    public function revokeApiToken(): void
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        set_setting('api_token_hash', null, 'api');
+
+        $this->new_api_token = null;
+        $this->api_token_enabled = false;
+
+        Flux::toast(__('API token revoked successfully.'));
     }
 
     public function save(): void
