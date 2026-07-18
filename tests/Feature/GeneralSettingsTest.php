@@ -26,6 +26,14 @@ it('shows branding preview controls on the general settings page', function () {
         ->assertSee('Upload Favicon');
 });
 
+it('shows the settings api endpoint in available endpoints', function () {
+    $this->actingAs(generalSettingsAdmin());
+
+    Livewire::test(GeneralSettings::class)
+        ->assertSee('Available endpoints:')
+        ->assertSee('GET /api/v1/settings');
+});
+
 it('stores logo and favicon uploads and refreshes current preview paths', function () {
     Storage::fake('public');
 
