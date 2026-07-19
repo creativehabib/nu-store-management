@@ -16,6 +16,7 @@ Route::prefix('v1')
             Route::get('auth/me', [AuthController::class, 'me'])->name('api.v1.auth.me');
             Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.v1.auth.logout');
             Route::get('dashboard', [DashboardController::class, 'index'])->name('api.v1.dashboard.index');
+            Route::get('my-requisitions', [InventoryDataController::class, 'myRequisitions'])->name('api.v1.my_requisitions.index');
         });
         Route::get('inventory', [InventoryDataController::class, 'index'])->name('api.v1.inventory.index');
         Route::get('categories', [InventoryDataController::class, 'categories'])->name('api.v1.categories.index');
