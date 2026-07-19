@@ -215,3 +215,97 @@ it('returns authenticated dashboard data through the api', function (): void {
             ],
         ]);
 });
+
+
+it('returns only the authenticated users requisition history through the api', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    $category = Category::query()->create(['name' => 'Stationery']);
+    $pen = Product::query()->create([
+        'category_id' => $category->id,
+        'name_bn' => 'কলম',
+        'name_en' => 'Pen',
+        'stock' => 50,
+    ]);
+    $paper = Product::query()->create([
+        'category_id' => $category->id,
+        'name_bn' => 'কাগজ',
+        'name_en' => 'Paper',
+        'stock' => 30,
+    ]);
+
+    $user = User::query()->create([
+        'name' => 'History User',
+        'email' => 'history@example.com',
+        'pf_no' => 'PF-5001',
+        'mobile_no' => '01700000005',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'is_approved' => true,
+    ]);
+
+    $otherUser = User::query()->create([
+        'name' => 'Other User',
+        'email' => 'other@example.com',
+        'pf_no' => 'PF-5002',
+        'mobile_no' => '01700000006',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'is_approved' => true,
+    ]);
+
+    $matchingRequisition = Requisition::query()->create([
+        'requisition_no' => 'REQ-MINE-001',
+        'user_id' => $user->id,
+        'status' => 'distributed',
+        'approval_history' => [],
+    ]);
+    $matchingRequisition->items()->create([
+        'product_id' => $pen->id,
+        'demanded_qty' => 2,
+        'supplied_qty' => 2,
+        'purpose' => 'Official Use',
+    ]);
+
+    $ownNonMatchingRequisition = Requisition::query()->create([
+        'requisition_no' => 'REQ-MINE-002',
+        'user_id' => $user->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+    $ownNonMatchingRequisition->items()->create([
+        'product_id' => $paper->id,
+        'demanded_qty' => 1,
+        'supplied_qty' => 0,
+        'purpose' => 'Official Use',
+    ]);
+
+    Requisition::query()->create([
+        'requisition_no' => 'REQ-OTHER-001',
+        'user_id' => $otherUser->id,
+        'status' => 'distributed',
+        'approval_history' => [],
+    ])->items()->create([
+        'product_id' => $pen->id,
+        'demanded_qty' => 4,
+        'supplied_qty' => 4,
+        'purpose' => 'Official Use',
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    getJson('/api/v1/my-requisitions?status=distributed&search=Pen&per_page=5', [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.data.0.requisition_no', 'REQ-MINE-001')
+        ->assertJsonPath('data.data.0.items.0.product.name_en', 'Pen')
+        ->assertJsonCount(1, 'data.data')
+        ->assertJsonMissing(['requisition_no' => 'REQ-MINE-002'])
+        ->assertJsonMissing(['requisition_no' => 'REQ-OTHER-001']);
+});
