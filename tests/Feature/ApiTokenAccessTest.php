@@ -5,6 +5,7 @@ use App\Models\Category;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Product;
+use App\Models\Purpose;
 use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -214,4 +215,68 @@ it('returns authenticated dashboard data through the api', function (): void {
                 'my_own_requisitions',
             ],
         ]);
+});
+
+it('allows authenticated users to create and view their requisitions through the api', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
+    $category = Category::query()->create(['name' => 'Stationery']);
+    $purpose = Purpose::query()->create(['name' => 'Official Use', 'is_active' => true]);
+    $product = Product::query()->create([
+        'category_id' => $category->id,
+        'name_bn' => 'কলম',
+        'name_en' => 'Pen',
+        'stock' => 25,
+    ]);
+    $user = User::query()->create([
+        'name' => 'Mobile User',
+        'email' => 'mobile@example.com',
+        'pf_no' => 'PF-5001',
+        'mobile_no' => '01700000005',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'department_id' => $department->id,
+        'is_approved' => true,
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    $createResponse = postJson('/api/v1/requisitions', [
+        'items' => [
+            [
+                'product_id' => $product->id,
+                'demanded_qty' => 3,
+                'purpose' => $purpose->name,
+            ],
+        ],
+    ], [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertCreated()
+        ->assertJsonPath('message', 'Requisition submitted successfully.')
+        ->assertJsonPath('data.user.email', 'mobile@example.com')
+        ->assertJsonPath('data.items.0.demanded_qty', 3)
+        ->assertJsonPath('data.items.0.product.name_en', 'Pen');
+
+    $requisitionId = $createResponse->json('data.id');
+
+    getJson('/api/v1/requisitions?mine=1', [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.data.0.id', $requisitionId);
+
+    getJson('/api/v1/requisitions/'.$requisitionId, [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.id', $requisitionId);
 });
