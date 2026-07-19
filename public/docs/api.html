@@ -148,9 +148,10 @@
             <a href="#master-data">8. Master Data</a>
             <a href="#dashboard">9. Dashboard</a>
             <a href="#requisitions">10. Requisitions</a>
-            <a href="#flutter-client">11. Flutter Client</a>
-            <a href="#screen-map">12. Suggested Screens</a>
-            <a href="#security">13. Security Notes</a>
+            <a href="#workflow">11. Workflow Queues</a>
+            <a href="#flutter-client">12. Flutter Client</a>
+            <a href="#screen-map">13. Suggested Screens</a>
+            <a href="#security">14. Security Notes</a>
         </nav>
     </aside>
 
@@ -534,8 +535,102 @@ final authHeaders = {
             <p>Single requisition full details return করে। User-এর role অনুযায়ী access না থাকলে 404 return হবে।</p>
         </section>
 
+
+        <section id="workflow">
+            <h2>11. Workflow Queue & Approval APIs</h2>
+            <p>এই endpoint-গুলো mobile app-এ initiator queue, approval queue, approve/return/forward/distribute action build করার জন্য। সব endpoint authenticated এবং <code>X-App-Token</code> + user bearer token দরকার।</p>
+
+            <h3>Missing APIs Now Covered</h3>
+            <table>
+                <thead><tr><th>Feature</th><th>Endpoint</th><th>Who Can Use</th></tr></thead>
+                <tbody>
+                    <tr><td>Workflow badge counts</td><td><code>GET /workflow/counts</code></td><td>Any authenticated user; role অনুযায়ী count return করে।</td></tr>
+                    <tr><td>Initiator queue</td><td><code>GET /workflow/initiator-queue</code></td><td><code>initiator</code></td></tr>
+                    <tr><td>Approval queue</td><td><code>GET /workflow/approval-queue</code></td><td><code>assistant_director</code>, <code>deputy_director</code>, <code>director</code></td></tr>
+                    <tr><td>Forward to approver</td><td><code>POST /workflow/requisitions/{id}/forward</code></td><td><code>initiator</code></td></tr>
+                    <tr><td>Approve requisition</td><td><code>POST /workflow/requisitions/{id}/approve</code></td><td>Current waiting approver role</td></tr>
+                    <tr><td>Return requisition</td><td><code>POST /workflow/requisitions/{id}/return</code></td><td>Current waiting approver role</td></tr>
+                    <tr><td>Distribute stock</td><td><code>POST /workflow/requisitions/{id}/distribute</code></td><td><code>initiator</code>, <code>admin</code>, <code>super_admin</code></td></tr>
+                </tbody>
+            </table>
+
+            <div class="endpoint"><span class="method get">GET</span><span class="path">/workflow/counts</span></div>
+            <p>Sidebar badge বা dashboard action count দেখানোর জন্য।</p>
+            <pre><code>{
+  "data": {
+    "initiator": 3,
+    "approval": 2
+  }
+}</code></pre>
+
+            <div class="endpoint"><span class="method get">GET</span><span class="path">/workflow/initiator-queue?status=pending&amp;search=REQ&amp;per_page=25</span></div>
+            <p>Initiator-এর জন্য pending, returned, director_approved এবং distributed requisitions list করে। Centralized mode-এ non-central initiator queue empty থাকবে।</p>
+            <table>
+                <thead><tr><th>Query</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>status</code></td><td>string|null</td><td><code>pending</code>, <code>returned</code>, <code>director_approved</code>, <code>distributed</code></td></tr>
+                    <tr><td><code>search</code></td><td>string|null</td><td>Requisition no, requester name/PF, department, product name.</td></tr>
+                    <tr><td><code>per_page</code></td><td>integer|null</td><td>1-100, default 25.</td></tr>
+                </tbody>
+            </table>
+
+            <div class="endpoint"><span class="method get">GET</span><span class="path">/workflow/approval-queue?search=REQ&amp;start_date=2026-07-01&amp;end_date=2026-07-31&amp;department_id=1&amp;per_page=25</span></div>
+            <p>Logged-in approver-এর role অনুযায়ী waiting status detect করে queue return করে। Response meta-তে <code>waiting_status</code> থাকে।</p>
+            <pre><code>{
+  "data": {
+    "data": [{"id": 10, "requisition_no": "REQ-20260719-ABCD", "status": "initiator_checked"}],
+    "current_page": 1,
+    "per_page": 25,
+    "total": 1
+  },
+  "meta": {
+    "waiting_status": "initiator_checked"
+  }
+}</code></pre>
+
+            <div class="endpoint"><span class="method post">POST</span><span class="path">/workflow/requisitions/{id}/forward</span></div>
+            <p>Initiator pending/returned requisition যাচাই করে first approval role-এ forward করে।</p>
+            <pre><code>{
+  "comment": "Checked from mobile app.",
+  "supplied_quantities": {
+    "21": 3,
+    "22": 1
+  }
+}</code></pre>
+
+            <div class="endpoint"><span class="method post">POST</span><span class="path">/workflow/requisitions/{id}/approve</span></div>
+            <p>Current approver requisition approve করলে workflow অনুযায়ী next status set হবে। Department director review হলে director approve করার পর central store initiator queue-তে <code>pending</code> যাবে।</p>
+            <pre><code>{
+  "comment": "Approved.",
+  "supplied_quantities": {
+    "21": 3
+  }
+}</code></pre>
+
+            <div class="endpoint"><span class="method post">POST</span><span class="path">/workflow/requisitions/{id}/return</span></div>
+            <p>Approver requisition initiator-এর কাছে ফেরত পাঠায়।</p>
+            <pre><code>{
+  "comment": "Please review requested quantity."
+}</code></pre>
+
+            <div class="endpoint"><span class="method post">POST</span><span class="path">/workflow/requisitions/{id}/distribute</span></div>
+            <p>Only <code>director_approved</code> requisition distribute করা যায়। Distribution হলে supplied quantity অনুযায়ী product stock decrement হয় এবং status <code>distributed</code> হয়।</p>
+            <pre><code>{
+  "message": "Requisition distributed successfully.",
+  "data": {"status": "distributed", "items": [...]}
+}</code></pre>
+
+            <h3>Workflow Error Rules</h3>
+            <ul>
+                <li><code>403</code>: user role action করার অনুমোদিত নয়।</li>
+                <li><code>404</code>: requisition user-এর visibility rule-এর বাইরে।</li>
+                <li><code>422</code>: requisition current status এই action-এর জন্য valid নয়।</li>
+            </ul>
+        </section>
+
+
         <section id="flutter-client">
-            <h2>11. Flutter Client Example</h2>
+            <h2>12. Flutter Client Example</h2>
             <p>নিচের example একটি minimal API client দেখাচ্ছে। Production app-এ timeout, retry policy, logging এবং typed models যোগ করুন।</p>
             <pre><code>import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -591,25 +686,27 @@ class NuStoreApiClient {
         </section>
 
         <section id="screen-map">
-            <h2>12. Suggested Flutter Screen Map</h2>
+            <h2>13. Suggested Flutter Screen Map</h2>
             <table>
                 <thead><tr><th>Screen</th><th>Endpoint(s)</th><th>Developer Notes</th></tr></thead>
                 <tbody>
                     <tr><td>Splash / Session Check</td><td><code>GET /auth/me</code>, <code>GET /settings</code></td><td>Saved token থাকলে profile load করুন, না থাকলে login screen।</td></tr>
                     <tr><td>Register</td><td><code>GET /departments</code>, <code>GET /designations</code>, <code>POST /auth/register</code></td><td>Department/designation dropdown আগে load করুন।</td></tr>
                     <tr><td>Login</td><td><code>POST /auth/login</code></td><td>Token secure storage-এ রাখুন।</td></tr>
-                    <tr><td>Dashboard</td><td><code>GET /dashboard</code></td><td>Role অনুযায়ী stat cards dynamically render করুন।</td></tr>
+                    <tr><td>Dashboard</td><td><code>GET /dashboard</code>, <code>GET /workflow/counts</code></td><td>Role অনুযায়ী stat cards এবং workflow badge dynamically render করুন।</td></tr>
+                    <tr><td>Workflow Queues</td><td><code>GET /workflow/initiator-queue</code>, <code>GET /workflow/approval-queue</code></td><td>User role অনুযায়ী initiator অথবা approval queue দেখান।</td></tr>
                     <tr><td>Products</td><td><code>GET /categories</code>, <code>GET /products</code></td><td>Offline-friendly cache রাখা যায়।</td></tr>
                     <tr><td>Create Requisition</td><td><code>GET /products</code>, <code>GET /purposes</code>, <code>POST /requisitions</code></td><td>At least one item, quantity minimum 1।</td></tr>
                     <tr><td>My Requisitions</td><td><code>GET /requisitions?mine=1</code></td><td>Pagination metadata ব্যবহার করে infinite scroll/pagination করুন।</td></tr>
                     <tr><td>Requisition Details</td><td><code>GET /requisitions/{id}</code></td><td>Items, supplied quantity এবং approval history দেখান।</td></tr>
+                    <tr><td>Workflow Action</td><td><code>POST /workflow/requisitions/{id}/forward</code>, <code>/approve</code>, <code>/return</code>, <code>/distribute</code></td><td>Status অনুযায়ী available action buttons show করুন।</td></tr>
                     <tr><td>Logout</td><td><code>POST /auth/logout</code></td><td>Server logout success হলে local token clear করুন।</td></tr>
                 </tbody>
             </table>
         </section>
 
         <section id="security">
-            <h2>13. Security & Production Notes</h2>
+            <h2>14. Security & Production Notes</h2>
             <ul>
                 <li>সবসময় HTTPS ব্যবহার করুন।</li>
                 <li>User token Flutter secure storage/keychain/keystore-এ রাখুন; plain shared preferences-এ রাখবেন না।</li>
