@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="bn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NU Store Management API Documentation</title>
+    <style>
+        body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.6;margin:0;color:#172033;background:#f7fafc}main{max-width:1120px;margin:auto;padding:32px}section{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px;margin:18px 0;box-shadow:0 1px 2px #0000000d}code,pre{background:#0f172a;color:#e2e8f0;border-radius:8px}code{padding:2px 6px}pre{padding:16px;overflow:auto}.method{display:inline-block;min-width:72px;text-align:center;border-radius:999px;padding:3px 10px;font-weight:700;color:white}.get{background:#2563eb}.post{background:#16a34a}.delete{background:#dc2626}table{width:100%;border-collapse:collapse}th,td{border:1px solid #e5e7eb;padding:10px;text-align:left;vertical-align:top}th{background:#f1f5f9}h1,h2,h3{line-height:1.2}.note{background:#ecfeff;border-left:4px solid #06b6d4;padding:12px;border-radius:8px}.warn{background:#fff7ed;border-left:4px solid #f97316;padding:12px;border-radius:8px}</style>
+</head>
+<body>
+<main>
+    <h1>NU Store Management System - Flutter API Documentation</h1>
+    <p>এই ডকুমেন্টটি Flutter/Android/iOS অ্যাপ থেকে NU Store Management System ব্যবহার করার জন্য প্রয়োজনীয় API endpoint, header, request body এবং response structure দেখায়।</p>
+
+    <section>
+        <h2>Base URL & Authentication</h2>
+        <p><strong>Base URL:</strong> <code>https://nu-store-management.test/api/v1</code></p>
+        <div class="note">সব request-এ server configured app token পাঠাতে হবে: <code>X-App-Token: APP_TOKEN</code>। Login-এর পর authenticated endpoint-এ user bearer token পাঠাতে হবে: <code>Authorization: Bearer USER_TOKEN</code>।</div>
+        <pre><code>Accept: application/json
+Content-Type: application/json
+X-App-Token: APP_TOKEN
+Authorization: Bearer USER_TOKEN</code></pre>
+    </section>
+
+    <section>
+        <h2>Common Error Responses</h2>
+        <table><thead><tr><th>Status</th><th>Meaning</th><th>Response</th></tr></thead><tbody>
+            <tr><td>401</td><td>Invalid app/user token</td><td><code>{"message":"Valid API app token is required."}</code></td></tr>
+            <tr><td>403</td><td>User pending approval</td><td><code>{"message":"Your account is pending admin approval."}</code></td></tr>
+            <tr><td>422</td><td>Validation error</td><td><code>{"message":"...","errors":{"field":["..."]}}</code></td></tr>
+            <tr><td>404</td><td>Record not found or not visible to user</td><td><code>{"message":"Not Found"}</code></td></tr>
+        </tbody></table>
+    </section>
+
+    <section>
+        <h2>Authentication</h2>
+        <h3><span class="method post">POST</span> /auth/register</h3>
+        <p>নতুন requisitioner/user registration. Admin approval না হওয়া পর্যন্ত login করা যাবে না।</p>
+        <pre><code>{
+  "name": "Rahim Uddin",
+  "email": "rahim@example.com",
+  "pf_no": "PF-1001",
+  "mobile_no": "01700000000",
+  "department_id": 1,
+  "designation_id": 2,
+  "role": "requisitioner",
+  "password": "Password#123",
+  "password_confirmation": "Password#123"
+}</code></pre>
+
+        <h3><span class="method post">POST</span> /auth/login</h3>
+        <pre><code>{
+  "login": "rahim@example.com or PF-1001",
+  "password": "Password#123",
+  "device_name": "android-phone"
+}</code></pre>
+        <p>Response থেকে <code>data.token</code> Flutter secure storage-এ রাখুন।</p>
+
+        <h3><span class="method get">GET</span> /auth/me</h3>
+        <p>Logged-in user profile, department এবং designation সহ।</p>
+
+        <h3><span class="method post">POST</span> /auth/logout</h3>
+        <p>বর্তমান device token revoke করে।</p>
+    </section>
+
+    <section>
+        <h2>Dashboard</h2>
+        <h3><span class="method get">GET</span> /dashboard?trend_filter=30</h3>
+        <p><code>trend_filter</code> হতে পারে <code>7</code>, <code>15</code>, <code>30</code>, বা <code>all</code>। Role-based stats, chart labels/values, recent requisitions এবং user's own requisitions return করে।</p>
+    </section>
+
+    <section>
+        <h2>Master Data</h2>
+        <table><thead><tr><th>Endpoint</th><th>Description</th></tr></thead><tbody>
+            <tr><td><span class="method get">GET</span> /inventory</td><td>Departments, designations, categories, products, purposes, recent stock entries, recent requisitions একসাথে।</td></tr>
+            <tr><td><span class="method get">GET</span> /departments</td><td>Department list.</td></tr>
+            <tr><td><span class="method get">GET</span> /designations</td><td>Designation list rank/title order-এ।</td></tr>
+            <tr><td><span class="method get">GET</span> /categories</td><td>Product category list.</td></tr>
+            <tr><td><span class="method get">GET</span> /products</td><td>Products with category and stock.</td></tr>
+            <tr><td><span class="method get">GET</span> /purposes</td><td>Requisition purpose list.</td></tr>
+            <tr><td><span class="method get">GET</span> /stock-entries</td><td>Paginated stock entries with product.</td></tr>
+            <tr><td><span class="method get">GET</span> /settings</td><td>Site name/logo/contact, store mode, central store department, approval roles.</td></tr>
+        </tbody></table>
+    </section>
+
+    <section>
+        <h2>Requisitions</h2>
+        <h3><span class="method get">GET</span> /requisitions</h3>
+        <p>Authenticated user-এর role অনুযায়ী visible requisitions return করে। Query params: <code>mine=1</code>, <code>status=pending</code>, <code>search=REQ</code>, <code>per_page=25</code>।</p>
+
+        <h3><span class="method post">POST</span> /requisitions</h3>
+        <p>Flutter app থেকে নতুন requisition submit করার endpoint।</p>
+        <pre><code>{
+  "items": [
+    {"product_id": 1, "demanded_qty": 3, "purpose": "Official Use"},
+    {"product_id": 2, "demanded_qty": 1, "purpose": "Training Purpose"}
+  ]
+}</code></pre>
+        <p>Created requisition response-এ <code>requisition_no</code>, <code>status</code>, requester user এবং item/product details থাকে।</p>
+
+        <h3><span class="method get">GET</span> /requisitions/{id}</h3>
+        <p>একটি requisition-এর full details, items, product category এবং approval history দেখায়।</p>
+    </section>
+
+    <section>
+        <h2>Flutter Integration Example</h2>
+        <pre><code>final response = await http.post(
+  Uri.parse('$baseUrl/auth/login'),
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'X-App-Token': appToken,
+  },
+  body: jsonEncode({
+    'login': login,
+    'password': password,
+    'device_name': 'flutter-app',
+  }),
+);
+
+final token = jsonDecode(response.body)['data']['token'];</code></pre>
+        <pre><code>final req = await http.post(
+  Uri.parse('$baseUrl/requisitions'),
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'X-App-Token': appToken,
+    'Authorization': 'Bearer $token',
+  },
+  body: jsonEncode({
+    'items': [
+      {'product_id': 1, 'demanded_qty': 2, 'purpose': 'Official Use'}
+    ],
+  }),
+);</code></pre>
+    </section>
+
+    <section>
+        <h2>Recommended Flutter Screens</h2>
+        <ul>
+            <li>Splash: app token availability এবং saved user token check.</li>
+            <li>Login/Register: <code>/auth/login</code>, <code>/auth/register</code>.</li>
+            <li>Dashboard: <code>/dashboard</code>.</li>
+            <li>Product catalog: <code>/categories</code>, <code>/products</code>, <code>/purposes</code>.</li>
+            <li>Create requisition: <code>POST /requisitions</code>.</li>
+            <li>My requisitions/details: <code>GET /requisitions?mine=1</code>, <code>GET /requisitions/{id}</code>.</li>
+            <li>Settings/About: <code>/settings</code>.</li>
+        </ul>
+        <div class="warn">Security note: production app token publicly bundled in mobile apps can be extracted. Use HTTPS, rotate tokens periodically, and keep user bearer tokens in Flutter secure storage.</div>
+    </section>
+</main>
+</body>
+</html>
