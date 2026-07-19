@@ -5,6 +5,7 @@ use App\Models\Category;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Product;
+use App\Models\Purpose;
 use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -214,4 +215,147 @@ it('returns authenticated dashboard data through the api', function (): void {
                 'my_own_requisitions',
             ],
         ]);
+});
+
+it('allows authenticated users to create and view their requisitions through the api', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
+    $category = Category::query()->create(['name' => 'Stationery']);
+    $purpose = Purpose::query()->create(['name' => 'Official Use', 'is_active' => true]);
+    $product = Product::query()->create([
+        'category_id' => $category->id,
+        'name_bn' => 'কলম',
+        'name_en' => 'Pen',
+        'stock' => 25,
+    ]);
+    $user = User::query()->create([
+        'name' => 'Mobile User',
+        'email' => 'mobile@example.com',
+        'pf_no' => 'PF-5001',
+        'mobile_no' => '01700000005',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'department_id' => $department->id,
+        'is_approved' => true,
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    $createResponse = postJson('/api/v1/requisitions', [
+        'items' => [
+            [
+                'product_id' => $product->id,
+                'demanded_qty' => 3,
+                'purpose' => $purpose->name,
+            ],
+        ],
+    ], [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertCreated()
+        ->assertJsonPath('message', 'Requisition submitted successfully.')
+        ->assertJsonPath('data.user.email', 'mobile@example.com')
+        ->assertJsonPath('data.items.0.demanded_qty', 3)
+        ->assertJsonPath('data.items.0.product.name_en', 'Pen');
+
+    $requisitionId = $createResponse->json('data.id');
+
+    getJson('/api/v1/requisitions?mine=1', [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.data.0.id', $requisitionId);
+
+    getJson('/api/v1/requisitions/'.$requisitionId, [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.id', $requisitionId);
+});
+
+it('allows approvers to list and approve requisitions through the workflow api', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+    set_setting('store_mode', 'departmental');
+    set_setting('approval_flow_roles', ['assistant_director', 'deputy_director', 'director']);
+
+    $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
+    $designation = Designation::query()->create(['title' => 'Assistant Director', 'rank' => 1]);
+    $category = Category::query()->create(['name' => 'Stationery']);
+    $product = Product::query()->create([
+        'category_id' => $category->id,
+        'name_bn' => 'কলম',
+        'name_en' => 'Pen',
+        'stock' => 25,
+    ]);
+    $requester = User::query()->create([
+        'name' => 'Requester User',
+        'email' => 'requester@example.com',
+        'pf_no' => 'PF-6001',
+        'mobile_no' => '01700000006',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'department_id' => $department->id,
+        'is_approved' => true,
+    ]);
+    $approver = User::query()->create([
+        'name' => 'Approver User',
+        'email' => 'approver@example.com',
+        'pf_no' => 'PF-6002',
+        'mobile_no' => '01700000007',
+        'password' => Hash::make('Password#123'),
+        'role' => 'assistant_director',
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'is_approved' => true,
+    ]);
+    $requisition = Requisition::query()->create([
+        'requisition_no' => 'REQ-WORKFLOW-001',
+        'user_id' => $requester->id,
+        'status' => 'initiator_checked',
+        'approval_history' => [],
+    ]);
+    $item = $requisition->items()->create([
+        'product_id' => $product->id,
+        'demanded_qty' => 5,
+        'supplied_qty' => 0,
+        'purpose' => 'Official Use',
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $approver->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'approver-token'),
+    ]);
+
+    getJson('/api/v1/workflow/approval-queue', [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer approver-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('meta.waiting_status', 'initiator_checked')
+        ->assertJsonPath('data.data.0.requisition_no', 'REQ-WORKFLOW-001');
+
+    postJson('/api/v1/workflow/requisitions/'.$requisition->id.'/approve', [
+        'comment' => 'Approved from mobile app.',
+        'supplied_quantities' => [
+            $item->id => 4,
+        ],
+    ], [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer approver-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('message', 'Requisition approved successfully.')
+        ->assertJsonPath('data.status', 'ad_approved')
+        ->assertJsonPath('data.items.0.supplied_qty', 4)
+        ->assertJsonPath('data.approval_history.0.role', 'assistant_director')
+        ->assertJsonPath('data.approval_history.0.action', 'approved');
 });
