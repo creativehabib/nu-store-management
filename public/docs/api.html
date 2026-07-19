@@ -143,13 +143,14 @@
             <a href="#auth-model">3. Authentication Model</a>
             <a href="#errors">4. Errors & Validation</a>
             <a href="#schemas">5. Core Data Schemas</a>
-            <a href="#auth-endpoints">6. Auth Endpoints</a>
-            <a href="#master-data">7. Master Data</a>
-            <a href="#dashboard">8. Dashboard</a>
-            <a href="#requisitions">9. Requisitions</a>
-            <a href="#flutter-client">10. Flutter Client</a>
-            <a href="#screen-map">11. Suggested Screens</a>
-            <a href="#security">12. Security Notes</a>
+            <a href="#settings-rules">6. Settings & Rules</a>
+            <a href="#auth-endpoints">7. Auth Endpoints</a>
+            <a href="#master-data">8. Master Data</a>
+            <a href="#dashboard">9. Dashboard</a>
+            <a href="#requisitions">10. Requisitions</a>
+            <a href="#flutter-client">11. Flutter Client</a>
+            <a href="#screen-map">12. Suggested Screens</a>
+            <a href="#security">13. Security Notes</a>
         </nav>
     </aside>
 
@@ -164,7 +165,7 @@
             <div class="grid">
                 <div class="card">
                     <strong>Base URL</strong>
-                    <code>https://nu-store-management.test/api/v1</code>
+                    <code data-base-url>https://your-domain.test/api/v1</code>
                 </div>
                 <div class="card">
                     <strong>Response Format</strong>
@@ -180,6 +181,7 @@
                 </div>
             </div>
             <p>এই API দুই স্তরের authentication ব্যবহার করে: প্রথমে app-level token এবং এরপর login করা user-এর bearer token। Public master data endpoint-গুলো app token দিয়ে চলে; user-specific endpoint-এ app token এবং user token দুটোই লাগে।</p>
+            <div class="note">ডকুমেন্টেশনটি যে domain/host থেকে খোলা হবে, Base URL স্বয়ংক্রিয়ভাবে সেই origin ব্যবহার করে <code>/api/v1</code> path যোগ করবে। Local, staging এবং production environment-এ আলাদা করে URL edit করতে হবে না।</div>
         </section>
 
         <section id="quick-start">
@@ -192,7 +194,7 @@
                 <li>Initial app load-এ <code>/settings</code>, <code>/departments</code>, <code>/designations</code>, <code>/categories</code>, <code>/products</code>, <code>/purposes</code> cache করতে পারেন।</li>
                 <li>Requisition submit করার আগে selected product, quantity এবং active purpose validate করুন।</li>
             </ol>
-            <pre><code>const baseUrl = 'https://nu-store-management.test/api/v1';
+            <pre><code>const baseUrl = '<span data-base-url>https://your-domain.test/api/v1</span>';
 
 final commonHeaders = {
   'Accept': 'application/json',
@@ -280,8 +282,135 @@ final authHeaders = {
             <p><span class="badge">pending</span><span class="badge">department_director_review</span><span class="badge">initiator_checked</span><span class="badge">ad_approved</span><span class="badge">dd_approved</span><span class="badge">director_approved</span><span class="badge">returned</span><span class="badge">distributed</span></p>
         </section>
 
+
+        <section id="settings-rules">
+            <h2>6. Settings & Rules Documentation</h2>
+            <p>এই অংশটি Flutter developer, backend maintainer এবং QA team-এর জন্য system settings, exposed API settings, hidden/private settings এবং business rules পরিষ্কারভাবে ব্যাখ্যা করে।</p>
+
+            <h3>6.1 Settings API: <code>GET /settings</code></h3>
+            <p>এই endpoint শুধু mobile app-এর জন্য নিরাপদ public configuration return করে। Secret বা sensitive key যেমন API token hash, mail password ইত্যাদি response-এ return করা হয় না।</p>
+            <h4>Response Shape</h4>
+            <pre><code>{
+  "data": {
+    "site": {
+      "name": "NU Store",
+      "email": "store@example.com",
+      "phone": "+8801700000000",
+      "address": "National University",
+      "logo": "settings/logo.png",
+      "logo_url": "/storage/settings/logo.png",
+      "favicon": "settings/favicon.png",
+      "favicon_url": "/storage/settings/favicon.png",
+      "social_links": {
+        "facebook": "https://facebook.com/example",
+        "twitter": null,
+        "instagram": null
+      }
+    },
+    "requisition": {
+      "show_print_footer": true,
+      "store_mode": "departmental",
+      "central_store_dept_id": 1,
+      "approval_flow_roles": ["assistant_director", "deputy_director", "director"]
+    }
+  }
+}</code></pre>
+
+            <h3>6.2 Exposed Settings Reference</h3>
+            <table>
+                <thead><tr><th>JSON Path</th><th>Type</th><th>Default</th><th>Flutter Usage</th><th>Rule / Note</th></tr></thead>
+                <tbody>
+                    <tr><td><code>data.site.name</code></td><td>string</td><td><code>Inventory Management System</code></td><td>App title, splash, about screen.</td><td>Fallback title ব্যবহার করুন যদি null/empty হয়।</td></tr>
+                    <tr><td><code>data.site.email</code></td><td>string|null</td><td><code>null</code></td><td>Support/contact screen.</td><td>Email link হিসেবে open করার আগে null check করুন।</td></tr>
+                    <tr><td><code>data.site.phone</code></td><td>string|null</td><td><code>null</code></td><td>Support/contact call action.</td><td>Phone action দেখানোর আগে null check করুন।</td></tr>
+                    <tr><td><code>data.site.address</code></td><td>string|null</td><td><code>null</code></td><td>About/contact screen.</td><td>Long text হতে পারে; multiline UI রাখুন।</td></tr>
+                    <tr><td><code>data.site.logo_url</code></td><td>string|null</td><td><code>null</code></td><td>Header/splash/logo image.</td><td>Null হলে bundled asset logo দেখান।</td></tr>
+                    <tr><td><code>data.site.favicon_url</code></td><td>string|null</td><td><code>null</code></td><td>Optional small icon.</td><td>Mobile app-এ optional।</td></tr>
+                    <tr><td><code>data.site.social_links.facebook</code></td><td>string|null</td><td><code>null</code></td><td>Social link button.</td><td>Valid URL হলে button show করুন।</td></tr>
+                    <tr><td><code>data.requisition.show_print_footer</code></td><td>boolean</td><td><code>true</code></td><td>Printable/PDF requisition UI.</td><td>false হলে print footer hide করুন।</td></tr>
+                    <tr><td><code>data.requisition.store_mode</code></td><td>string</td><td><code>departmental</code></td><td>Workflow label, help text, visibility expectation.</td><td>Allowed: <code>departmental</code>, <code>centralized</code>।</td></tr>
+                    <tr><td><code>data.requisition.central_store_dept_id</code></td><td>integer</td><td><code>1</code></td><td>Central store badge/logic hints.</td><td>Only meaningful when store mode is centralized।</td></tr>
+                    <tr><td><code>data.requisition.approval_flow_roles</code></td><td>array&lt;string&gt;</td><td><code>[assistant_director,deputy_director,director]</code></td><td>Approval progress timeline.</td><td>Director সবসময় final approver হিসেবে থাকবে।</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.3 Private / Non-Exposed Settings</h3>
+            <table>
+                <thead><tr><th>Setting Key</th><th>Purpose</th><th>Exposure Rule</th></tr></thead>
+                <tbody>
+                    <tr><td><code>api_token_hash</code></td><td>App-level API token hash verify করতে ব্যবহৃত হয়।</td><td>Never expose in API response, Flutter app শুধু plain app token জানবে।</td></tr>
+                    <tr><td><code>mail_password</code> এবং mail settings</td><td>Email notification sending configuration.</td><td>Never expose to mobile app.</td></tr>
+                    <tr><td><code>cache_*</code></td><td>Backend cache behaviour control.</td><td>Mobile app-এর জন্য দরকার নেই; API response-এ দেওয়া হবে না।</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.4 User Roles</h3>
+            <table>
+                <thead><tr><th>Role</th><th>Meaning</th><th>Mobile App Behaviour</th></tr></thead>
+                <tbody>
+                    <tr><td><code>super_admin</code></td><td>Full administrative access.</td><td>All requisitions/dashboard data দেখতে পারে।</td></tr>
+                    <tr><td><code>admin</code></td><td>Administrative access.</td><td>All requisitions/dashboard data দেখতে পারে।</td></tr>
+                    <tr><td><code>director</code></td><td>Final approver / department director review.</td><td>Approval queue/status timeline দেখান।</td></tr>
+                    <tr><td><code>deputy_director</code></td><td>Approval flow approver.</td><td>তার status queue থাকলে approval item show করুন।</td></tr>
+                    <tr><td><code>assistant_director</code></td><td>Approval flow approver.</td><td>তার status queue থাকলে approval item show করুন।</td></tr>
+                    <tr><td><code>initiator</code></td><td>Initial checker and distribution-ready handler.</td><td>Pending/returned/director approved/distributed requisitions নিয়ে কাজ করে।</td></tr>
+                    <tr><td><code>requisitioner</code></td><td>Demand/request submitter.</td><td>নিজের requisition submit/list/detail দেখতে পারে।</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.5 Store Mode Rules</h3>
+            <table>
+                <thead><tr><th>Mode</th><th>How Requisition Starts</th><th>Visibility / Routing Rule</th><th>Flutter Hint</th></tr></thead>
+                <tbody>
+                    <tr><td><code>departmental</code></td><td>New requisition status starts as <code>pending</code>.</td><td>Store roles usually see requisitions from their own department.</td><td>Department-specific workflow message দেখান।</td></tr>
+                    <tr><td><code>centralized</code></td><td>If requester is not in central store department, status starts as <code>department_director_review</code>; central store requester starts as <code>pending</code>.</td><td>Central store roles can see all department requisitions; non-central initiator queue is hidden for centralized mode.</td><td>Show “Central Store Workflow” label and department director review step.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.6 Approval Flow Rules</h3>
+            <p><code>approval_flow_roles</code> controls which approver roles are active between initiator checking and director final approval. Director is always included as final approver, even if only optional roles are selected.</p>
+            <table>
+                <thead><tr><th>Configured Roles</th><th>Status Sequence After Initiator</th><th>Developer Display</th></tr></thead>
+                <tbody>
+                    <tr><td><code>[assistant_director, deputy_director, director]</code></td><td><code>initiator_checked → ad_approved → dd_approved → director_approved</code></td><td>AD, DD, Director three-step approval timeline.</td></tr>
+                    <tr><td><code>[deputy_director, director]</code></td><td><code>ad_approved → dd_approved → director_approved</code></td><td>DD then Director timeline.</td></tr>
+                    <tr><td><code>[assistant_director, director]</code></td><td><code>initiator_checked → dd_approved → director_approved</code></td><td>AD then Director timeline.</td></tr>
+                    <tr><td><code>[director]</code></td><td><code>dd_approved → director_approved</code></td><td>Director-only approval timeline.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.7 Requisition Visibility Rules</h3>
+            <ul>
+                <li><code>admin</code> এবং <code>super_admin</code> সব requisition দেখতে পারে।</li>
+                <li><code>requisitioner</code> শুধু নিজের requisition দেখতে পারে; <code>mine=1</code> না দিলেও API তাকে own data-তেই সীমাবদ্ধ রাখে।</li>
+                <li>Departmental mode-এ store/approval roles নিজের department-এর requisitions দেখে।</li>
+                <li>Centralized mode-এ central store department-এর store roles সব department-এর requisitions দেখতে পারে।</li>
+                <li>Access rule fail করলে detail endpoint <code>404</code> return করতে পারে, যাতে hidden resource leak না হয়।</li>
+            </ul>
+
+            <h3>6.8 Requisition Form Validation Rules</h3>
+            <table>
+                <thead><tr><th>Field</th><th>Rule</th><th>Flutter Validation Message</th></tr></thead>
+                <tbody>
+                    <tr><td><code>items</code></td><td>Required array, minimum 1 item.</td><td>কমপক্ষে একটি পণ্য যোগ করুন।</td></tr>
+                    <tr><td><code>items.*.product_id</code></td><td>Required existing product ID.</td><td>একটি valid product নির্বাচন করুন।</td></tr>
+                    <tr><td><code>items.*.demanded_qty</code></td><td>Required integer, minimum 1.</td><td>পরিমাণ ১ বা তার বেশি হতে হবে।</td></tr>
+                    <tr><td><code>items.*.purpose</code></td><td>Required active purpose name.</td><td>একটি active purpose নির্বাচন করুন।</td></tr>
+                </tbody>
+            </table>
+
+            <h3>6.9 Recommended App-Side Settings Cache Rules</h3>
+            <ul>
+                <li><code>/settings</code> response app startup-এ load করে memory/cache-এ রাখুন।</li>
+                <li>Logo URL null হলে local asset fallback ব্যবহার করুন।</li>
+                <li>Master data যেমন departments/designations/products/purposes cache করা যায়, কিন্তু requisition submit করার আগে stale product/purpose error handle করুন।</li>
+                <li>Admin settings change করলে user app refresh করলে নতুন settings পাবে; forced refresh button রাখতে পারেন।</li>
+            </ul>
+        </section>
+
+
         <section id="auth-endpoints">
-            <h2>6. Auth Endpoints</h2>
+            <h2>7. Auth Endpoints</h2>
 
             <div class="endpoint"><span class="method post">POST</span><span class="path">/auth/register</span></div>
             <p>নতুন user registration করে। Registration successful হলেও admin approval না হওয়া পর্যন্ত login blocked থাকবে।</p>
@@ -327,7 +456,7 @@ final authHeaders = {
         </section>
 
         <section id="master-data">
-            <h2>7. Master Data Endpoints</h2>
+            <h2>8. Master Data Endpoints</h2>
             <p>এই endpoint-গুলো form dropdown, product catalog এবং app configuration build করতে ব্যবহার করুন।</p>
             <table>
                 <thead><tr><th>Method</th><th>Endpoint</th><th>Authentication</th><th>Purpose</th></tr></thead>
@@ -345,7 +474,7 @@ final authHeaders = {
         </section>
 
         <section id="dashboard">
-            <h2>8. Dashboard Endpoint</h2>
+            <h2>9. Dashboard Endpoint</h2>
             <div class="endpoint"><span class="method get">GET</span><span class="path">/dashboard?trend_filter=30</span></div>
             <p>Role-based dashboard summary, chart data, recent requisitions এবং own requisitions return করে।</p>
             <table>
@@ -367,7 +496,7 @@ final authHeaders = {
         </section>
 
         <section id="requisitions">
-            <h2>9. Requisition Endpoints</h2>
+            <h2>10. Requisition Endpoints</h2>
             <div class="endpoint"><span class="method get">GET</span><span class="path">/requisitions?mine=1&amp;status=pending&amp;search=REQ&amp;per_page=25</span></div>
             <p>Authenticated user-এর role অনুযায়ী requisition list দেখায়। Requisitioner শুধু নিজের requisition দেখবে; admin/super admin সব দেখতে পারবে; store roles department/store mode অনুযায়ী visible data পাবে।</p>
             <table>
@@ -406,7 +535,7 @@ final authHeaders = {
         </section>
 
         <section id="flutter-client">
-            <h2>10. Flutter Client Example</h2>
+            <h2>11. Flutter Client Example</h2>
             <p>নিচের example একটি minimal API client দেখাচ্ছে। Production app-এ timeout, retry policy, logging এবং typed models যোগ করুন।</p>
             <pre><code>import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -462,7 +591,7 @@ class NuStoreApiClient {
         </section>
 
         <section id="screen-map">
-            <h2>11. Suggested Flutter Screen Map</h2>
+            <h2>12. Suggested Flutter Screen Map</h2>
             <table>
                 <thead><tr><th>Screen</th><th>Endpoint(s)</th><th>Developer Notes</th></tr></thead>
                 <tbody>
@@ -480,7 +609,7 @@ class NuStoreApiClient {
         </section>
 
         <section id="security">
-            <h2>12. Security & Production Notes</h2>
+            <h2>13. Security & Production Notes</h2>
             <ul>
                 <li>সবসময় HTTPS ব্যবহার করুন।</li>
                 <li>User token Flutter secure storage/keychain/keystore-এ রাখুন; plain shared preferences-এ রাখবেন না।</li>
@@ -493,5 +622,19 @@ class NuStoreApiClient {
         </section>
     </main>
 </div>
+<script>
+    (() => {
+        const apiBasePath = '/api/v1';
+        const fallbackOrigin = 'https://your-domain.test';
+        const origin = window.location.origin && window.location.origin !== 'null'
+            ? window.location.origin
+            : fallbackOrigin;
+        const baseUrl = `${origin}${apiBasePath}`;
+
+        document.querySelectorAll('[data-base-url]').forEach((element) => {
+            element.textContent = baseUrl;
+        });
+    })();
+</script>
 </body>
 </html>
