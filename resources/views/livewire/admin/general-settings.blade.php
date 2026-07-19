@@ -175,6 +175,7 @@
                             <li><code>POST /api/v1/auth/login</code></li>
                             <li><code>GET /api/v1/auth/me</code></li>
                             <li><code>POST /api/v1/auth/logout</code></li>
+                            <li><code>GET /api/v1/dashboard</code></li>
                             <li><code>GET /api/v1/inventory</code></li>
                             <li><code>GET /api/v1/products</code></li>
                             <li><code>GET /api/v1/categories</code></li>

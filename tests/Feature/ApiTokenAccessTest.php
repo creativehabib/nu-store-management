@@ -4,6 +4,8 @@ use App\Models\ApiUserToken;
 use App\Models\Category;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Product;
+use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -154,4 +156,62 @@ it('returns application settings through the api without exposing secret setting
         ->assertJsonPath('data.requisition.approval_flow_roles.0', 'deputy_director')
         ->assertJsonMissing(['api_token_hash' => hash('sha256', 'app-token')])
         ->assertJsonMissing(['mail_password' => 'secret-mail-password']);
+});
+
+it('returns authenticated dashboard data through the api', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
+    $category = Category::query()->create(['name' => 'Stationery']);
+    Product::query()->create([
+        'category_id' => $category->id,
+        'name_bn' => 'কলম',
+        'name_en' => 'Pen',
+        'stock' => 0,
+    ]);
+
+    $user = User::query()->create([
+        'name' => 'Dashboard User',
+        'email' => 'dashboard@example.com',
+        'pf_no' => 'PF-4001',
+        'mobile_no' => '01700000004',
+        'password' => Hash::make('Password#123'),
+        'role' => 'initiator',
+        'department_id' => $department->id,
+        'is_approved' => true,
+    ]);
+
+    Requisition::query()->create([
+        'requisition_no' => 'REQ-DASH-001',
+        'user_id' => $user->id,
+        'status' => 'pending',
+        'approval_history' => [],
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    getJson('/api/v1/dashboard', [
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.role', 'initiator')
+        ->assertJsonPath('data.stats.pending_action', 1)
+        ->assertJsonPath('data.stats.stock_out_products', 1)
+        ->assertJsonPath('data.recent_requisitions.0.requisition_no', 'REQ-DASH-001')
+        ->assertJsonStructure([
+            'data' => [
+                'stats',
+                'charts' => [
+                    'requisition_trends' => ['labels', 'values'],
+                    'category_inventory' => ['labels', 'values'],
+                ],
+                'recent_requisitions',
+                'my_own_requisitions',
+            ],
+        ]);
 });

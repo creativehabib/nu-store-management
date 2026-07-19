@@ -31,6 +31,7 @@ it('shows the settings api endpoint in available endpoints', function () {
 
     Livewire::test(GeneralSettings::class)
         ->assertSee('Available endpoints:')
+        ->assertSee('GET /api/v1/dashboard')
         ->assertSee('GET /api/v1/settings');
 });
 
