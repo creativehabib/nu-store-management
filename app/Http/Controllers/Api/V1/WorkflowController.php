@@ -162,9 +162,7 @@ class WorkflowController extends Controller
 
     public function return(Request $request, Requisition $requisition): JsonResponse
     {
-        $validated = $request->validate([
-            'comment' => ['nullable', 'string', 'max:1000'],
-        ]);
+        $validated = $this->validateWorkflowPayload($request);
 
         /** @var User $user */
         $user = $request->user();
@@ -177,7 +175,9 @@ class WorkflowController extends Controller
         $requisition = $this->loadWorkflowRequisition($requisition);
 
         DB::transaction(function () use ($requisition, $validated, $user): void {
+            $this->updateSuppliedQuantities($requisition, $validated['supplied_quantities'] ?? []);
             $this->appendHistory($requisition, $user, 'return', $validated['comment'] ?? null);
+
             $requisition->update(['status' => 'returned']);
         });
 
@@ -252,7 +252,7 @@ class WorkflowController extends Controller
         return $request->validate([
             'comment' => ['nullable', 'string', 'max:1000'],
             'supplied_quantities' => ['nullable', 'array'],
-            'supplied_quantities.*' => ['integer', 'min:0'],
+            'supplied_quantities.*' => ['integer', 'min:1'],
         ]);
     }
 
