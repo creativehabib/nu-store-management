@@ -252,7 +252,7 @@ class WorkflowController extends Controller
         return $request->validate([
             'comment' => ['nullable', 'string', 'max:1000'],
             'supplied_quantities' => ['nullable', 'array'],
-            'supplied_quantities.*' => ['integer', 'min:1'],
+            'supplied_quantities.*' => ['integer', 'min:0'],
         ]);
     }
 
@@ -325,8 +325,22 @@ class WorkflowController extends Controller
     protected function updateSuppliedQuantities(Requisition $requisition, array $suppliedQuantities): void
     {
         foreach ($requisition->items as $item) {
+            $quantity = null;
+
             if (array_key_exists($item->id, $suppliedQuantities)) {
-                $item->update(['supplied_qty' => $suppliedQuantities[$item->id]]);
+                $quantity = $suppliedQuantities[$item->id];
+            } elseif (array_key_exists((string) $item->id, $suppliedQuantities)) {
+                $quantity = $suppliedQuantities[(string) $item->id];
+            } elseif (array_key_exists($item->product_id, $suppliedQuantities)) {
+                $quantity = $suppliedQuantities[$item->product_id];
+            } elseif (array_key_exists((string) $item->product_id, $suppliedQuantities)) {
+                $quantity = $suppliedQuantities[(string) $item->product_id];
+            }
+
+            if ($quantity !== null) {
+                $item->update([
+                    'supplied_qty' => (int) $quantity,
+                ]);
             }
         }
     }
