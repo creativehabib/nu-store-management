@@ -9,7 +9,9 @@ use App\Models\Purpose;
 use App\Models\Requisition;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
@@ -358,4 +360,113 @@ it('allows approvers to list and approve requisitions through the workflow api',
         ->assertJsonPath('data.items.0.supplied_qty', 4)
         ->assertJsonPath('data.approval_history.0.role', 'assistant_director')
         ->assertJsonPath('data.approval_history.0.action', 'approved');
+});
+
+it('returns profile image urls and lets authenticated users update profile and password through the api', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    Storage::fake('public');
+
+    $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
+    $newDepartment = Department::query()->create(['name' => 'Accounts', 'code' => 'ACC']);
+    $designation = Designation::query()->create(['title' => 'Officer', 'rank' => 1]);
+    $newDesignation = Designation::query()->create(['title' => 'Senior Officer', 'rank' => 2]);
+
+    Storage::disk('public')->put('profile-images/old-profile.png', 'old profile');
+
+    $user = User::query()->create([
+        'name' => 'Old Name',
+        'email' => 'old-profile@example.com',
+        'pf_no' => 'PF-7001',
+        'mobile_no' => '01700000008',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'picture' => 'profile-images/old-profile.png',
+        'is_approved' => true,
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    $response = $this->withHeaders([
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])->patch('/api/v1/auth/profile', [
+        'name' => 'Updated Name',
+        'email' => 'updated-profile@example.com',
+        'mobile_no' => '01900000008',
+        'department_id' => $newDepartment->id,
+        'designation_id' => $newDesignation->id,
+        'picture' => UploadedFile::fake()->image('new-profile.png'),
+        'current_password' => 'Password#123',
+        'password' => 'NewPassword#123',
+        'password_confirmation' => 'NewPassword#123',
+    ]);
+
+    $response
+        ->assertSuccessful()
+        ->assertJsonPath('message', 'Profile updated successfully.')
+        ->assertJsonPath('data.user.name', 'Updated Name')
+        ->assertJsonPath('data.user.email', 'updated-profile@example.com')
+        ->assertJsonPath('data.user.mobile_no', '01900000008')
+        ->assertJsonPath('data.user.department.id', $newDepartment->id)
+        ->assertJsonPath('data.user.designation.id', $newDesignation->id);
+
+    $user->refresh();
+
+    expect($user->picture)->not->toBe('profile-images/old-profile.png')
+        ->and($response->json('data.user.picture'))->toBe($user->picture)
+        ->and($response->json('data.user.picture_url'))->toBe(url(Storage::disk('public')->url($user->picture)))
+        ->and(Hash::check('NewPassword#123', $user->password))->toBeTrue();
+
+    Storage::disk('public')->assertMissing('profile-images/old-profile.png');
+    Storage::disk('public')->assertExists($user->picture);
+});
+
+it('requires the current password when changing password through the api profile endpoint', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
+    $designation = Designation::query()->create(['title' => 'Officer', 'rank' => 1]);
+
+    $user = User::query()->create([
+        'name' => 'Password User',
+        'email' => 'password-profile@example.com',
+        'pf_no' => 'PF-7002',
+        'mobile_no' => '01700000009',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'is_approved' => true,
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    $this->withHeaders([
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])->patch('/api/v1/auth/profile', [
+        'name' => $user->name,
+        'email' => $user->email,
+        'mobile_no' => $user->mobile_no,
+        'department_id' => $department->id,
+        'designation_id' => $designation->id,
+        'current_password' => 'wrong-password',
+        'password' => 'NewPassword#123',
+        'password_confirmation' => 'NewPassword#123',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+
+    expect(Hash::check('Password#123', $user->refresh()->password))->toBeTrue();
 });
