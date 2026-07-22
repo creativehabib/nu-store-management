@@ -378,7 +378,7 @@ it('allows approvers to list and approve requisitions through the workflow api',
         ->assertJsonPath('data.approval_history.0.action', 'approved');
 });
 
-it('returns profile image urls and lets authenticated users update profile and password through the api', function (): void {
+it('returns profile image urls and lets authenticated users update their profile through the api', function (): void {
     set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
 
     Storage::fake('public');
@@ -419,9 +419,6 @@ it('returns profile image urls and lets authenticated users update profile and p
         'department_id' => $newDepartment->id,
         'designation_id' => $newDesignation->id,
         'picture' => UploadedFile::fake()->image('new-profile.png'),
-        'current_password' => 'Password#123',
-        'password' => 'NewPassword#123',
-        'password_confirmation' => 'NewPassword#123',
     ]);
 
     $response
@@ -438,13 +435,13 @@ it('returns profile image urls and lets authenticated users update profile and p
     expect($user->picture)->not->toBe('profile-images/old-profile.png')
         ->and($response->json('data.user.picture'))->toBe($user->picture)
         ->and($response->json('data.user.picture_url'))->toBe(url(Storage::disk('public')->url($user->picture)))
-        ->and(Hash::check('NewPassword#123', $user->password))->toBeTrue();
+        ->and(Hash::check('Password#123', $user->password))->toBeTrue();
 
     Storage::disk('public')->assertMissing('profile-images/old-profile.png');
     Storage::disk('public')->assertExists($user->picture);
 });
 
-it('requires the current password when changing password through the api profile endpoint', function (): void {
+it('changes passwords through the api change password endpoint', function (): void {
     set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
 
     $department = Department::query()->create(['name' => 'Store', 'code' => 'STR']);
@@ -471,12 +468,40 @@ it('requires the current password when changing password through the api profile
     $this->withHeaders([
         'X-App-Token' => 'app-token',
         'Authorization' => 'Bearer user-token',
-    ])->patch('/api/v1/auth/profile', [
-        'name' => $user->name,
-        'email' => $user->email,
-        'mobile_no' => $user->mobile_no,
-        'department_id' => $department->id,
-        'designation_id' => $designation->id,
+    ])->postJson('/api/v1/auth/change-password', [
+        'current_password' => 'Password#123',
+        'password' => 'NewPassword#123',
+        'password_confirmation' => 'NewPassword#123',
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('message', 'Password changed successfully.');
+
+    expect(Hash::check('NewPassword#123', $user->refresh()->password))->toBeTrue();
+});
+
+it('requires the current password when changing password through the api change password endpoint', function (): void {
+    set_setting('api_token_hash', hash('sha256', 'app-token'), 'api');
+
+    $user = User::query()->create([
+        'name' => 'Wrong Password User',
+        'email' => 'wrong-password-profile@example.com',
+        'pf_no' => 'PF-7003',
+        'mobile_no' => '01700000010',
+        'password' => Hash::make('Password#123'),
+        'role' => 'requisitioner',
+        'is_approved' => true,
+    ]);
+
+    ApiUserToken::query()->create([
+        'user_id' => $user->id,
+        'name' => 'android',
+        'token_hash' => hash('sha256', 'user-token'),
+    ]);
+
+    $this->withHeaders([
+        'X-App-Token' => 'app-token',
+        'Authorization' => 'Bearer user-token',
+    ])->postJson('/api/v1/auth/change-password', [
         'current_password' => 'wrong-password',
         'password' => 'NewPassword#123',
         'password_confirmation' => 'NewPassword#123',

@@ -97,15 +97,7 @@ class AuthController extends Controller
             'department_id' => ['required', 'integer', Rule::exists('departments', 'id')],
             'designation_id' => ['required', 'integer', Rule::exists('designations', 'id')],
             'picture' => ['nullable', 'image', 'max:2048'],
-            'current_password' => ['required_with:password', 'string'],
-            'password' => ['nullable', 'string', Password::default(), 'confirmed'],
         ]);
-
-        if (filled($validated['password'] ?? null) && ! Hash::check((string) $validated['current_password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'current_password' => __('The provided password does not match your current password.'),
-            ]);
-        }
 
         $profileData = [
             'name' => $validated['name'],
@@ -123,10 +115,6 @@ class AuthController extends Controller
             $profileData['picture'] = $request->file('picture')->store('profile-images', 'public');
         }
 
-        if (filled($validated['password'] ?? null)) {
-            $profileData['password'] = $validated['password'];
-        }
-
         $user->update($profileData);
 
         return response()->json([
@@ -134,6 +122,31 @@ class AuthController extends Controller
             'data' => [
                 'user' => $this->userPayload($user->refresh()->load(['department', 'designation'])),
             ],
+        ]);
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', Password::default(), 'confirmed'],
+        ]);
+
+        if (! Hash::check((string) $validated['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => __('The provided password does not match your current password.'),
+            ]);
+        }
+
+        $user->update([
+            'password' => $validated['password'],
+        ]);
+
+        return response()->json([
+            'message' => 'Password changed successfully.',
         ]);
     }
 
