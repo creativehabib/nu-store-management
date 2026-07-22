@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\V1\SettingsController;
 use App\Http\Controllers\Api\V1\WorkflowController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('v1', fn () => response()->json([
+    'message' => 'Missing bearer token.',
+], 401))->name('api.v1.index');
+
 Route::prefix('v1')
     ->middleware('api.token')
     ->group(function (): void {
