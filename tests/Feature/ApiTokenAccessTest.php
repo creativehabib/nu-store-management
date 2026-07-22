@@ -28,6 +28,22 @@ afterEach(function (): void {
     }
 });
 
+it('returns a minimal response for the api v1 root', function (): void {
+    getJson('/api/v1')
+        ->assertUnauthorized()
+        ->assertExactJson([
+            'message' => 'Missing bearer token.',
+        ]);
+});
+
+it('returns a minimal not found response for missing api routes', function (): void {
+    getJson('/api/v1/missing-route')
+        ->assertNotFound()
+        ->assertExactJson([
+            'message' => 'Not found.',
+        ]);
+});
+
 it('rejects api requests without an app token', function (): void {
     getJson('/api/v1/categories')
         ->assertUnauthorized()
