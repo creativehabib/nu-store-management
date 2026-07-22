@@ -215,7 +215,7 @@ final authHeaders = {
                 <thead><tr><th>Token</th><th>Header</th><th>Required For</th><th>Notes</th></tr></thead>
                 <tbody>
                     <tr><td>App token</td><td><code>X-App-Token: APP_TOKEN</code></td><td>All API endpoints</td><td>Backend setting হিসেবে configured token. Missing/invalid হলে 401।</td></tr>
-                    <tr><td>User token</td><td><code>Authorization: Bearer USER_TOKEN</code></td><td><code>/auth/me</code>, <code>/auth/logout</code>, <code>/dashboard</code>, <code>/requisitions</code></td><td><code>/auth/login</code> response থেকে পাওয়া যায়। Logout করলে token delete হয়।</td></tr>
+                    <tr><td>User token</td><td><code>Authorization: Bearer USER_TOKEN</code></td><td><code>/auth/me</code>, <code>/auth/profile</code>, <code>/auth/change-password</code>, <code>/auth/logout</code>, <code>/dashboard</code>, <code>/requisitions</code></td><td><code>/auth/login</code> response থেকে পাওয়া যায়। Logout করলে token delete হয়।</td></tr>
                 </tbody>
             </table>
             <div class="warning">যদি app token <code>Authorization</code> header-এ পাঠানো হয়, authenticated endpoint-এ user token conflict হতে পারে। Flutter app-এ app token সবসময় <code>X-App-Token</code> header-এ পাঠানো recommended।</div>
@@ -245,6 +245,8 @@ final authHeaders = {
   "email": "rahim@example.com",
   "pf_no": "PF-1001",
   "mobile_no": "01700000000",
+  "picture": "profile-images/abc.png",
+  "picture_url": "https://your-domain.test/storage/profile-images/abc.png",
   "role": "requisitioner",
   "is_approved": true,
   "department": {"id": 1, "name": "Store", "code": "STR"},
@@ -450,7 +452,37 @@ final authHeaders = {
 }</code></pre>
 
             <div class="endpoint"><span class="method get">GET</span><span class="path">/auth/me</span></div>
-            <p>বর্তমান authenticated user profile return করে। App startup-এ saved token valid কিনা যাচাই করতে ব্যবহার করুন।</p>
+            <p>বর্তমান authenticated user profile return করে। App startup-এ saved token valid কিনা যাচাই করতে ব্যবহার করুন। Response-এ <code>picture</code> path এবং app থেকে image দেখানোর জন্য <code>picture_url</code> থাকে।</p>
+
+            <div class="endpoint"><span class="method post">PATCH</span><span class="path">/auth/profile</span></div>
+            <p>Authenticated user নিজের profile update করতে পারবে: নাম, পদবী, department, mobile number, email এবং profile image। Profile image upload করতে <code>multipart/form-data</code> ব্যবহার করুন। Password পরিবর্তনের জন্য আলাদা <code>/auth/change-password</code> endpoint ব্যবহার করুন।</p>
+            <h4>Request Body</h4>
+            <pre><code>{
+  "name": "Rahim Uddin",
+  "email": "rahim.updated@example.com",
+  "mobile_no": "01800000000",
+  "department_id": 1,
+  "designation_id": 2,
+  "picture": "multipart image file, optional"
+}</code></pre>
+            <h4>Success Response: 200</h4>
+            <pre><code>{
+  "message": "Profile updated successfully.",
+  "data": {"user": {...}}
+}</code></pre>
+
+            <div class="endpoint"><span class="method post">POST</span><span class="path">/auth/change-password</span></div>
+            <p>Authenticated user নিজের password পরিবর্তন করতে পারবে। Security-এর জন্য বর্তমান password সঠিক হতে হবে।</p>
+            <h4>Request Body</h4>
+            <pre><code>{
+  "current_password": "OldPassword#123",
+  "password": "NewPassword#123",
+  "password_confirmation": "NewPassword#123"
+}</code></pre>
+            <h4>Success Response: 200</h4>
+            <pre><code>{
+  "message": "Password changed successfully."
+}</code></pre>
 
             <div class="endpoint"><span class="method post">POST</span><span class="path">/auth/logout</span></div>
             <p>Current device/session token revoke করে। Logout success হলে local secure storage থেকেও token delete করুন।</p>

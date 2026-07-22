@@ -9,7 +9,10 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -82,6 +85,71 @@ class AuthController extends Controller
         ]);
     }
 
+    public function updateProfile(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'mobile_no' => ['required', 'string', 'max:20', Rule::unique(User::class, 'mobile_no')->ignore($user->id)],
+            'department_id' => ['required', 'integer', Rule::exists('departments', 'id')],
+            'designation_id' => ['required', 'integer', Rule::exists('designations', 'id')],
+            'picture' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        $profileData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'mobile_no' => $validated['mobile_no'],
+            'department_id' => $validated['department_id'],
+            'designation_id' => $validated['designation_id'],
+        ];
+
+        if ($request->hasFile('picture')) {
+            if ($user->picture) {
+                Storage::disk('public')->delete($user->picture);
+            }
+
+            $profileData['picture'] = $request->file('picture')->store('profile-images', 'public');
+        }
+
+        $user->update($profileData);
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'data' => [
+                'user' => $this->userPayload($user->refresh()->load(['department', 'designation'])),
+            ],
+        ]);
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', Password::default(), 'confirmed'],
+        ]);
+
+        if (! Hash::check((string) $validated['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => __('The provided password does not match your current password.'),
+            ]);
+        }
+
+        $user->update([
+            'password' => $validated['password'],
+        ]);
+
+        return response()->json([
+            'message' => 'Password changed successfully.',
+        ]);
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $apiUserToken = $request->attributes->get('api_user_token');
@@ -106,6 +174,8 @@ class AuthController extends Controller
             'email' => $user->email,
             'pf_no' => $user->pf_no,
             'mobile_no' => $user->mobile_no,
+            'picture' => $user->picture,
+            'picture_url' => $user->picture ? url(Storage::disk('public')->url($user->picture)) : null,
             'role' => $user->role,
             'is_approved' => $user->is_approved,
             'department' => $user->department,
